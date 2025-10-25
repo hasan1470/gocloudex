@@ -13,7 +13,8 @@ import {
   Search,
   Calendar
 } from 'lucide-react';
-import { portfolioProjects, portfolioCategories, allTechnologies } from '@/data/portfolio';
+import { Project, Category } from '@/types';
+import Image from 'next/image';
 
 export default function PortfolioPage() {
   const searchParams = useSearchParams();
@@ -28,6 +29,47 @@ export default function PortfolioPage() {
   const [selectedTech, setSelectedTech] = useState(initialTech);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [showFilters, setShowFilters] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [portfolioProjects, setPortfolioProjects] = useState<Project[]>([]);
+  const [portfolioCategories, setPortfolioCategories] = useState<Category[]>([]);
+
+  // Fetch projects
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/client/projects/`);
+      const result = await response.json();
+      if (result.success) {
+        setPortfolioProjects(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch categories
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/client/categories/`);
+      const result = await response.json();
+      if (result.success) {
+        setPortfolioCategories(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch categories:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data on component mount
+  useEffect(() => {
+    fetchProjects();
+    fetchCategories();
+  }, []);
 
   // Update URL when filters change
   useEffect(() => {
@@ -52,23 +94,32 @@ export default function PortfolioPage() {
   // Filter projects based on all criteria
   const filteredProjects = useMemo(() => {
     return portfolioProjects.filter(project => {
-      // Category filter
-      const categoryMatch = activeCategory === 'all' || project.category === activeCategory;
+      // Category filter - updated for multiple categories
+      const categoryMatch = activeCategory === 'all' || 
+        project.categories?.some(cat => {
+          const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
+          return category?.slug === activeCategory;
+        });
       
       // Technology filter
       const techMatch = !selectedTech || project.technologies.includes(selectedTech);
       
-      // Search filter
+      // Search filter - updated for multiple categories
       const searchMatch = !searchQuery || 
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.technologies.some(tech => 
           tech.toLowerCase().includes(searchQuery.toLowerCase())
-        );
+        ) ||
+        // Search by category names
+        project.categories?.some(cat => {
+          const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
+          return category?.name.toLowerCase().includes(searchQuery.toLowerCase());
+        });
       
       return categoryMatch && techMatch && searchMatch;
     });
-  }, [activeCategory, selectedTech, searchQuery]);
+  }, [portfolioProjects, portfolioCategories, activeCategory, selectedTech, searchQuery]);
 
   // Reset all filters
   const resetFilters = () => {
@@ -81,12 +132,76 @@ export default function PortfolioPage() {
   const availableTechnologies = useMemo(() => {
     const categoryProjects = activeCategory === 'all' 
       ? portfolioProjects 
-      : portfolioProjects.filter(p => p.category === activeCategory);
+      : portfolioProjects.filter(p => {
+          // Match by category slug in multiple categories
+          return p.categories?.some(cat => {
+            const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
+            return category?.slug === activeCategory;
+          });
+        });
     
     return Array.from(
       new Set(categoryProjects.flatMap(p => p.technologies))
     ).sort();
-  }, [activeCategory]);
+  }, [portfolioProjects, portfolioCategories, activeCategory]);
+
+  // Get category names for display
+  const getCategoryNames = (project: Project) => {
+    if (!project.categories || project.categories.length === 0) {
+      return ['Uncategorized'];
+    }
+
+    return project.categories.map(cat => {
+      if (typeof cat === 'object') {
+        return cat.name;
+      } else {
+        const category = portfolioCategories.find(c => c._id === cat);
+        return category?.name || 'Unknown';
+      }
+    });
+  };
+
+  // Check if project has a specific category
+  const projectHasCategory = (project: Project, categorySlug: string) => {
+    return project.categories?.some(cat => {
+      const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
+      return category?.slug === categorySlug;
+    });
+  };
+
+  // Render categories for a project
+  const renderProjectCategories = (project: Project) => {
+    const categoryNames = getCategoryNames(project);
+    
+    if (categoryNames.length === 0) {
+      return (
+        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 text-style">
+          Uncategorized
+        </span>
+      );
+    }
+
+    // Show first category and +count if there are more
+    if (categoryNames.length > 1) {
+      return (
+        <div className="flex items-center space-x-1">
+          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
+            {categoryNames[0]}
+          </span>
+          <span className="text-xs text-textLight">
+            +{categoryNames.length - 1}
+          </span>
+        </div>
+      );
+    }
+
+    // Single category
+    return (
+      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
+        {categoryNames[0]}
+      </span>
+    );
+  };
 
   return (
     <div className="bg-bgLight">
@@ -120,7 +235,7 @@ export default function PortfolioPage() {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search projects by title, description, or technology..."
+                  placeholder="Search projects by title, description, technology, or category..."
                   className="block w-full pl-10 pr-3 py-3 border border-border rounded-lg bg-bgLight placeholder-textLight focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-style"
                 />
                 {searchQuery && (
@@ -161,13 +276,25 @@ export default function PortfolioPage() {
               <div className="flex-1">
                 <h3 className="text-sm font-medium text-textLight mb-3 text-style">Categories</h3>
                 <div className="flex flex-wrap gap-2">
+                  <button
+                    onClick={() => setActiveCategory('all')}
+                    className={`
+                      px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-style
+                      ${activeCategory === 'all'
+                        ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5'
+                        : 'bg-bgLight text-textLight border border-border hover:bg-input hover:text-headingLight hover:-translate-y-0.5'
+                      }
+                    `}
+                  >
+                    All
+                  </button>
                   {portfolioCategories.map((category) => (
                     <button
-                      key={category.id}
-                      onClick={() => setActiveCategory(category.id)}
+                      key={category._id}
+                      onClick={() => setActiveCategory(category.slug)}
                       className={`
                         px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-style
-                        ${activeCategory === category.id
+                        ${activeCategory === category.slug
                           ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5'
                           : 'bg-bgLight text-textLight border border-border hover:bg-input hover:text-headingLight hover:-translate-y-0.5'
                         }
@@ -204,7 +331,7 @@ export default function PortfolioPage() {
                   <span>Active filters:</span>
                   {activeCategory !== 'all' && (
                     <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
-                      {portfolioCategories.find(c => c.id === activeCategory)?.name}
+                      {portfolioCategories.find(cat => cat.slug === activeCategory)?.name || activeCategory}
                     </span>
                   )}
                   {selectedTech && (
@@ -232,7 +359,7 @@ export default function PortfolioPage() {
           <div className="mt-6 text-center">
             <p className="text-textLight text-style">
               Showing {filteredProjects.length} of {portfolioProjects.length} projects
-              {activeCategory !== 'all' && ` in ${portfolioCategories.find(c => c.id === activeCategory)?.name}`}
+              {activeCategory !== 'all' && ` in ${portfolioCategories.find(cat => cat.slug === activeCategory)?.name || activeCategory}`}
               {selectedTech && ` using ${selectedTech}`}
             </p>
           </div>
@@ -242,7 +369,12 @@ export default function PortfolioPage() {
       {/* Projects Grid */}
       <section className="py-16 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {filteredProjects.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-16">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+              <p className="mt-4 text-textLight text-style">Loading projects...</p>
+            </div>
+          ) : filteredProjects.length === 0 ? (
             <div className="text-center py-16">
               <div className="text-textLight text-lg mb-4 text-style">
                 No projects found matching your criteria.
@@ -258,20 +390,26 @@ export default function PortfolioPage() {
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
               {filteredProjects.map((project) => (
                 <div
-                  key={project.id}
+                  key={project._id}
                   className="group bg-bgLight rounded-2xl border border-border shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden"
                 >
                   {/* Project Image */}
                   <div className="relative overflow-hidden">
                     <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                      <div className="text-textLight text-style">Project Image</div>
+                      <Image 
+                        src={project.image} 
+                        width={400} 
+                        height={192} 
+                        alt={project.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                     
                     {/* Overlay with Links */}
                     <div className="absolute inset-0 bg-bgDark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
-                      {project.liveLink && (
+                      {project.projectUrl && (
                         <a
-                          href={project.liveLink}
+                          href={project.projectUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-3 bg-primary text-bgLight rounded-full hover:bg-primary-dark transition-colors"
@@ -279,9 +417,9 @@ export default function PortfolioPage() {
                           <ExternalLink className="h-5 w-5" />
                         </a>
                       )}
-                      {project.githubLink && (
+                      {project.githubUrl && (
                         <a
-                          href={project.githubLink}
+                          href={project.githubUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-3 bg-bgLight text-headingLight rounded-full hover:bg-input transition-colors"
@@ -344,11 +482,9 @@ export default function PortfolioPage() {
                       )}
                     </div>
 
-                    {/* Category */}
+                    {/* Categories - Updated for multiple categories */}
                     <div className="mb-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
-                        {portfolioCategories.find(c => c.id === project.category)?.name || project.category}
-                      </span>
+                      {renderProjectCategories(project)}
                     </div>
 
                     {/* Action Buttons */}
@@ -362,9 +498,9 @@ export default function PortfolioPage() {
                       </Link>
                       
                       <div className="flex space-x-2">
-                        {project.liveLink && (
+                        {project.projectUrl && (
                           <a
-                            href={project.liveLink}
+                            href={project.projectUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-textLight hover:text-primary transition-colors"
@@ -373,9 +509,9 @@ export default function PortfolioPage() {
                             <ExternalLink className="h-4 w-4" />
                           </a>
                         )}
-                        {project.githubLink && (
+                        {project.githubUrl && (
                           <a
-                            href={project.githubLink}
+                            href={project.githubUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="p-2 text-textLight hover:text-headingLight transition-colors"

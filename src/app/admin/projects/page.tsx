@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import { 
   Plus, 
   Search, 
-  Filter, 
   Edit, 
   Trash2, 
   Eye,
@@ -408,9 +407,26 @@ export default function ProjectsPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
-                          {project.category?.name || 'Uncategorized'}
-                        </span>
+                        {project.categories && project.categories.length > 0 ? (
+                          project.categories.length === 1 ? (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
+                              {typeof project.categories[0] === 'object' ? project.categories[0].name : 'Loading...'}
+                            </span>
+                          ) : (
+                            <div className="flex items-center space-x-1">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary text-style">
+                                {typeof project.categories[0] === 'object' ? project.categories[0].name : 'Loading...'}
+                              </span>
+                              <span className="text-xs text-textLight">
+                                +{project.categories.length - 1}
+                              </span>
+                            </div>
+                          )
+                        ) : (
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 text-style">
+                            Uncategorized
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4">
                         <span

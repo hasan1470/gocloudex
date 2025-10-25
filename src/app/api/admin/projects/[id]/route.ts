@@ -16,7 +16,7 @@ export async function GET(
     console.log('Fetching project with ID:', id);
 
     const project = await Project.findById(id)
-      .populate('category', 'name slug')
+      .populate('categories', 'name slug') // Changed from category to categories
       .lean();
 
     if (!project) {
@@ -55,8 +55,10 @@ export async function PUT(
     // Get text fields
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
+    const categories = JSON.parse(formData.get('categories') as string || '[]'); // Changed to categories array
     const technologies = JSON.parse(formData.get('technologies') as string || '[]');
+    const keyFeatures = JSON.parse(formData.get('keyFeatures') as string || '[]'); // New field
+    const projectOverview = formData.get('projectOverview') as string; // New field
     const projectUrl = formData.get('projectUrl') as string;
     const githubUrl = formData.get('githubUrl') as string;
     const featured = formData.get('featured') === 'true';
@@ -72,6 +74,17 @@ export async function PUT(
       return NextResponse.json(
         { success: false, error: 'Project not found' },
         { status: 404 }
+      );
+    }
+
+    // Validate required fields
+    if (!title || !description || !categories?.length || !technologies?.length) {
+      return NextResponse.json(
+        { 
+          success: false, 
+          error: 'Title, description, categories, and technologies are required' 
+        },
+        { status: 400 }
       );
     }
 
@@ -99,12 +112,12 @@ export async function PUT(
       }
     }
 
-    // If category changed, validate it exists
-    if (category && category !== existingProject.category.toString()) {
-      const categoryDoc = await Category.findById(category);
-      if (!categoryDoc) {
+    // Validate categories exist
+    if (categories && categories.length > 0) {
+      const categoryDocs = await Category.find({ _id: { $in: categories } });
+      if (categoryDocs.length !== categories.length) {
         return NextResponse.json(
-          { success: false, error: 'Invalid category' },
+          { success: false, error: 'One or more categories are invalid' },
           { status: 400 }
         );
       }
@@ -139,9 +152,11 @@ export async function PUT(
         title,
         description,
         slug,
-        category,
+        categories, // Array of category IDs
         image: imageUrl,
         technologies,
+        keyFeatures, // Array of key features
+        projectOverview, // HTML content for project overview
         projectUrl,
         githubUrl,
         featured,
@@ -149,14 +164,32 @@ export async function PUT(
         completionDate: new Date(completionDate),
       },
       { new: true, runValidators: true }
-    ).populate('category', 'name slug');
+    ).populate('categories', 'name slug'); // Populate categories array
 
     return NextResponse.json({
       success: true,
       data: project,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error('Update project error:', error);
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, error: 'A project with this title already exists' },
+        { status: 400 }
+      );
+    }
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json(
+        { success: false, error: errors.join(', ') },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Failed to update project' },
       { status: 500 }

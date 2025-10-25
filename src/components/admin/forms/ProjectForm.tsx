@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Save, 
@@ -8,9 +8,13 @@ import {
   Link as LinkIcon,
   Github,
   Calendar,
+  Plus,
+  ChevronDown,
+  Search,
 } from 'lucide-react';
 import { Project, Category } from '@/types';
 import SingleImageUpload from './SingleImageUpload';
+import RichTextEditor from './RichTextEditor';
 import toast from 'react-hot-toast';
 
 interface ProjectFormProps {
@@ -21,8 +25,10 @@ interface ProjectFormProps {
 interface ProjectFormData {
   title: string;
   description: string;
-  category: string;
+  categories: string[];
   technologies: string[];
+  keyFeatures: string[];
+  projectOverview: string;
   projectUrl: string;
   githubUrl: string;
   featured: boolean;
@@ -35,13 +41,23 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [techInput, setTechInput] = useState('');
+  const [keyFeatureInput, setKeyFeatureInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [showTechSuggestions, setShowTechSuggestions] = useState(false);
+  const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+  const [categorySearch, setCategorySearch] = useState('');
+  const [filteredTechSuggestions, setFilteredTechSuggestions] = useState<string[]>([]);
+  const [portfolioProjects, setPortfolioProjects] = useState<Project[]>([]);
+
+  const categoryDropdownRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState<ProjectFormData>({
     title: '',
     description: '',
-    category: '',
+    categories: [],
     technologies: [],
+    keyFeatures: [],
+    projectOverview: '',
     projectUrl: '',
     githubUrl: '',
     featured: false,
@@ -49,8 +65,30 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     completionDate: new Date().toISOString().split('T')[0],
   });
 
+  // Fetch projects
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/client/projects/`);
+      const result = await response.json();
+      if (result.success) {
+        setPortfolioProjects(result.data);
+      }
+    } catch (error) {
+      console.error('Failed to fetch projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get all unique technologies from projects
+  const allTechnologies = Array.from(
+    new Set(portfolioProjects.flatMap(project => project.technologies))
+  ).sort();
+
   // Fetch categories
   useEffect(() => {
+    fetchProjects();
     const fetchCategories = async () => {
       try {
         const response = await fetch('/api/admin/categories');
@@ -66,14 +104,30 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     fetchCategories();
   }, []);
 
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
+        setShowCategoryDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   // Populate form if editing
   useEffect(() => {
     if (project && isEditing) {
       setFormData({
         title: project.title,
         description: project.description,
-        category: project.category?._id || '',
+        categories: project.categories?.map(cat => cat._id) || [],
         technologies: project.technologies || [],
+        keyFeatures: project.keyFeatures || [],
+        projectOverview: project.projectOverview || '',
         projectUrl: project.projectUrl || '',
         githubUrl: project.githubUrl || '',
         featured: project.featured || false,
@@ -83,20 +137,66 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     }
   }, [project, isEditing]);
 
+  // Filter technology suggestions based on input
+  useEffect(() => {
+    if (techInput.trim()) {
+      const filtered = allTechnologies.filter(tech =>
+        tech.toLowerCase().includes(techInput.toLowerCase()) &&
+        !formData.technologies.includes(tech)
+      );
+      setFilteredTechSuggestions(filtered);
+      setShowTechSuggestions(filtered.length > 0);
+    } else {
+      setFilteredTechSuggestions([]);
+      setShowTechSuggestions(false);
+    }
+  }, [techInput, formData.technologies]);
+
+  // Filter categories based on search
+  const filteredCategories = categories.filter(category =>
+    category.name.toLowerCase().includes(categorySearch.toLowerCase())
+  );
+
+  // Get selected category names for display
+  const selectedCategoryNames = formData.categories.map(catId => {
+    const category = categories.find(c => c._id === catId);
+    return category?.name || '';
+  }).filter(Boolean);
+
   // Handle form input changes
   const handleInputChange = (field: keyof ProjectFormData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // Handle technology input
-  const handleAddTechnology = () => {
-    const tech = techInput.trim();
-    if (tech && !formData.technologies.includes(tech)) {
+  // Handle category selection
+  const handleAddCategory = (categoryId: string) => {
+    if (!formData.categories.includes(categoryId)) {
       setFormData(prev => ({
         ...prev,
-        technologies: [...prev.technologies, tech]
+        categories: [...prev.categories, categoryId]
+      }));
+    }
+    setCategorySearch('');
+    setShowCategoryDropdown(false);
+  };
+
+  const handleRemoveCategory = (categoryIdToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      categories: prev.categories.filter(id => id !== categoryIdToRemove)
+    }));
+  };
+
+  // Handle technology input
+  const handleAddTechnology = (tech?: string) => {
+    const technologyToAdd = tech || techInput.trim();
+    if (technologyToAdd && !formData.technologies.includes(technologyToAdd)) {
+      setFormData(prev => ({
+        ...prev,
+        technologies: [...prev.technologies, technologyToAdd]
       }));
       setTechInput('');
+      setShowTechSuggestions(false);
     }
   };
 
@@ -107,11 +207,57 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     }));
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
+  // Handle key features
+  const handleAddKeyFeature = () => {
+    const feature = keyFeatureInput.trim();
+    if (feature && !formData.keyFeatures.includes(feature)) {
+      setFormData(prev => ({
+        ...prev,
+        keyFeatures: [...prev.keyFeatures, feature]
+      }));
+      setKeyFeatureInput('');
+    }
+  };
+
+  const handleRemoveKeyFeature = (featureToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      keyFeatures: prev.keyFeatures.filter(feature => feature !== featureToRemove)
+    }));
+  };
+
+  const handleKeyFeatureKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddKeyFeature();
+    }
+  };
+
+  const handleTechKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       handleAddTechnology();
     }
+  };
+
+  const handleTechInputChange = (value: string) => {
+    setTechInput(value);
+  };
+
+  const handleSuggestionClick = (tech: string) => {
+    handleAddTechnology(tech);
+  };
+
+  const handleTechInputFocus = () => {
+    if (techInput.trim() && filteredTechSuggestions.length > 0) {
+      setShowTechSuggestions(true);
+    }
+  };
+
+  const handleTechInputBlur = () => {
+    setTimeout(() => {
+      setShowTechSuggestions(false);
+    }, 200);
   };
 
   // Handle form submission
@@ -129,8 +275,10 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       // Append all form data
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
-      formDataToSend.append('category', formData.category);
+      formDataToSend.append('categories', JSON.stringify(formData.categories));
       formDataToSend.append('technologies', JSON.stringify(formData.technologies));
+      formDataToSend.append('keyFeatures', JSON.stringify(formData.keyFeatures));
+      formDataToSend.append('projectOverview', formData.projectOverview);
       formDataToSend.append('projectUrl', formData.projectUrl);
       formDataToSend.append('githubUrl', formData.githubUrl);
       formDataToSend.append('featured', formData.featured.toString());
@@ -208,25 +356,123 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
               />
             </div>
 
-            {/* Category */}
+            {/* Categories - Dropdown with Search */}
             <div>
               <label className="block text-sm font-medium text-headingLight mb-2 text-style">
-                Category *
+                Categories *
               </label>
-              <select
-                value={formData.category}
-                onChange={(e) => handleInputChange('category', e.target.value)}
-                className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
-                required
-              >
-                <option value="">Select a category</option>
-                {categories.map((category) => (
-                  <option key={category._id} value={category._id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              
+              {/* Selected Categories */}
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.categories.map((categoryId) => {
+                  const category = categories.find(c => c._id === categoryId);
+                  return category ? (
+                    <span
+                      key={categoryId}
+                      className="inline-flex items-center px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    >
+                      {category.name}
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveCategory(categoryId)}
+                        className="ml-2 hover:text-redType transition-colors"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </span>
+                  ) : null;
+                })}
+              </div>
+
+              {/* Category Dropdown */}
+              <div className="relative" ref={categoryDropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
+                  className="w-full flex items-center justify-between px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style bg-bgLight"
+                >
+                  <span className="text-textLight">
+                    {formData.categories.length === 0 ? 'Select categories...' : `${formData.categories.length} category selected`}
+                  </span>
+                  <ChevronDown className={`h-4 w-4 transition-transform ${showCategoryDropdown ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Dropdown Menu */}
+                {showCategoryDropdown && (
+                  <div className="absolute z-20 w-full mt-1 bg-bgLight border border-border rounded-lg shadow-lg max-h-60 overflow-hidden">
+                    {/* Search Input */}
+                    <div className="p-2 border-b border-border">
+                      <div className="relative">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-textLight" />
+                        <input
+                          type="text"
+                          value={categorySearch}
+                          onChange={(e) => setCategorySearch(e.target.value)}
+                          placeholder="Search categories..."
+                          className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:outline-none focus:ring-2 focus:ring-ring text-style bg-bgLight"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                      </div>
+                    </div>
+
+                    {/* Categories List */}
+                    <div className="max-h-48 overflow-y-auto">
+                      {filteredCategories.length === 0 ? (
+                        <div className="px-4 py-3 text-sm text-textLight text-center text-style">
+                          No categories found
+                        </div>
+                      ) : (
+                        filteredCategories.map((category) => {
+                          const isSelected = formData.categories.includes(category._id);
+                          return (
+                            <button
+                              key={category._id}
+                              type="button"
+                              onClick={() => handleAddCategory(category._id)}
+                              disabled={isSelected}
+                              className={`w-full px-4 py-3 text-left text-sm transition-colors border-b border-border last:border-b-0 text-style ${
+                                isSelected
+                                  ? 'bg-primary/10 text-primary cursor-not-allowed'
+                                  : 'text-textLight hover:bg-input hover:text-headingLight'
+                              }`}
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{category.name}</span>
+                                {isSelected && (
+                                  <div className="w-2 h-2 bg-primary rounded-full" />
+                                )}
+                              </div>
+                            </button>
+                          );
+                        })
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {formData.categories.length === 0 && (
+                <p className="text-sm text-redType mt-2 text-style">Please select at least one category</p>
+              )}
             </div>
+          </div>
+        </div>
+
+        {/* Project Overview */}
+        <div className="bg-bgLight border border-border rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
+            Project Overview
+          </h2>
+          
+          <div>
+            <label className="block text-sm font-medium text-headingLight mb-2 text-style">
+              Detailed Project Overview
+            </label>
+            <RichTextEditor
+              value={formData.projectOverview}
+              onChange={(value) => handleInputChange('projectOverview', value)}
+              
+            />
           </div>
         </div>
 
@@ -253,6 +499,8 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
             <label className="block text-sm font-medium text-headingLight mb-2 text-style">
               Technologies Used *
             </label>
+            
+            {/* Selected Technologies */}
             <div className="flex flex-wrap gap-2 mb-4">
               {formData.technologies.map((tech) => (
                 <span
@@ -270,21 +518,107 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                 </span>
               ))}
             </div>
+
+            {/* Technology Input with Suggestions */}
+            <div className="relative">
+              <div className="flex space-x-2">
+                <div className="flex-1 relative">
+                  <input
+                    type="text"
+                    value={techInput}
+                    onChange={(e) => handleTechInputChange(e.target.value)}
+                    onKeyPress={handleTechKeyPress}
+                    onFocus={handleTechInputFocus}
+                    onBlur={handleTechInputBlur}
+                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
+                    placeholder="Type to search technologies..."
+                  />
+                  
+                  {/* Suggestions Dropdown */}
+                  {showTechSuggestions && (
+                    <div className="absolute z-10 w-full mt-1 bg-bgLight border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      {filteredTechSuggestions.map((tech) => (
+                        <button
+                          key={tech}
+                          type="button"
+                          onClick={() => handleSuggestionClick(tech)}
+                          className="w-full px-4 py-2 text-left text-sm text-textLight hover:bg-input hover:text-headingLight transition-colors first:rounded-t-lg last:rounded-b-lg text-style"
+                        >
+                          {tech}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => handleAddTechnology()}
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-input text-textLight rounded-lg hover:bg-border transition-colors text-style"
+                >
+                <Plus className="h-4 w-4" />
+                <span>Add</span>
+                </button>
+              </div>
+              
+              {/* Available Technologies Hint */}
+              {techInput.length === 0 && (
+                <p className="mt-2 text-xs text-textLight text-style">
+                  Start typing to see suggestions from {allTechnologies.length} available technologies
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Key Features */}
+        <div className="bg-bgLight border border-border rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
+            Key Features
+          </h2>
+          
+          <div>
+            <label className="block text-sm font-medium text-headingLight mb-2 text-style">
+              Key Features of the Project
+            </label>
+            
+            {/* Selected Key Features */}
+            <div className="flex flex-wrap gap-2 mb-4">
+              {formData.keyFeatures.map((feature) => (
+                <span
+                  key={feature}
+                  className="inline-flex items-center px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm"
+                >
+                  {feature}
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveKeyFeature(feature)}
+                    className="ml-2 hover:text-redType transition-colors"
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </span>
+              ))}
+            </div>
+
+            {/* Key Feature Input */}
             <div className="flex space-x-2">
               <input
                 type="text"
-                value={techInput}
-                onChange={(e) => setTechInput(e.target.value)}
-                onKeyPress={handleKeyPress}
+                value={keyFeatureInput}
+                onChange={(e) => setKeyFeatureInput(e.target.value)}
+                onKeyPress={handleKeyFeatureKeyPress}
                 className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
-                placeholder="Add a technology (press Enter)"
+                placeholder="Enter a key feature..."
               />
+              
               <button
                 type="button"
-                onClick={handleAddTechnology}
-                className="px-4 py-2 bg-input text-textLight rounded-lg hover:bg-border transition-colors text-style"
+                onClick={handleAddKeyFeature}
+                className="inline-flex items-center space-x-2 px-4 py-2 bg-input text-textLight rounded-lg hover:bg-border transition-colors text-style"
               >
-                Add
+                <Plus className="h-4 w-4" />
+                <span>Add</span>
               </button>
             </div>
           </div>
@@ -393,7 +727,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || formData.categories.length === 0}
             className="inline-flex items-center space-x-2 px-6 py-3 bg-primary text-bgLight rounded-lg hover:bg-primary-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-style"
           >
             {loading ? (

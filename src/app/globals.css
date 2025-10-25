@@ -114,3 +114,7 @@ body {
 .text-style {
   font-family: var(--font-body), Arial, Helvetica, sans-serif;
 }
+
+a, button, [role="button"] {
+  cursor: pointer;
+}

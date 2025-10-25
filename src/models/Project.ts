@@ -5,9 +5,11 @@ export interface IProject extends Document {
   title: string;
   description: string;
   slug: string;
-  category: Schema.Types.ObjectId;
-  image: string; // Changed from images[] to single image
+  categories: Schema.Types.ObjectId[]; // Changed from category to categories array
+  image: string;
   technologies: string[];
+  keyFeatures: string[]; // New field for key features
+  projectOverview: string; // New field for rich text overview
   projectUrl?: string;
   githubUrl?: string;
   featured: boolean;
@@ -22,9 +24,15 @@ const ProjectSchema: Schema = new Schema(
     title: { type: String, required: true },
     description: { type: String, required: true },
     slug: { type: String, required: true, unique: true },
-    category: { type: Schema.Types.ObjectId, ref: 'Category', required: true },
-    image: { type: String }, // Single image instead of array
+    categories: [{ 
+      type: Schema.Types.ObjectId, 
+      ref: 'Category', 
+      required: true 
+    }], // Array of categories
+    image: { type: String },
     technologies: [{ type: String }],
+    keyFeatures: [{ type: String }], // Array of key features
+    projectOverview: { type: String }, // HTML content for project overview
     projectUrl: { type: String },
     githubUrl: { type: String },
     featured: { type: Boolean, default: false },
@@ -40,7 +48,7 @@ const ProjectSchema: Schema = new Schema(
 
 // Create indexes for better performance
 ProjectSchema.index({ slug: 1 });
-ProjectSchema.index({ category: 1 });
+ProjectSchema.index({ categories: 1 }); // Updated index
 ProjectSchema.index({ featured: 1 });
 ProjectSchema.index({ status: 1 });
 

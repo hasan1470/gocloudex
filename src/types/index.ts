@@ -34,14 +34,17 @@ export interface Category {
   updatedAt: string;
 }
 
+// types/index.ts
 export interface Project {
   _id: string;
   title: string;
   description: string;
   slug: string;
-  category: Category;
-  images: string[];
+  categories: Category[]; // Changed from category to categories array
+  image: string;
   technologies: string[];
+  keyFeatures: string[]; // New field
+  projectOverview: string; // New field
   projectUrl?: string;
   githubUrl?: string;
   featured: boolean;
@@ -49,6 +52,19 @@ export interface Project {
   status: 'draft' | 'published' | 'archived';
   createdAt: string;
   updatedAt: string;
+}
+
+export interface ProjectFormData {
+  title: string;
+  description: string;
+  category: string;
+  technologies: string[];
+  projectUrl: string;
+  githubUrl: string;
+  featured: boolean;
+  status: 'draft' | 'published' | 'archived';
+  completionDate: string;
+  images: string[];
 }
 
 // API Response Types
@@ -68,19 +84,4 @@ export interface PaginatedResponse<T> {
     total: number;
     pages: number;
   };
-}
-
-
-// Add to your existing types
-export interface ProjectFormData {
-  title: string;
-  description: string;
-  category: string;
-  technologies: string[];
-  projectUrl: string;
-  githubUrl: string;
-  featured: boolean;
-  status: 'draft' | 'published' | 'archived';
-  completionDate: string;
-  images: string[];
 }

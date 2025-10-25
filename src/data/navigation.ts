@@ -69,7 +69,8 @@ export const serviceMegaMenu: MegaMenuData = {
           title: 'Mobile App Development',
           description: 'Native and cross-platform mobile applications for iOS and Android',
           icon: Smartphone,
-          link: '/services/mobile-app-development'
+          link: '/services/mobile-app-development',
+          featured: true
         },
         {
           title: 'UI/UX Design',
@@ -100,7 +101,8 @@ export const serviceMegaMenu: MegaMenuData = {
           title: 'Social Media Marketing',
           description: 'Build your brand presence and engage with your audience',
           icon: MessageCircle,
-          link: '/services/social-media-marketing'
+          link: '/services/social-media-marketing',
+          featured: true
         },
         {
           title: 'Content Marketing',
@@ -209,7 +211,8 @@ export const portfolioMegaMenu: MegaMenuData = {
           title: 'E-commerce',
           description: 'Online stores and payment systems',
           icon: ShoppingCart,
-          link: '/portfolio?filter=ecommerce-tech'
+          link: '/portfolio?filter=ecommerce-tech',
+          featured: true
         }
       ]
     },
@@ -266,7 +269,7 @@ export const mainNavigation: NavigationItem[] = [
     icon: Home 
   },
   { 
-    name: 'Services', 
+    name: 'Our Services', 
     href: '/services',
     hasMegaMenu: true,
     megaMenuData: serviceMegaMenu
@@ -278,12 +281,12 @@ export const mainNavigation: NavigationItem[] = [
     megaMenuData: portfolioMegaMenu
   },
   { 
-    name: 'About', 
+    name: 'About Us', 
     href: '/about', 
     icon: User 
   },
   { 
-    name: 'Contact', 
+    name: 'Contact Us', 
     href: '/contact', 
     icon: Mail 
   },

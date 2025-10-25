@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     if (category && category !== 'all') {
       const categoryDoc = await Category.findOne({ slug: category });
       if (categoryDoc) {
-        filter.category = categoryDoc._id;
+        filter.categories = categoryDoc._id; // Changed from category to categories
       }
     }
     
@@ -41,13 +41,15 @@ export async function GET(request: NextRequest) {
       filter.$or = [
         { title: { $regex: search, $options: 'i' } },
         { description: { $regex: search, $options: 'i' } },
-        { technologies: { $in: [new RegExp(search, 'i')] } }
+        { technologies: { $in: [new RegExp(search, 'i')] } },
+        { keyFeatures: { $in: [new RegExp(search, 'i')] } }, // Added keyFeatures to search
+        { projectOverview: { $regex: search, $options: 'i' } } // Added projectOverview to search
       ];
     }
 
     // Get projects with population
     const projects = await Project.find(filter)
-      .populate('category', 'name slug')
+      .populate('categories', 'name slug') // Changed from category to categories
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -86,8 +88,10 @@ export async function POST(request: NextRequest) {
     // Get text fields
     const title = formData.get('title') as string;
     const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
+    const categories = JSON.parse(formData.get('categories') as string || '[]'); // Changed to categories array
     const technologies = JSON.parse(formData.get('technologies') as string || '[]');
+    const keyFeatures = JSON.parse(formData.get('keyFeatures') as string || '[]'); // New field
+    const projectOverview = formData.get('projectOverview') as string; // New field
     const projectUrl = formData.get('projectUrl') as string;
     const githubUrl = formData.get('githubUrl') as string;
     const featured = formData.get('featured') === 'true';
@@ -98,9 +102,12 @@ export async function POST(request: NextRequest) {
     const imageFile = formData.get('image') as File;
 
     // Validate required fields
-    if (!title || !description || !category || !technologies?.length) {
+    if (!title || !description || !categories?.length || !technologies?.length) {
       return NextResponse.json(
-        { success: false, error: 'Title, description, category, and technologies are required' },
+        { 
+          success: false, 
+          error: 'Title, description, categories, and technologies are required' 
+        },
         { status: 400 }
       );
     }
@@ -122,11 +129,11 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find category
-    const categoryDoc = await Category.findById(category);
-    if (!categoryDoc) {
+    // Validate categories exist
+    const categoryDocs = await Category.find({ _id: { $in: categories } });
+    if (categoryDocs.length !== categories.length) {
       return NextResponse.json(
-        { success: false, error: 'Invalid category' },
+        { success: false, error: 'One or more categories are invalid' },
         { status: 400 }
       );
     }
@@ -151,9 +158,11 @@ export async function POST(request: NextRequest) {
       title,
       description,
       slug,
-      category: categoryDoc._id,
+      categories, // Array of category IDs
       image: imageUrl,
       technologies,
+      keyFeatures, // Array of key features
+      projectOverview, // HTML content for project overview
       projectUrl,
       githubUrl,
       featured,
@@ -161,14 +170,32 @@ export async function POST(request: NextRequest) {
       completionDate: new Date(completionDate),
     });
 
-    await project.populate('category', 'name slug');
+    await project.populate('categories', 'name slug'); // Populate categories array
 
     return NextResponse.json(
       { success: true, data: project },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('Create project error:', error);
+    
+    // Handle duplicate key errors
+    if (error.code === 11000) {
+      return NextResponse.json(
+        { success: false, error: 'A project with this title already exists' },
+        { status: 400 }
+      );
+    }
+    
+    // Handle validation errors
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json(
+        { success: false, error: errors.join(', ') },
+        { status: 400 }
+      );
+    }
+    
     return NextResponse.json(
       { success: false, error: 'Failed to create project' },
       { status: 500 }
