@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { serviceMegaMenu } from '@/data/navigation';
 
+
 // Flatten all services from mega menu data
 const allServices = serviceMegaMenu.columns.flatMap(column => 
   column.items.map(service => ({
@@ -87,7 +88,7 @@ export default function ServicesPage() {
 
                     {/* Features */}
                     <div className="space-y-2 mb-6">
-                      {service.features.map((feature, featureIndex) => (
+                      {service.features?.map((feature, featureIndex) => (
                         <div key={featureIndex} className="flex items-center text-textLight text-sm text-style">
                           <CheckCircle className="h-4 w-4 text-greenType mr-2 flex-shrink-0" />
                           {feature}
