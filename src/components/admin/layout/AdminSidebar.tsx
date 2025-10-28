@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { redirect, usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
   FolderOpen,
@@ -11,7 +11,9 @@ import {
   LogOut,
   Menu,
   X,
-  Cloud
+  Cloud,
+  Sparkles,
+  MessageCircle
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -20,13 +22,22 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { name: 'Categories', href: '/admin/categories', icon: Tag },
-  { name: 'Messages', href: '/admin/messages', icon: Mail },
+  { name: 'Messages', href: '/admin/messages', icon: MessageCircle },
+  { name: 'Emails', href: '/admin/emails', icon: Mail },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];
 
 export default function AdminSidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const pathname = usePathname();
+
+    const handleLogout = async () => {
+      
+      localStorage.removeItem('adminToken');
+      redirect('/adminlogin');
+
+      
+    }
 
   return (
     <>
@@ -45,10 +56,14 @@ export default function AdminSidebar() {
       `}>
         {/* Sidebar header */}
         <div className="flex items-center justify-between h-16 px-4 border-b border-b-gray-700 border-border">
-          <Link href="/admin" className="flex items-center space-x-2">
-            <Cloud className="h-8 w-8 text-primary" />
+
+          <Link href="/admin" className="flex items-center space-x-3 group">
+            <div className="relative">
+              <Cloud className="h-10 w-10 text-primary group-hover:text-primary-dark transition-colors" />
+              <Sparkles className="h-4 w-4 text-accent absolute -top-1 -right-1" />
+            </div>
             <div className="flex flex-col">
-              <span className="text-xl font-bold text-headingDark heading-style">GoCloudEx</span>
+              <span className="text-2xl font-bold text-headingDark heading-style">GoCloudEx</span>
               <span className="text-xs text-textDark -mt-1 text-style">Admin Panel</span>
             </div>
           </Link>
@@ -92,7 +107,8 @@ export default function AdminSidebar() {
           <button className="
             flex items-center space-x-3 w-full px-3 py-3 text-sm font-medium text-textDark 
             hover:text-hoverTextDark hover:bg-white/10 rounded-lg transition-colors text-style
-          ">
+          "
+          onClick={handleLogout}>
             <LogOut className="h-5 w-5" />
             <span>Logout</span>
           </button>

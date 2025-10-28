@@ -3,6 +3,7 @@ import connectDB from '@/lib/database';
 import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/upload';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
 // GET /api/admin/projects/[id] - Get single project
 export async function GET(
@@ -10,6 +11,11 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
     await connectDB();
 
     const { id } = await params;
@@ -47,6 +53,11 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
     await connectDB();
 
     const { id } = await params;
@@ -203,6 +214,11 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
     await connectDB();
     
     const { id } = await params;

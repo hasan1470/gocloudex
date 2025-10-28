@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/database';
 import Category from '@/models/Category';
 import Project from '@/models/Project';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
 // GET /api/admin/categories/[id] - Get single category
 export async function GET(
@@ -9,6 +10,13 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
 
     const { id } = await params;
@@ -44,6 +52,13 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
 
     const { id } = await params;
@@ -115,6 +130,13 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
     
     const { id } = await params;

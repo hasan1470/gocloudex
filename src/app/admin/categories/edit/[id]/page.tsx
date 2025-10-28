@@ -8,6 +8,7 @@ import { Category } from '@/types';
 export default function EditCategoryPage() {
   const params = useParams();
   const router = useRouter();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [category, setCategory] = useState<Category | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +21,13 @@ export default function EditCategoryPage() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/admin/categories/${categoryId}`);
+        const response = await fetch(`/api/admin/categories/${categoryId}`,{
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              }          
+      });
         
         if (!response.ok) {
           if (response.status === 404) {

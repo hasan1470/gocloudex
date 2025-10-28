@@ -448,8 +448,14 @@ export default function PortfolioPage() {
                     <div className="absolute top-4 right-4">
                       <div className="flex items-center space-x-1 bg-bgDark/80 text-bgLight px-2 py-1 rounded text-xs">
                         <Calendar className="h-3 w-3" />
-                        <span>{new Date(project.completionDate).getFullYear()}</span>
+                        <span>
+                          {new Date(project.completionDate).toLocaleString('default', {
+                            month: 'short', // e.g. Jan, Feb, Mar
+                            year: 'numeric'
+                          })}
+                        </span>
                       </div>
+
                     </div>
                   </div>
 

@@ -1,11 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/database';
 import Category from '@/models/Category';
-import Project from '@/models/Project';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
 // GET /api/admin/categories - Get all categories
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
 
     const categories = await Category.find().sort({ name: 1 }).lean();
@@ -26,6 +32,12 @@ export async function GET() {
 // POST /api/admin/categories - Create new category
 export async function POST(request: NextRequest) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
 
     const { name, description } = await request.json();

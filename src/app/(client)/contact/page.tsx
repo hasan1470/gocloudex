@@ -31,22 +31,22 @@ const contactInfo = [
     icon: Mail,
     title: 'Email Us',
     description: 'We\'ll respond quickly',
-    details: 'hello@gocloudex.com',
-    link: 'mailto:hello@gocloudex.com'
+    details: 'info@gocloudex.com',
+    link: 'mailto:info@gocloudex.com'
   },
   {
     icon: Phone,
     title: 'Call Us',
     description: 'Mon to Fri, 9am to 6pm',
-    details: '+1 (555) 123-4567',
-    link: 'tel:+15551234567'
+    details: '+1 (311) 049-455',
+    link: 'tel:+1311049455'
   },
   {
     icon: MapPin,
     title: 'Visit Us',
     description: 'Come say hello at our office',
-    details: '123 Business Ave, Suite 100\nCity, State 12345',
-    link: 'https://maps.google.com'
+    details: '123 Trishal-2220, Mymensingh, Bangladesh',
+    link: 'https://maps.app.goo.gl/pm7A5FgYj7vfNtQU8'
   },
   {
     icon: Clock,
@@ -84,7 +84,11 @@ export default function ContactPage() {
       const result = await response.json();
 
       if (response.ok) {
-        toast.success('Message sent successfully! We\'ll get back to you soon.');
+        if (result.data.hasAccount) {
+          toast.success('Message sent successfully! We\'ll get back to you soon.');
+        } else {
+          toast.success('Message sent successfully! Check your email for account details.');
+        }
         setIsSubmitted(true);
         reset();
       } else {
@@ -193,7 +197,7 @@ export default function ContactPage() {
 
             {/* Contact Form */}
             <div className="lg:col-span-2">
-              <div className="bg-bgLight border border-border rounded-2xl shadow-sm p-8">
+              <div className="bg-bgLight border border-border rounded-2xl shadow-sm p-3 md:p-8">
                 <div className="flex items-center space-x-3 mb-6">
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                     <MessageCircle className="h-5 w-5 text-primary" />

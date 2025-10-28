@@ -38,6 +38,7 @@ interface ProjectFormData {
 
 export default function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
   const router = useRouter();
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [techInput, setTechInput] = useState('');
@@ -69,7 +70,13 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/client/projects/`);
+      const response = await fetch(`/api/client/projects/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+      });
       const result = await response.json();
       if (result.success) {
         setPortfolioProjects(result.data);
@@ -91,7 +98,13 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     fetchProjects();
     const fetchCategories = async () => {
       try {
-        const response = await fetch('/api/admin/categories');
+        const response = await fetch('/api/admin/categories', {
+          method: 'GET',
+          headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        });
         const result = await response.json();
         if (result.success) {
           setCategories(result.data);
@@ -293,6 +306,9 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         body: formDataToSend,
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+        }
       });
 
       const result = await response.json();
@@ -473,6 +489,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
               onChange={(value) => handleInputChange('projectOverview', value)}
               
             />
+
           </div>
         </div>
 

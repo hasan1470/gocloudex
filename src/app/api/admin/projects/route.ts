@@ -3,10 +3,17 @@ import connectDB from '@/lib/database';
 import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { uploadToCloudinary } from '@/lib/upload';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
 // GET /api/admin/projects - Get all projects with pagination and filtering
 export async function GET(request: NextRequest) {
   try {
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);
@@ -49,7 +56,7 @@ export async function GET(request: NextRequest) {
 
     // Get projects with population
     const projects = await Project.find(filter)
-      .populate('categories', 'name slug') // Changed from category to categories
+      .populate('categories', 'name slug') 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
@@ -81,6 +88,13 @@ export async function GET(request: NextRequest) {
 // POST /api/admin/projects - Create new project
 export async function POST(request: NextRequest) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+      return authResult.error;
+    }
+    
     await connectDB();
 
     const formData = await request.formData();

@@ -6,6 +6,8 @@ import ProjectForm from '@/components/admin/forms/ProjectForm';
 import { Project } from '@/types';
 
 export default function EditProjectPage() {
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const params = useParams();
   const router = useRouter();
   const [project, setProject] = useState<Project | null>(null);
@@ -20,7 +22,14 @@ export default function EditProjectPage() {
         setLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/admin/projects/${projectId}`);
+        const response = await fetch(`/api/admin/projects/${projectId}`,{
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+            
+        });
         
         if (!response.ok) {
           if (response.status === 404) {

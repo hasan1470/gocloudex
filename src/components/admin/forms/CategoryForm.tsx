@@ -17,6 +17,8 @@ interface CategoryFormData {
 }
 
 export default function CategoryForm({ category, isEditing = false }: CategoryFormProps) {
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
 
@@ -51,6 +53,7 @@ export default function CategoryForm({ category, isEditing = false }: CategoryFo
       const response = await fetch(url, {
         method,
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(formData),
@@ -60,7 +63,7 @@ export default function CategoryForm({ category, isEditing = false }: CategoryFo
 
       if (result.success) {
         router.push('/admin/categories');
-        router.refresh();
+        toast.success(`Category ${isEditing ? 'updated' : 'created'} successfully`);
       } else {
         toast.error(`Failed to ${isEditing ? 'update' : 'create'} category: ${result.error || 'Unknown error'}`);
         console.error('Category form error:', result.error);

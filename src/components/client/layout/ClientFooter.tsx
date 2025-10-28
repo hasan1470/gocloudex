@@ -106,14 +106,6 @@ export default function ClientFooter() {
                       </Link>
                     </li>
                   ))}
-                  <li>
-                    <Link
-                      href="/admin"
-                      className="text-linkDark hover:text-hoverLinkDark transition-colors duration-200 font-medium text-style"
-                    >
-                      Admin Dashboard
-                    </Link>
-                  </li>
                 </ul>
               </div>
 
@@ -143,8 +135,8 @@ export default function ClientFooter() {
                 <div className="space-y-4 text-textDark text-style">
                   <p className="flex items-center space-x-3">
                     <Mail className="h-4 w-4 text-primary flex-shrink-0" />
-                    <a href="mailto:hello@gocloudex.com" className="hover:text-hoverTextDark transition-colors">
-                      hello@gocloudex.com
+                    <a href="mailto:info@gocloudex.com" className="hover:text-hoverTextDark transition-colors">
+                      info@gocloudex.com
                     </a>
                   </p>
                   <p className="leading-relaxed">
@@ -172,7 +164,7 @@ export default function ClientFooter() {
               <span>Built with</span>
               <div className="flex space-x-1">
                 <span className="text-redType">♥</span>
-                <span>using Next.js & Cloudinary</span>
+                <span>using NextJs & MongoDB</span>
               </div>
             </div>
           </div>

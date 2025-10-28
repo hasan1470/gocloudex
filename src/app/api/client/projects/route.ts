@@ -8,7 +8,9 @@ export async function GET() {
     await connectDB();
 
     // Only fetch projects with status 'published'
-    const projects = await Project.find({ status: 'published' });
+    const projects = await Project.find({ status: 'published' })
+    .sort({ completionDate: -1 }); // newest first based on completionDate
+
 
     return NextResponse.json({
       success: true,

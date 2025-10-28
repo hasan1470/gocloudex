@@ -33,6 +33,7 @@ interface CategoriesResponse {
 }
 
 export default function ProjectsPage() {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,7 +69,13 @@ export default function ProjectsPage() {
       if (filters.featured !== 'all') params.append('featured', filters.featured);
       if (filters.search) params.append('search', filters.search);
 
-      const response = await fetch(`/api/admin/projects?${params}`);
+      const response = await fetch(`/api/admin/projects?${params}`,{
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
       const result: ProjectsResponse = await response.json();
 
       if (result.success) {
@@ -86,7 +93,13 @@ export default function ProjectsPage() {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories');
+      const response = await fetch('/api/admin/categories',{
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
       const result: CategoriesResponse = await response.json();
 
       if (result.success) {
@@ -121,6 +134,7 @@ export default function ProjectsPage() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
       });
 

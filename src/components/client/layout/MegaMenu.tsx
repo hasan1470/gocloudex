@@ -42,7 +42,7 @@ export default function MegaMenu({ isOpen, onClose, menuData }: MegaMenuProps) {
       {/* Mega Menu */}
       <div
         ref={menuRef}
-        className="fixed top-0 left-0 right-0 bg-bgLight border-b border-border shadow-2xl z-50 lg:top-20 lg:mx-auto lg:max-w-7xl lg:rounded-2xl lg:border"
+        className="fixed top-0 mt-1 left-0 right-0 bg-bgLight border-b border-border shadow-2xl z-50 lg:top-20 lg:mx-auto lg:max-w-7xl lg:rounded-2xl lg:border"
       >
         {/* Header */}
         <div className="border-b border-border">
@@ -75,7 +75,7 @@ export default function MegaMenu({ isOpen, onClose, menuData }: MegaMenuProps) {
                   {column.title}
                 </h3>
                 <div className="space-y-4">
-                  {column.items.map((item, itemIndex) => {
+                  {column.items.slice(0, 4).map((item, itemIndex) => {
                     const Icon = item.icon;
                     return (
                       <Link

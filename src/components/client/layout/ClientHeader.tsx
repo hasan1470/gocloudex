@@ -8,7 +8,9 @@ import {
   Menu, 
   X, 
   ChevronDown,
-  User
+  User,
+  Mail,
+  Sparkles
 } from 'lucide-react';
 import { mainNavigation, NavigationItem } from '@/data/navigation';
 import MegaMenu from './MegaMenu';
@@ -39,15 +41,16 @@ export default function ClientHeader() {
           <div className="flex w-full items-center justify-between py-4">
             {/* Logo */}
             <div className="flex items-center">
-              <Link href="/" className="flex items-center space-x-3 group">
-                <Cloud className="h-8 w-8 text-primary group-hover:text-primary-dark transition-colors" />
-                <div className="flex flex-col">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent heading-style">
-                    GoCloudEx
-                  </span>
-                  <span className="text-xs text-textLight -mt-1 text-style">Cloud Solutions</span>
-                </div>
-              </Link>
+            <Link href="/" className="flex items-center space-x-3 group">
+              <div className="relative">
+                <Cloud className="h-10 w-10 text-primary group-hover:text-primary-dark transition-colors" />
+                <Sparkles className="h-4 w-4 text-accent absolute -top-1 -right-1" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-primary heading-style">GoCloudEx</span>
+                <span className="text-sm text-textLight -mt-1 text-style">Cloud Solutions</span>
+              </div>
+            </Link>
             </div>
 
             {/* Desktop Navigation */}
@@ -92,12 +95,13 @@ export default function ClientHeader() {
 
             {/* Admin Login Button */}
             <div className="hidden lg:flex">
+
               <Link
-                href="/admin"
+                href="/contact"
                 className="inline-flex items-center space-x-2 px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-bgLight bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 transition-all duration-200 transform hover:-translate-y-0.5 text-style"
               >
-                <User className="h-4 w-4" />
-                <span>Admin</span>
+                <Mail className="h-4 w-4" />
+                <span>Contact</span>
               </Link>
             </div>
 
@@ -105,7 +109,7 @@ export default function ClientHeader() {
             <div className="flex lg:hidden">
               <button
                 type="button"
-                className="inline-flex items-center justify-center rounded-lg p-2 text-textLight hover:bg-input hover:text-hoverTextLight transition-colors"
+                className="inline-flex items-center justify-center rounded-lg p-2 text-white hover:bg-primary-dark hover:text-white transition-colors bg-primary"
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               >
                 <span className="sr-only">Open main menu</span>
@@ -141,12 +145,12 @@ export default function ClientHeader() {
                   );
                 })}
                 <Link
-                  href="/admin"
+                  href="/contact"
                   className="flex items-center space-x-3 px-4 py-3 text-base font-medium text-textLight hover:text-hoverHeadingLight hover:bg-input rounded-lg transition-colors mt-4 border-t border-border pt-4 text-style"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <User className="h-5 w-5" />
-                  <span>Admin Dashboard</span>
+                  <Mail className="h-5 w-5" />
+                  <span>Contact Us</span>
                 </Link>
               </div>
             </div>

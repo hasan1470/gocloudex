@@ -12,6 +12,7 @@ interface CategoriesResponse {
 }
 
 export default function CategoriesPage() {
+  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -21,7 +22,13 @@ export default function CategoriesPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/categories');
+      const response = await fetch('/api/admin/categories', {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
       const result: CategoriesResponse = await response.json();
 
       if (result.success) {
@@ -33,6 +40,9 @@ export default function CategoriesPage() {
       setLoading(false);
     }
   };
+
+  
+  
 
   useEffect(() => {
     fetchCategories();
@@ -50,6 +60,7 @@ export default function CategoriesPage() {
       const response = await fetch(`/api/admin/categories/${categoryId}`, {
         method: 'DELETE',
         headers: {
+          'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
       });

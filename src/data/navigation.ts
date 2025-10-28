@@ -14,7 +14,6 @@ import {
   Palette,
   Video,
   Mail,
-  FolderOpen,
   User,
   Home
 } from 'lucide-react';
@@ -31,6 +30,7 @@ export interface MegaMenuItem {
   icon: any; // Lucide icon component
   link: string;
   featured?: boolean;
+  features?: string[];
 }
 
 export interface MegaMenuData {
@@ -56,27 +56,30 @@ export const serviceMegaMenu: MegaMenuData = {
           description: 'Custom, responsive websites that convert visitors into customers',
           icon: Layout,
           link: '/services/website-design',
-          featured: true
+          featured: true,
+          features: ['Modern design', 'SEO-friendly', 'mobile-optimized'],
         },
         {
           title: 'E-commerce Development',
           description: 'Online stores with secure payment processing and inventory management',
           icon: ShoppingCart,
           link: '/services/ecommerce-development',
-          featured: true
+          featured: true,
+          features: ['Secure payments', 'User-friendly', 'Scalable solutions'],
         },
         {
           title: 'Mobile App Development',
           description: 'Native and cross-platform mobile applications for iOS and Android',
           icon: Smartphone,
           link: '/services/mobile-app-development',
-          featured: true
+          featured: true,
+          features: ['iOS & Android', 'User-centric design', 'Performance optimized'],
         },
         {
           title: 'UI/UX Design',
           description: 'User-centered design that enhances user experience and engagement',
           icon: Palette,
-          link: '/services/ui-ux-design'
+          link: '/services'
         }
       ]
     },
@@ -88,27 +91,30 @@ export const serviceMegaMenu: MegaMenuData = {
           description: 'Improve your search engine rankings and drive organic traffic',
           icon: Search,
           link: '/services/seo',
-          featured: true
+          featured: true,
+          features: ['Keyword research', 'On-page SEO', 'Link building']
         },
         {
           title: 'Ads Campaign',
           description: 'Targeted advertising campaigns across Google, social media, and more',
           icon: Target,
           link: '/services/ads-campaign',
-          featured: true
+          featured: true,
+          features: ['PPC Management', 'Social Media Ads', 'Performance Tracking']
         },
         {
           title: 'Social Media Marketing',
           description: 'Build your brand presence and engage with your audience',
           icon: MessageCircle,
           link: '/services/social-media-marketing',
-          featured: true
+          featured: true,
+          features: ['Content Creation', 'Community Management', 'Analytics & Reporting']
         },
         {
           title: 'Content Marketing',
           description: 'Strategic content creation to attract and retain customers',
           icon: Video,
-          link: '/services/content-marketing'
+          link: '/services'
         }
       ]
     },
@@ -120,26 +126,28 @@ export const serviceMegaMenu: MegaMenuData = {
           description: 'Custom web applications tailored to your business needs',
           icon: Code,
           link: '/services/web-application',
-          featured: true
+          featured: true,
+          features: ['Scalable Architecture', 'Robust Security', 'User-friendly Interfaces']
         },
         {
           title: 'Cloud Solutions',
           description: 'Scalable cloud infrastructure and deployment services',
           icon: Cloud,
           link: '/services/cloud-solutions',
-          featured: true
+          featured: true,
+          features: ['AWS & Azure', 'Cloud Migration', '24/7 Monitoring']
         },
         {
           title: 'API Development',
           description: 'RESTful APIs and integration services for your applications',
           icon: Zap,
-          link: '/services/api-development'
+          link: '/services'
         },
         {
           title: 'Security Audit',
           description: 'Comprehensive security assessment and protection solutions',
           icon: Shield,
-          link: '/services/security-audit'
+          link: '/services'
         }
       ]
     }
@@ -220,29 +228,30 @@ export const portfolioMegaMenu: MegaMenuData = {
       title: 'Featured Work',
       items: [
         {
-          title: 'Award Winning',
-          description: 'Our most recognized and awarded projects',
-          icon: TrendingUp,
-          link: '/portfolio?filter=award-winning',
-          featured: true
-        },
-        {
           title: 'Latest Projects',
           description: 'Recently completed work and case studies',
           icon: Zap,
-          link: '/portfolio?filter=latest'
+          link: '/portfolio',
+          featured: true
         },
         {
           title: 'Client Stories',
           description: 'Success stories and client testimonials',
           icon: User,
-          link: '/portfolio?filter=stories'
+          link: '/portfolio',
+          featured: true
+        },
+        {
+          title: 'Award Winning',
+          description: 'Our most recognized and awarded projects',
+          icon: TrendingUp,
+          link: '/portfolio',
         },
         {
           title: 'Open Source',
           description: 'Our contributions to the open source community',
           icon: Code,
-          link: '/portfolio?filter=open-source'
+          link: '/portfolio'
         }
       ]
     }
