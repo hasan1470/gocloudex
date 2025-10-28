@@ -13,7 +13,8 @@ import {
   X,
   Cloud,
   Sparkles,
-  MessageCircle
+  MessageCircle,
+  Users
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -22,7 +23,8 @@ const navigation = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Projects', href: '/admin/projects', icon: FolderOpen },
   { name: 'Categories', href: '/admin/categories', icon: Tag },
-  { name: 'Messages', href: '/admin/messages', icon: MessageCircle },
+  { name: 'Users', href: '/admin/users', icon: Users },
+  { name: 'Chats', href: '/admin/chats', icon: MessageCircle },
   { name: 'Emails', href: '/admin/emails', icon: Mail },
   { name: 'Settings', href: '/admin/settings', icon: Settings },
 ];

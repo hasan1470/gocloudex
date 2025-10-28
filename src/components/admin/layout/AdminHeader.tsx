@@ -3,6 +3,11 @@
 import { Bell, Search, User, Settings } from 'lucide-react';
 
 export default function AdminHeader() {
+
+
+  const user = 'Hasan';
+  const role = 'Administrator';
+
   return (
     <header className="bg-bgLight shadow-sm border-b border-border">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
@@ -40,8 +45,8 @@ export default function AdminHeader() {
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="text-sm font-medium text-headingLight heading-style">Admin User</div>
-              <div className="text-xs text-textLight text-style">Administrator</div>
+              <div className="text-sm font-medium text-headingLight heading-style">{user} </div>
+              <div className="text-xs text-textLight text-style">{role}</div>
             </div>
           </div>
         </div>

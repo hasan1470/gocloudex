@@ -1,10 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/database';
 import User from '@/models/User';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
-// GET - Fetch users with pagination and filtering
+// GET - Fetch users with pagination and filtering (only those with email activity)
 export async function GET(request: NextRequest) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+        return authResult.error;
+    }
+
     await connectDB();
 
     const { searchParams } = new URL(request.url);
@@ -15,30 +23,37 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    // Build query
-    let query: any = {};
+    // Build query - Only users who have email activity
+    let query: any = {
+      $and: [
+        { lastEmailMessage: { $exists: true, $ne: '' } },
+        { lastEmailSubject: { $exists: true, $ne: '' } }
+      ]
+    };
     
     // Search filter
     if (search) {
-      query.$or = [
-        { name: { $regex: search, $options: 'i' } },
-        { email: { $regex: search, $options: 'i' } }
-      ];
+      query.$and.push({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } }
+        ]
+      });
     }
 
-    // Status filter
+    // Status filter - using emailUnreadCount for email-specific filtering
     if (status === 'unread') {
-      query.unreadCount = { $gt: 0 };
+      query.$and.push({ emailUnreadCount: { $gt: 0 } });
     } else if (status === 'read') {
-      query.unreadCount = 0;
+      query.$and.push({ emailUnreadCount: 0 });
     }
 
-    // Get users with pagination
+    // Get users with pagination - sort by lastEmailDate
     const users = await User.find(query)
-      .sort({ lastMessage: -1 })
+      .sort({ lastEmailDate: -1 })
       .skip(skip)
       .limit(limit)
-      .select('-messages') // Exclude full messages for performance
+      .select('name email password emailCount emailUnreadCount lastEmailSubject lastEmailMessage lastEmailDate createdAt')
       .lean();
 
     // Get total count for pagination
@@ -51,10 +66,11 @@ export async function GET(request: NextRequest) {
       name: user.name,
       email: user.email,
       password: user.password,
-      messageCount: user.messageCount,
-      unreadCount: user.unreadCount,
-      lastMessage: user.lastMessage,
-      lastMessagePreview: user.lastMessagePreview,
+      emailCount: user.emailCount || 0,
+      emailUnreadCount: user.emailUnreadCount || 0,
+      lastEmailSubject: user.lastEmailSubject || '',
+      lastEmailMessage: user.lastEmailMessage || '',
+      lastEmailDate: user.lastEmailDate || user.createdAt,
       createdAt: user.createdAt
     }));
 
@@ -84,6 +100,13 @@ export async function GET(request: NextRequest) {
 // PATCH - Update user read status
 export async function PATCH(request: NextRequest) {
   try {
+
+    // Verify authentication and admin role
+    const authResult = await verifyAdminAuth(request);
+    if ('error' in authResult) {
+        return authResult.error;
+    }
+
     await connectDB();
 
     const { id, action, originalUnreadCount } = await request.json();
@@ -105,11 +128,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     if (action === 'mark-read') {
-      // Mark ALL messages as read
-      user.messages.forEach((message: any) => {
-        message.isRead = true;
-      });
-      user.unreadCount = 0;
+      // Mark ALL email messages as read by setting emailUnreadCount to 0
+      user.emailUnreadCount = 0;
       
       await user.save();
       
@@ -117,53 +137,36 @@ export async function PATCH(request: NextRequest) {
         success: true,
         data: {
           unreadCount: 0,
-          message: 'All messages marked as read'
+          message: 'All emails marked as read'
         }
       });
       
     } else if (action === 'mark-unread') {
-      // Sort messages by latest first (newest at the top)
-      const sortedMessages = [...user.messages].sort((a, b) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      );
-      
+      // Restore to original unread count or use smart default
       let messagesToMarkUnread = 0;
       
       if (originalUnreadCount && originalUnreadCount > 0) {
         // Use the original unread count if provided
-        messagesToMarkUnread = Math.min(originalUnreadCount, user.messages.length);
+        messagesToMarkUnread = Math.min(originalUnreadCount, user.emailCount);
       } else {
         // If no original count, use a smart default
-        if (user.unreadCount === 0) {
-          // If all are read, mark 25% of messages as unread (minimum 1)
-          messagesToMarkUnread = Math.max(1, Math.ceil(user.messages.length * 0.25));
+        if (user.emailUnreadCount === 0) {
+          // If all are read, mark 25% of emails as unread (minimum 1)
+          messagesToMarkUnread = Math.max(1, Math.ceil(user.emailCount * 0.25));
         } else {
-          // If some are already unread, double the unread count (but don't exceed total messages)
-          messagesToMarkUnread = Math.min(user.unreadCount * 2, user.messages.length);
+          // If some are already unread, double the unread count (but don't exceed total emails)
+          messagesToMarkUnread = Math.min(user.emailUnreadCount * 2, user.emailCount);
         }
       }
       
-      
-      // Mark the specified number of most recent messages as unread
-      let markedCount = 0;
-      for (const message of sortedMessages) {
-        if (markedCount < messagesToMarkUnread) {
-          message.isRead = false;
-          markedCount++;
-        } else {
-          // Ensure the rest are marked as read
-          message.isRead = true;
-        }
-      }
-      
-      user.unreadCount = markedCount;
+      user.emailUnreadCount = messagesToMarkUnread;
       await user.save();
       
       return NextResponse.json({
         success: true,
         data: {
-          unreadCount: markedCount,
-          message: `${markedCount} messages marked as unread`
+          unreadCount: messagesToMarkUnread,
+          message: `${messagesToMarkUnread} emails marked as unread`
         }
       });
     } else {

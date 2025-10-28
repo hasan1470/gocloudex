@@ -1,8 +1,25 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Mail, Copy, Check, Eye, EyeOff, Search, Filter, MessageCircle, User, Calendar, RefreshCw, ExternalLink } from 'lucide-react';
+import { 
+  Users, 
+  Copy, 
+  Check, 
+  Eye, 
+  EyeOff, 
+  Search, 
+  Filter, 
+  Mail, 
+  MessageCircle, 
+  User, 
+  Calendar,
+  Edit, 
+  Trash2, 
+  RefreshCw,
+  Plus
+} from 'lucide-react';
 import toast from 'react-hot-toast';
+import Link from 'next/link';
 
 interface User {
   id: string;
@@ -11,10 +28,11 @@ interface User {
   password: string;
   emailCount: number;
   emailUnreadCount: number;
-  lastEmailSubject: string;
-  lastEmailMessage: string;
-  lastEmailDate: string;
+  chatCount: number;
+  chatUnreadCount: number;
   createdAt: string;
+  lastEmailDate?: string;
+  lastChatDate?: string;
 }
 
 interface PaginationInfo {
@@ -25,18 +43,7 @@ interface PaginationInfo {
   totalUsers: number;
 }
 
-// Track original unread counts
-interface UserUnreadState {
-  [userId: string]: number;
-}
-
-const yourEmailCredentials = {
-  email: process.env.NEXT_PUBLIC_EMAIL_USERNAME || 'info@gocloudex.com',
-  password: process.env.NEXT_PUBLIC_EMAIL_PASSWORD || '6PzPXeWIOH@Dosa353sdIGo',
-  webmailUrl: process.env.NEXT_PUBLIC_EMAIL_SERVICE_URL || 'https://mail.hostinger.com',
-};
-
-export default function EmailPage() {
+export default function AdminUsersPage() {
   const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +52,7 @@ export default function EmailPage() {
   const [copiedField, setCopiedField] = useState<{type: string, id: string} | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
-  const [statusFilter, setStatusFilter] = useState<'all' | 'read' | 'unread'>('all');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'email' | 'chat'>('all');
   const [pagination, setPagination] = useState<PaginationInfo>({
     currentPage: 1,
     totalPages: 1,
@@ -53,9 +60,6 @@ export default function EmailPage() {
     hasNext: false,
     hasPrev: false
   });
-  
-  // Track original unread states
-  const [originalUnreadCounts, setOriginalUnreadCounts] = useState<UserUnreadState>({});
 
   // Fetch users from API
   const fetchUsers = async (page: number, limit: number, search: string, status: string) => {
@@ -68,27 +72,18 @@ export default function EmailPage() {
         ...(status !== 'all' && { status })
       });
 
-      const response = await fetch(`/api/admin/emails?${params}`, {
+      const response = await fetch(`/api/admin/users?${params}`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
-        }
-    });
-
+        },
+      });
       const result = await response.json();
 
       if (result.success) {
-        const fetchedUsers = result.data.users;
-        setUsers(fetchedUsers);
+        setUsers(result.data.users);
         setPagination(result.data.pagination);
-        
-        // Initialize original unread counts
-        const newOriginalCounts: UserUnreadState = {};
-        fetchedUsers.forEach((user: User) => {
-          newOriginalCounts[user.id] = user.emailUnreadCount;
-        });
-        setOriginalUnreadCounts(newOriginalCounts);
       } else {
         throw new Error(result.error);
       }
@@ -121,73 +116,55 @@ export default function EmailPage() {
     }
   };
 
-  const toggleReadStatus = async (userId: string) => {
-    try {
-      const user = users.find(u => u.id === userId);
-      if (!user) return;
-
-      const action = user.emailUnreadCount > 0 ? 'mark-read' : 'mark-unread';
-      
-      console.log('Toggling status for user:', userId, 'Action:', action, 'Current unread:', user.emailUnreadCount);
-
-      // Get the original unread count from our state
-      const originalUnreadCount = originalUnreadCounts[userId];
-
-      const response = await fetch('/api/admin/emails', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: userId,
-          action: action,
-          originalUnreadCount: action === 'mark-unread' ? originalUnreadCount : undefined
-        }),
-      });
-
-      const result = await response.json();
-
-      if (result.success) {
-        // Update local state
-        setUsers(users.map(user => 
-          user.id === userId 
-            ? { 
-                ...user, 
-                emailUnreadCount: result.data.unreadCount,
-              }
-            : user
-        ));
-        
-        // Update original unread counts if we're marking as read
-        if (action === 'mark-read') {
-          setOriginalUnreadCounts(prev => ({
-            ...prev,
-            [userId]: user.emailUnreadCount // Store the count before marking as read
-          }));
-        } else {
-          // When marking unread, update the original count to the new value
-          setOriginalUnreadCounts(prev => ({
-            ...prev,
-            [userId]: result.data.unreadCount
-          }));
-        }
-        
-        toast.success(result.data.message);
-      } else {
-        throw new Error(result.error);
-      }
-    } catch (error) {
-      console.error('Failed to update read status:', error);
-      toast.error('Failed to update read status');
-    }
-  };
-
   const togglePasswordVisibility = (userId: string) => {
     setShowPasswords(prev => ({
       ...prev,
       [userId]: !prev[userId]
     }));
+  };
+
+  const handleDeleteUser = async (userId: string, userName: string) => {
+    if (!confirm(`Are you sure you want to delete user "${userName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/admin/users`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: userId }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        toast.success('User deleted successfully');
+        // Refresh the user list
+        fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error('Failed to delete user');
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+    toast.success('Refreshing users...');
+  };
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   };
 
   const getInitials = (name: string) => {
@@ -199,155 +176,66 @@ export default function EmailPage() {
       .slice(0, 2);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    
-    // Format time in 12-hour format with AM/PM
-    const time = date.toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit',
-      hour12: true
-    });
-    
-    // Format date as DD/MM/YYYY
-    const formattedDate = date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-    
-    return `${time} - ${formattedDate}`;
-  };
-
-  const handleRefresh = () => {
-    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
-    toast.success('Refreshing messages...');
-  };
-
-  const handleOpenWebmail = () => {
-    window.open(yourEmailCredentials.webmailUrl, '_blank');
-  };
-
   // Calculate stats from real data
   const totalCustomers = pagination.totalUsers;
-  const totalMessages = users.reduce((sum, user) => sum + user.emailCount, 0);
-  const totalUnread = users.reduce((sum, user) => sum + user.emailUnreadCount, 0);
-  const activeToday = users.filter(user => 
-    new Date(user.lastEmailDate).toDateString() === new Date().toDateString()
-  ).length;
+  const totalEmails = users.reduce((sum, user) => sum + user.emailCount, 0);
+  const totalChats = users.reduce((sum, user) => sum + user.chatCount, 0);
+  const totalUnreadEmails = users.reduce((sum, user) => sum + user.emailUnreadCount, 0);
+  const totalUnreadChats = users.reduce((sum, user) => sum + user.chatUnreadCount, 0);
 
   return (
     <div className="space-y-6">
-      {/* Header with Your Email Credentials */}
-      <div className="bg-gradient-to-r from-primary/10 to-accent/10 border border-primary/20 rounded-lg p-6">
-        <h2 className="text-lg font-semibold text-headingLight mb-3 heading-style">Your Email Credentials</h2>
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          {/* Your Email Credentials */}
-          <div className="flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Email */}
-              <div className="flex items-center space-x-3">
-                <div className="flex-1 bg-bgLight border border-border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-textLight text-sm text-style">Email</p>
-                      <p className="text-headingLight font-mono text-sm text-style">{yourEmailCredentials.email}</p>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(yourEmailCredentials.email, 'email')}
-                      className="p-2 hover:bg-input rounded-lg transition-colors"
-                      title="Copy email"
-                    >
-                      {copiedField?.type === 'email' && copiedField.id === 'admin' ? (
-                        <Check className="h-4 w-4 text-greenType" />
-                      ) : (
-                        <Copy className="h-4 w-4 text-textLight" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-              </div>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-headingLight heading-style">User Management</h1>
+          <p className="text-textLight text-style mt-2">Manage all users and their communication history</p>
+        </div>
+        <div className="flex items-center space-x-3">
+          <Link
+            href="/admin/users/create"
+            className="inline-flex items-center space-x-2 px-4 py-3 bg-bgLight border border-border text-headingLight rounded-lg hover:bg-input transition-colors disabled:opacity-50 text-style"
+            
+          >
+            <Plus className="h-5 w-5" />
+            <span>Add New User</span>
+          </Link>
+          <button
+            onClick={handleRefresh}
+            disabled={loading}
+            className="inline-flex items-center space-x-2 px-4 py-3 bg-primary text-bgLight rounded-lg hover:bg-primary-dark transition-colors text-style"
+            title="Refresh users list"
+          >
+            <RefreshCw className={`h-5 w-5 ${loading ? 'animate-spin' : ''}`} />
+            <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
+          </button>
 
-              {/* Password */}
-              <div className="flex items-center space-x-3">
-                <div className="flex-1 bg-bgLight border border-border rounded-lg p-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-textLight text-sm text-style">Password</p>
-                      <p className="text-headingLight font-mono text-sm text-style">
-                        {showPasswords['admin'] ? yourEmailCredentials.password : '••••••••••'}
-                      </p>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => togglePasswordVisibility('admin')}
-                        className="p-2 hover:bg-input rounded-lg transition-colors"
-                        title={showPasswords['admin'] ? 'Hide password' : 'Show password'}
-                      >
-                        {showPasswords['admin'] ? (
-                          <EyeOff className="h-4 w-4 text-textLight" />
-                        ) : (
-                          <Eye className="h-4 w-4 text-textLight" />
-                        )}
-                      </button>
-                      <button
-                        onClick={() => copyToClipboard(yourEmailCredentials.password, 'password')}
-                        className="p-2 hover:bg-input rounded-lg transition-colors"
-                        title="Copy password"
-                      >
-                        {copiedField?.type === 'password' && copiedField.id === 'admin' ? (
-                          <Check className="h-4 w-4 text-greenType" />
-                        ) : (
-                          <Copy className="h-4 w-4 text-textLight" />
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleOpenWebmail}
-              className="inline-flex items-center space-x-2 px-4 py-3 bg-bgLight border border-border text-headingLight rounded-lg hover:bg-input transition-colors text-style"
-            >
-              <ExternalLink className="h-4 w-4" />
-              <span>Open Webmail</span>
-            </button>
-            <button
-              onClick={handleRefresh}
-              disabled={loading}
-              className="inline-flex items-center space-x-2 px-4 py-3 bg-primary text-bgLight rounded-lg hover:bg-primary-dark disabled:opacity-50 transition-colors text-style"
-            >
-              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
-              <span>{loading ? 'Loading...' : 'Refresh'}</span>
-            </button>
-          </div>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-textLight text-sm text-style">Total Customers</p>
+              <p className="text-textLight text-sm text-style">Total Users</p>
               <p className="text-2xl font-bold text-headingLight heading-style">{totalCustomers}</p>
             </div>
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-              <User className="h-5 w-5 text-primary" />
+              <Users className="h-5 w-5 text-primary" />
             </div>
           </div>
         </div>
+        
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Emails</p>
               <p className="text-2xl font-bold text-headingLight heading-style">
-                {totalMessages}
+                {totalEmails}
+              </p>
+              <p className="text-xs text-textLight text-style">
+                {totalUnreadEmails} unread
               </p>
             </div>
             <div className="w-10 h-10 bg-greenType/10 rounded-lg flex items-center justify-center">
@@ -355,25 +243,33 @@ export default function EmailPage() {
             </div>
           </div>
         </div>
+        
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-textLight text-sm text-style">Unread Emails</p>
+              <p className="text-textLight text-sm text-style">Total Chats</p>
               <p className="text-2xl font-bold text-headingLight heading-style">
-                {totalUnread}
+                {totalChats}
+              </p>
+              <p className="text-xs text-textLight text-style">
+                {totalUnreadChats} unread
               </p>
             </div>
-            <div className="w-10 h-10 bg-redType/10 rounded-lg flex items-center justify-center">
-              <MessageCircle className="h-5 w-5 text-redType" />
+            <div className="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center">
+              <MessageCircle className="h-5 w-5 text-blue-500" />
             </div>
           </div>
         </div>
+        
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Active Today</p>
               <p className="text-2xl font-bold text-headingLight heading-style">
-                {activeToday}
+                {users.filter(user => 
+                  new Date(user.lastEmailDate || user.lastChatDate || user.createdAt).toDateString() === 
+                  new Date().toDateString()
+                ).length}
               </p>
             </div>
             <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -391,7 +287,7 @@ export default function EmailPage() {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-textLight" />
               <input
                 type="text"
-                placeholder="Search customers by name or email..."
+                placeholder="Search users by name or email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-bgLight focus:outline-none focus:ring-2 focus:ring-ring focus:border-ring text-style"
@@ -401,18 +297,18 @@ export default function EmailPage() {
           <div className="flex items-center space-x-4">
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
               <Filter className="h-4 w-4" />
-              <span>Status:</span>
+              <span>Filter:</span>
               <select 
                 value={statusFilter}
                 onChange={(e) => {
-                  setStatusFilter(e.target.value as 'all' | 'read' | 'unread');
+                  setStatusFilter(e.target.value as 'all' | 'email' | 'chat');
                   setCurrentPage(1);
                 }}
                 className="bg-bgLight border border-border rounded px-2 py-1 text-style"
               >
-                <option value="all">All Emails</option>
-                <option value="unread">Unread Only</option>
-                <option value="read">Read Only</option>
+                <option value="all">All Users</option>
+                <option value="email">With Emails</option>
+                <option value="chat">With Chats</option>
               </select>
             </div>
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
@@ -425,12 +321,20 @@ export default function EmailPage() {
                 }}
                 className="bg-bgLight border border-border rounded px-2 py-1 text-style"
               >
-                <option value={5}>5 per page</option>
                 <option value={10}>10 per page</option>
                 <option value={20}>20 per page</option>
                 <option value={50}>50 per page</option>
+                <option value={100}>100 per page</option>
               </select>
             </div>
+            <button
+              onClick={handleRefresh}
+              disabled={loading}
+              className="p-2 hover:bg-input rounded-lg transition-colors disabled:opacity-50"
+              title="Refresh"
+            >
+              <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            </button>
           </div>
         </div>
       </div>
@@ -440,8 +344,8 @@ export default function EmailPage() {
         {/* Table Header */}
         <div className="border-b border-border bg-input px-6 py-4">
           <div className="flex items-center space-x-3">
-            <Mail className="h-5 w-5 text-primary" />
-            <h2 className="font-semibold text-headingLight text-style">Customer Emails</h2>
+            <Users className="h-5 w-5 text-primary" />
+            <h2 className="font-semibold text-headingLight text-style">All Users</h2>
             {loading && (
               <div className="flex items-center space-x-2 text-sm text-textLight">
                 <RefreshCw className="h-4 w-4 animate-spin" />
@@ -460,21 +364,21 @@ export default function EmailPage() {
                   No.
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
-                  Customer
+                  User Info
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
                   Credentials
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
-                  Last Email
+                  Account Date
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
-                  Emails
+                  Email Stats
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
-                  Status
+                  Chat Stats
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style">
+                <th className="px-6 py-3 text-left text-xs font-medium text-textLight uppercase tracking-wider text-style w-24">
                   Actions
                 </th>
               </tr>
@@ -487,7 +391,7 @@ export default function EmailPage() {
                     {((currentPage - 1) * itemsPerPage) + index + 1}
                   </td>
 
-                  {/* Customer Info */}
+                  {/* User Info */}
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white font-semibold text-sm">
@@ -556,27 +460,19 @@ export default function EmailPage() {
                     </div>
                   </td>
 
-                  {/* Last Email */}
+                  {/* Account Date */}
                   <td className="px-6 py-4">
-                    <div className="max-w-xs">
-                      <div className="text-sm font-medium text-headingLight mb-1 text-style">
-                        {user.lastEmailSubject}
-                      </div>
-                      <div className="text-textLight text-sm mb-1 line-clamp-2 text-style">
-                        {user.lastEmailMessage}
-                      </div>
-                      <div className="text-textLight text-xs text-style">
-                        {formatDate(user.lastEmailDate)}
-                      </div>
+                    <div className="text-textLight text-sm text-style">
+                      {formatDate(user.createdAt)}
                     </div>
                   </td>
 
-                  {/* Email Counts */}
+                  {/* Email Stats */}
                   <td className="px-6 py-4">
                     <div className="flex items-center space-x-4">
                       <div className="text-center">
-                        <div className="flex items-center justify-center w-8 h-8 bg-primary/10 rounded-full">
-                          <Mail className="h-4 w-4 text-primary" />
+                        <div className="flex items-center justify-center w-8 h-8 bg-greenType/10 rounded-full">
+                          <Mail className="h-4 w-4 text-greenType" />
                         </div>
                         <div className="text-xs text-textLight mt-1 text-style">Total</div>
                         <div className="font-semibold text-headingLight text-style">{user.emailCount}</div>
@@ -591,45 +487,44 @@ export default function EmailPage() {
                     </div>
                   </td>
 
-                  {/* Status */}
+                  {/* Chat Stats */}
                   <td className="px-6 py-4">
-                    <div className="flex items-center space-x-2">
-                      {user.emailUnreadCount > 0 ? (
-                        <>
-                          <div className="w-3 h-3 bg-redType rounded-full animate-pulse"></div>
-                          <span className="text-redType text-sm font-medium text-style">Unread</span>
-                        </>
-                      ) : (
-                        <>
-                          <div className="w-3 h-3 bg-greenType rounded-full"></div>
-                          <span className="text-greenType text-sm font-medium text-style">Read</span>
-                        </>
-                      )}
+                    <div className="flex items-center space-x-4">
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-500/10 rounded-full">
+                          <MessageCircle className="h-4 w-4 text-blue-500" />
+                        </div>
+                        <div className="text-xs text-textLight mt-1 text-style">Total</div>
+                        <div className="font-semibold text-headingLight text-style">{user.chatCount}</div>
+                      </div>
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-orange-500/10 rounded-full">
+                          <MessageCircle className="h-4 w-4 text-orange-500" />
+                        </div>
+                        <div className="text-xs text-textLight mt-1 text-style">Unread</div>
+                        <div className="font-semibold text-headingLight text-style">{user.chatUnreadCount}</div>
+                      </div>
                     </div>
                   </td>
 
                   {/* Actions */}
                   <td className="px-6 py-4">
-                    <button
-                      onClick={() => toggleReadStatus(user.id)}
-                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors text-style ${
-                        user.emailUnreadCount > 0
-                          ? 'bg-redType/10 text-redType hover:bg-redType/20'
-                          : 'bg-greenType/10 text-greenType hover:bg-greenType/20'
-                      }`}
-                    >
-                      {user.emailUnreadCount > 0 ? (
-                        <>
-                          <Check className="h-4 w-4" />
-                          <span>Mark Read</span>
-                        </>
-                      ) : (
-                        <>
-                          <MessageCircle className="h-4 w-4" />
-                          <span>Mark Unread</span>
-                        </>
-                      )}
-                    </button>
+                    <div className="flex items-center space-x-2">
+                      <Link
+                        href={`/admin/users/edit/${user.id}`}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        title="Edit user"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Link>
+                      <button
+                        onClick={() => handleDeleteUser(user.id, user.name)}
+                        className="p-2 text-redType hover:bg-red-50 rounded-lg transition-colors"
+                        title="Delete user"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -641,7 +536,7 @@ export default function EmailPage() {
         <div className="border-t border-border bg-input px-6 py-4">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div className="text-sm text-textLight text-style">
-              Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, pagination.totalUsers)} of {pagination.totalUsers} customers
+              Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, pagination.totalUsers)} of {pagination.totalUsers} users
             </div>
             
             <div className="flex items-center space-x-2">
@@ -700,14 +595,14 @@ export default function EmailPage() {
       {/* Empty State */}
       {users.length === 0 && !loading && (
         <div className="text-center py-12">
-          <Mail className="h-12 w-12 text-textLight mx-auto mb-4" />
+          <Users className="h-12 w-12 text-textLight mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-headingLight mb-2 heading-style">
-            No customers found
+            No users found
           </h3>
           <p className="text-textLight text-style">
             {searchTerm || statusFilter !== 'all' 
               ? 'Try adjusting your search terms or filters' 
-              : 'No customer emails yet'
+              : 'No users registered yet'
             }
           </p>
         </div>
@@ -717,7 +612,7 @@ export default function EmailPage() {
       {loading && users.length === 0 && (
         <div className="text-center py-12">
           <RefreshCw className="h-12 w-12 text-textLight mx-auto mb-4 animate-spin" />
-          <p className="text-textLight text-style">Loading customer emails...</p>
+          <p className="text-textLight text-style">Loading users...</p>
         </div>
       )}
     </div>

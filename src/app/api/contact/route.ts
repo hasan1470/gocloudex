@@ -31,23 +31,14 @@ export async function POST(request: NextRequest) {
     const isNewCustomer = !user;
     
     let password = '';
-    let existingPassword = '';
 
     if (user) {
-      // Existing customer - use their existing password
-      existingPassword = user.password;
-      
-      // Update existing user
-      user.messageCount += 1;
-      user.unreadCount += 1;
-      user.lastMessage = new Date();
-      user.lastMessagePreview = message.substring(0, 100) + (message.length > 100 ? '...' : '');
-      user.messages.push({
-        subject,
-        message,
-        isRead: false,
-        createdAt: new Date()
-      });
+      // Existing customer - update email fields
+      user.emailCount += 1;
+      user.emailUnreadCount += 1;
+      user.lastEmailSubject = subject;
+      user.lastEmailMessage = message.substring(0, 100) + (message.length > 100 ? '...' : '');
+      user.lastEmailDate = new Date();
     } else {
       // Create new customer - generate password
       password = generatePassword();
@@ -56,16 +47,13 @@ export async function POST(request: NextRequest) {
         name,
         email,
         password,
-        messageCount: 1,
-        unreadCount: 1,
-        lastMessage: new Date(),
-        lastMessagePreview: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
-        messages: [{
-          subject,
-          message,
-          isRead: false,
-          createdAt: new Date()
-        }]
+        emailCount: 1,
+        emailUnreadCount: 1,
+        lastEmailSubject: subject,
+        lastEmailMessage: message.substring(0, 100) + (message.length > 100 ? '...' : ''),
+        lastEmailDate: new Date(),
+        chatCount: 0,
+        chatUnreadCount: 0
       });
     }
 
@@ -79,12 +67,13 @@ export async function POST(request: NextRequest) {
         subject,
         message,
         isNewCustomer,
-        existingPassword: existingPassword || user.password
+        existingPassword: isNewCustomer ? password : undefined,
+        source: 'contact'
       });
 
-      console.log('Email result:', emailResult);
+      console.log('Contact form email result:', emailResult);
     } catch (emailError) {
-      console.error('Email sending failed:', emailError);
+      console.error('Contact form email sending failed:', emailError);
       // Don't fail the request if email fails
     }
 
@@ -112,7 +101,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// Helper function to generate password (moved here to avoid import issues)
+// Helper function to generate password
 function generatePassword(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let password = '';

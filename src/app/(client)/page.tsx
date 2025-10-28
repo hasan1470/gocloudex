@@ -11,7 +11,13 @@ import {
   TrendingUp,
   Users,
   Globe,
-  Server
+  Server,
+  Palette,
+  Smartphone,
+  Database,
+  ShoppingCart,
+  Layout,
+  Cpu
 } from 'lucide-react';
 
 const features = [
@@ -70,7 +76,128 @@ const stats = [
 
 const technologies = [
   'Next.js', 'React', 'TypeScript', 'Node.js', 'MongoDB', 
-  'Cloudinary', 'Tailwind CSS', 'PostgreSQL', 'AWS', 'Vercel'
+  'Cloudinary', 'Tailwind CSS', 'PostgreSQL', 'AWS', 'Vercel',
+  'Prisma', 'WordPress', 'Shopify', 'React Native'
+];
+
+// New service categories
+const serviceCategories = [
+  {
+    name: 'Website Platforms',
+    description: 'Professional website development on popular platforms',
+    icon: Layout,
+    color: 'text-blue-600',
+    services: [
+      {
+        name: 'WordPress Development',
+        description: 'Custom themes, plugins, and full-site development',
+        features: ['Custom Themes', 'Plugin Development', 'WooCommerce', 'Elementor']
+      },
+      {
+        name: 'Shopify Stores',
+        description: 'Beautiful, high-converting e-commerce stores',
+        features: ['Custom Themes', 'App Integration', 'Payment Setup', 'SEO Optimization']
+      },
+      {
+        name: 'Wix Development',
+        description: 'Professional Wix sites with custom functionality',
+        features: ['Custom Design', 'API Integration', 'E-commerce', 'Responsive Design']
+      }
+    ]
+  },
+  {
+    name: 'Modern Frameworks',
+    description: 'Cutting-edge web applications with latest technologies',
+    icon: Cpu,
+    color: 'text-purple-600',
+    services: [
+      {
+        name: 'Next.js Development',
+        description: 'Server-side rendering and static site generation',
+        features: ['SSR/SSG', 'API Routes', 'Performance', 'SEO Friendly']
+      },
+      {
+        name: 'React Applications',
+        description: 'Dynamic and interactive web applications',
+        features: ['Component Library', 'State Management', 'UI/UX', 'Progressive Web Apps']
+      },
+      {
+        name: 'React Native Apps',
+        description: 'Cross-platform mobile applications',
+        features: ['iOS & Android', 'Native Performance', 'Offline Support', 'App Store Deployment']
+      }
+    ]
+  },
+  {
+    name: 'Design & Styling',
+    description: 'Beautiful interfaces with modern design systems',
+    icon: Palette,
+    color: 'text-pink-600',
+    services: [
+      {
+        name: 'Tailwind CSS',
+        description: 'Utility-first CSS framework for rapid UI development',
+        features: ['Responsive Design', 'Custom Components', 'Dark Mode', 'Design Systems']
+      },
+      {
+        name: 'TypeScript',
+        description: 'Type-safe JavaScript for better developer experience',
+        features: ['Type Safety', 'Better IDE Support', 'Reduced Bugs', 'Scalable Code']
+      },
+      {
+        name: 'Elementor Pro',
+        description: 'Advanced page building with Elementor',
+        features: ['Custom Widgets', 'Dynamic Content', 'Theme Builder', 'WooCommerce Integration']
+      }
+    ]
+  },
+  {
+    name: 'Backend & Database',
+    description: 'Robust backend solutions and data management',
+    icon: Database,
+    color: 'text-green-600',
+    services: [
+      {
+        name: 'MongoDB Integration',
+        description: 'NoSQL database solutions for modern applications',
+        features: ['Schema Design', 'Aggregation', 'Indexing', 'Performance Optimization']
+      },
+      {
+        name: 'Prisma ORM',
+        description: 'Next-generation Node.js TypeScript ORM',
+        features: ['Type Safety', 'Migrations', 'Relations', 'Database Management']
+      },
+      {
+        name: 'Cloudinary Media',
+        description: 'Advanced media management and optimization',
+        features: ['Image Optimization', 'Video Processing', 'CDN Delivery', 'AI Features']
+      }
+    ]
+  }
+];
+
+// Technology stacks
+const techStacks = [
+  {
+    category: 'Frontend',
+    technologies: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'JavaScript']
+  },
+  {
+    category: 'Backend',
+    technologies: ['Node.js', 'MongoDB', 'Prisma', 'PostgreSQL', 'AWS']
+  },
+  {
+    category: 'Platforms',
+    technologies: ['WordPress', 'Shopify', 'Wix', 'WooCommerce', 'Elementor']
+  },
+  {
+    category: 'Mobile',
+    technologies: ['React Native', 'Expo', 'iOS', 'Android', 'PWA']
+  },
+  {
+    category: 'Cloud & Media',
+    technologies: ['Cloudinary', 'Vercel', 'AWS', 'CDN', 'Serverless']
+  }
 ];
 
 export default function Home() {
@@ -96,8 +223,8 @@ export default function Home() {
               </span>
             </h1>
             <p className="mt-8 text-xl text-textLight max-w-3xl mx-auto leading-relaxed text-style">
-              We build exceptional web applications and cloud solutions using modern technologies like 
-              Next.js, MongoDB, and Cloudinary. Let&apos;s transform your ideas into reality.
+              From WordPress to React, Shopify to Next.js - we build exceptional digital experiences 
+              using the perfect technology stack for your business needs.
             </p>
             <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -138,12 +265,285 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Comprehensive Services Section */}
+      <section className="py-24 bg-bgLight">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+              Comprehensive Services
+            </h2>
+            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+              End-to-end solutions covering all aspects of modern web and mobile development.
+            </p>
+          </div>
+
+          <div className="mt-20 space-y-16">
+            {serviceCategories.map((category, categoryIndex) => (
+              <div key={category.name} className="relative">
+                <div className="flex items-center mb-8">
+                  <div className={`flex items-center justify-center w-12 h-12 ${category.color.replace('text', 'bg')}/10 rounded-xl`}>
+                    <category.icon className={`h-6 w-6 ${category.color}`} />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-2xl font-bold text-headingLight heading-style">{category.name}</h3>
+                    <p className="text-textLight text-style">{category.description}</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {category.services.map((service, serviceIndex) => (
+                    <div
+                      key={service.name}
+                      className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 group"
+                    >
+                      <h4 className="text-lg font-semibold text-headingLight heading-style group-hover:text-primary transition-colors">
+                        {service.name}
+                      </h4>
+                      <p className="mt-2 text-textLight text-sm text-style">{service.description}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {service.features.map((feature, featureIndex) => (
+                          <span
+                            key={feature}
+                            className="inline-flex items-center px-2 py-1 bg-input text-textLight text-xs rounded-md text-style"
+                          >
+                            <CheckCircle className="h-3 w-3 mr-1 text-greenType" />
+                            {feature}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Technology Stack Section */}
+      <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+              Our Technology Stack
+            </h2>
+            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+              We master a wide range of technologies to deliver the perfect solution for every project.
+            </p>
+          </div>
+
+          <div className="mt-16 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+            {techStacks.map((stack, index) => (
+              <div
+                key={stack.category}
+                className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300"
+              >
+                <h3 className="text-lg font-semibold text-headingLight heading-style text-center mb-4">
+                  {stack.category}
+                </h3>
+                <div className="space-y-2">
+                  {stack.technologies.map((tech) => (
+                    <div
+                      key={tech}
+                      className="flex items-center justify-between p-3 bg-input rounded-lg hover:bg-input/80 transition-colors"
+                    >
+                      <span className="text-textLight text-sm font-medium text-style">{tech}</span>
+                      <CheckCircle className="h-4 w-4 text-greenType" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Platform Specialization Section */}
+      <section className="py-24 bg-bgLight">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+              Platform Specialization
+            </h2>
+            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+              Expert development across all major platforms and frameworks.
+            </p>
+          </div>
+
+          <div className="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* WordPress & E-commerce */}
+            <div className="space-y-8">
+              <div className="flex items-center">
+                <Layout className="h-8 w-8 text-blue-600 mr-3" />
+                <h3 className="text-2xl font-bold text-headingLight heading-style">WordPress & E-commerce</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">WordPress</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Custom Theme Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Plugin Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Elementor Pro
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">WooCommerce</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Store Setup
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Payment Integration
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Custom Features
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">Shopify</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Theme Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      App Integration
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Store Optimization
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">Wix</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Custom Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      API Integration
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      E-commerce Solutions
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Modern Development */}
+            <div className="space-y-8">
+              <div className="flex items-center">
+                <Cpu className="h-8 w-8 text-purple-600 mr-3" />
+                <h3 className="text-2xl font-bold text-headingLight heading-style">Modern Development</h3>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">React Ecosystem</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Next.js Applications
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      TypeScript
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Tailwind CSS
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">React Native</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Cross-platform Apps
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Native Performance
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      App Store Deployment
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">Backend & Database</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      MongoDB Integration
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Prisma ORM
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Cloudinary Media
+                    </li>
+                  </ul>
+                </div>
+
+                <div className="bg-input p-4 rounded-lg border border-border">
+                  <h4 className="font-semibold text-headingLight heading-style">JavaScript/TypeScript</h4>
+                  <ul className="mt-2 space-y-1 text-sm text-textLight">
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Full-Stack Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      API Development
+                    </li>
+                    <li className="flex items-center">
+                      <CheckCircle className="h-3 w-3 text-greenType mr-2" />
+                      Performance Optimization
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features Section */}
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
-              Why Choose GoCloudEx?
+              Why Choose Our Services?
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
               We combine cutting-edge technology with proven methodologies to deliver outstanding results.
@@ -166,80 +566,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Technologies Section */}
-      <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
-              Technologies We Love
-            </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
-              We work with modern technologies to build fast, scalable, and maintainable applications.
-            </p>
-          </div>
-          <div className="mt-12 flex flex-wrap justify-center gap-4">
-            {technologies.map((tech) => (
-              <div
-                key={tech}
-                className="inline-flex items-center px-4 py-3 bg-bgLight border border-border rounded-lg shadow-sm hover:shadow-md transition-all duration-200 hover:-translate-y-0.5"
-              >
-                <CheckCircle className="h-4 w-4 text-greenType mr-2" />
-                <span className="text-textLight font-medium text-style">{tech}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Process Section */}
-      <section className="py-24 bg-bgLight">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
-              Our Development Process
-            </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
-              A structured approach to ensure quality and success in every project.
-            </p>
-          </div>
-          <div className="mt-20 grid grid-cols-1 gap-8 lg:grid-cols-3">
-            <div className="text-center p-8">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-                  <Globe className="h-8 w-8 text-primary" />
-                </div>
-              </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">Discovery & Planning</h3>
-              <p className="mt-4 text-textLight text-style">
-                We start by understanding your requirements, goals, and target audience to create a comprehensive project plan.
-              </p>
-            </div>
-            <div className="text-center p-8">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 bg-accent/10 rounded-full flex items-center justify-center">
-                  <Code className="h-8 w-8 text-accent" />
-                </div>
-              </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">Development & Testing</h3>
-              <p className="mt-4 text-textLight text-style">
-                Our team builds your solution using best practices, with continuous testing and quality assurance.
-              </p>
-            </div>
-            <div className="text-center p-8">
-              <div className="flex justify-center">
-                <div className="w-16 h-16 bg-greenType/10 rounded-full flex items-center justify-center">
-                  <Zap className="h-8 w-8 text-greenType" />
-                </div>
-              </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">Deployment & Support</h3>
-              <p className="mt-4 text-textLight text-style">
-                We deploy your application and provide ongoing support to ensure optimal performance and growth.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
       {/* CTA Section */}
       <section className="py-24 bg-bgDark">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -248,7 +574,7 @@ export default function Home() {
               Ready to Start Your Project?
             </h2>
             <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
-              Let&apos;s discuss how we can help bring your vision to life with modern technology and expert development.
+              Whether you need a WordPress site, React application, or full-stack solution - we have the expertise to deliver.
             </p>
             <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
