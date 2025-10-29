@@ -12,23 +12,20 @@ interface MongooseCache {
   promise: Promise<typeof mongoose> | null;
 }
 
+// Extend the Node.js global type to include `mongoose`
 declare global {
+  // eslint-disable-next-line no-var
   var mongoose: MongooseCache | undefined;
 }
 
-let cached: MongooseCache = global.mongoose || {
-  conn: null,
-  promise: null,
-};
+const cached: MongooseCache = global.mongoose ?? { conn: null, promise: null };
 
 if (!global.mongoose) {
   global.mongoose = cached;
 }
 
 async function connectDB() {
-  if (cached.conn) {
-    return cached.conn;
-  }
+  if (cached.conn) return cached.conn;
 
   if (!cached.promise) {
     const opts = {

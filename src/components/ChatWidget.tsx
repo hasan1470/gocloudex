@@ -33,7 +33,9 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const pollingRef = useRef<NodeJS.Timeout>();
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+
+  
 
   // Check if user is at the bottom of messages
   const checkIfAtBottom = useCallback(() => {
