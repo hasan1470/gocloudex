@@ -33,7 +33,6 @@ export async function GET(
       );
     }
 
-    console.log('Project found:', project.title);
     return NextResponse.json({
       success: true,
       data: project,

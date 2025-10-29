@@ -3,6 +3,7 @@ import connectDB from '@/lib/database';
 import User from '@/models/User';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
+
 // GET - Fetch chat users or specific user messages
 export async function GET(request: NextRequest) {
 
@@ -70,7 +71,7 @@ export async function GET(request: NextRequest) {
         .lean();
 
       const transformedUsers = users.map(user => ({
-        id: user._id.toString(),
+        id: user._id,
         name: user.name,
         email: user.email,
         lastChatDate: user.lastChatDate || user.createdAt,
