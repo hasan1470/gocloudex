@@ -1,4 +1,3 @@
-'use client';
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash2, FolderOpen } from 'lucide-react';

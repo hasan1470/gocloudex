@@ -1,4 +1,3 @@
-'use client';
 
 
 import ProjectForm from '@/components/admin/forms/ProjectForm';
