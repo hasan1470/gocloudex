@@ -1,4 +1,4 @@
-
+'use client';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import UserForm from '@/components/admin/forms/UserForm';

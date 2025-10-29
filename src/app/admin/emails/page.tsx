@@ -1,4 +1,4 @@
-
+'use client';
 import { useState, useEffect } from 'react';
 import { Mail, Copy, Check, Eye, EyeOff, Search, Filter, MessageCircle, User, Calendar, RefreshCw, ExternalLink } from 'lucide-react';
 import toast from 'react-hot-toast';
