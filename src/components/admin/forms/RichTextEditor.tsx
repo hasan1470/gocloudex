@@ -6,6 +6,7 @@ import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
 import Link from '@tiptap/extension-link';
 
+
 import { 
   Bold, 
   Italic, 
@@ -77,12 +78,56 @@ const isValueEmpty = (value: string): boolean => {
 };
 
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
+
+
   const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<EditorMode>('visual');
   const [codeValue, setCodeValue] = useState(value);
   const [linkUrl, setLinkUrl] = useState('');
   const [showLinkInput, setShowLinkInput] = useState(false);
   const linkButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Process HTML to add inline styles to headings
+  const processHtmlWithHeadingStyles = (html: string): string => {
+    // If html is empty, return empty string
+    if (isValueEmpty(html)) {
+      return '';
+    }
+
+    const fontSizeMap: Record<number, string> = {
+      1: '32px',
+      2: '28px',
+      3: '24px',
+      4: '20px',
+      5: '18px',
+      6: '16px',
+    };
+
+    return html.replace(
+      /<h([1-6])([^>]*)>(.*?)<\/h\1>/g,
+      (match, level, attributes, content) => {
+        const levelNum = parseInt(level, 10);
+
+        // Extract and clean existing style
+        const existingStyleMatch = attributes.match(/style="([^"]*)"/);
+        let existingStyle = existingStyleMatch ? existingStyleMatch[1] : '';
+
+        // Remove any font-size declarations (px, rem, %, var, etc.)
+        existingStyle = existingStyle.replace(/font-size\s*:\s*[^;]+;?/gi, '');
+
+        // Merge with default heading style
+        const finalStyle = `${existingStyle.trim()} font-size: ${fontSizeMap[levelNum]}; font-weight:500;`.trim();
+
+        // Remove existing style and class attributes before rebuilding
+        const cleanedAttributes = attributes
+          .replace(/style="[^"]*"/g, '')
+          .replace(/class="[^"]*"/g, '')
+          .trim();
+
+        return `<h${level}${cleanedAttributes ? ' ' + cleanedAttributes : ''} style="${finalStyle}">${content}</h${level}>`;
+      }
+    );
+  };
 
   const editor = useEditor({
     extensions: [
@@ -137,52 +182,12 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         }
       } else if (value !== editor.getHTML()) {
         const processedValue = processHtmlWithHeadingStyles(value);
-        editor.commands.setContent(processedValue, false);
+        editor.commands.setContent(processedValue, { emitUpdate: false });
+
         setCodeValue(processedValue);
       }
     }
   }, [value, editor, mounted]);
-
-  const processHtmlWithHeadingStyles = (html: string): string => {
-    // If html is empty, return empty string
-    if (isValueEmpty(html)) {
-      return '';
-    }
-
-    const fontSizeMap: Record<number, string> = {
-      1: '32px',
-      2: '28px',
-      3: '24px',
-      4: '20px',
-      5: '18px',
-      6: '16px',
-    };
-
-    return html.replace(
-      /<h([1-6])([^>]*)>(.*?)<\/h\1>/gs,
-      (match, level, attributes, content) => {
-        const levelNum = parseInt(level, 10);
-
-        // Extract and clean existing style
-        const existingStyleMatch = attributes.match(/style="([^"]*)"/);
-        let existingStyle = existingStyleMatch ? existingStyleMatch[1] : '';
-
-        // Remove any font-size declarations (px, rem, %, var, etc.)
-        existingStyle = existingStyle.replace(/font-size\s*:\s*[^;]+;?/gi, '');
-
-        // Merge with default heading style
-        const finalStyle = `${existingStyle.trim()} font-size: ${fontSizeMap[levelNum]}; font-weight:500;`.trim();
-
-        // Remove existing style and class attributes before rebuilding
-        let cleanedAttributes = attributes
-          .replace(/style="[^"]*"/g, '')
-          .replace(/class="[^"]*"/g, '')
-          .trim();
-
-        return `<h${level}${cleanedAttributes ? ' ' + cleanedAttributes : ''} style="${finalStyle}">${content}</h${level}>`;
-      }
-    );
-  };
 
   // Handle code mode changes
   const handleCodeChange = (newCode: string) => {
@@ -204,7 +209,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
       
       // Update visual editor if it exists
       if (editor && mode === 'code') {
-        editor.commands.setContent(processedCode, false);
+      editor.commands.setContent(processedCode, { emitUpdate: false });
+
       }
     }
   };
@@ -216,7 +222,8 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
         editor.commands.clearContent();
       } else {
         const processedValue = processHtmlWithHeadingStyles(codeValue);
-        editor.commands.setContent(processedValue, false);
+        editor.commands.setContent(processedValue, { emitUpdate: false });
+
       }
     }
     setMode('visual');

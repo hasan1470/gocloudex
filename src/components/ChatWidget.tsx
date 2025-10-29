@@ -15,7 +15,14 @@ interface ChatWidgetProps {
   onNewMessage?: (userEmail: string) => void;
 }
 
+interface AuthData {
+  name: string;
+  email: string;
+  password?: string;
+}
+
 export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
+
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isNewUser, setIsNewUser] = useState(false);
@@ -24,18 +31,17 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   const [newMessage, setNewMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [userData, setUserData] = useState({
+  const [authData, setAuthData] = useState<AuthData>({
     name: '',
     email: '',
     password: ''
   });
+  const [userInfo, setUserInfo] = useState<{ name: string; email: string } | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-
-  
 
   // Check if user is at the bottom of messages
   const checkIfAtBottom = useCallback(() => {
@@ -43,39 +49,38 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
-    return distanceFromBottom <= 100; // 100px threshold
+    return distanceFromBottom <= 100;
   }, []);
 
-  // Smart scroll function - only scroll if user is at bottom
+  // Smart scroll function
   const smartScrollToBottom = useCallback(() => {
     if (isAtBottom && messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [isAtBottom]);
 
-  // Handle scroll events to track if user is at bottom
+  // Handle scroll events
   const handleScroll = useCallback(() => {
     setIsAtBottom(checkIfAtBottom());
   }, [checkIfAtBottom]);
 
-  // Real-time polling for new messages with smart scroll
+  // Real-time polling for new messages
   const startPolling = useCallback(() => {
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
     }
 
     pollingRef.current = setInterval(async () => {
-      if (isAuthenticated && userData.email) {
-        const hasNewMessages = await loadChatHistory(userData.email, userData.password, true);
+      if (isAuthenticated && userInfo?.email) {
+        const hasNewMessages = await loadChatHistory(true);
         if (hasNewMessages && isAtBottom) {
-          // Only auto-scroll if there are new messages and user is at bottom
           setTimeout(smartScrollToBottom, 100);
         }
       }
-    }, 3000); // Poll every 3 seconds
-  }, [isAuthenticated, userData.email, isAtBottom, smartScrollToBottom]);
+    }, 3000);
+  }, [isAuthenticated, userInfo?.email, isAtBottom, smartScrollToBottom]);
 
-  // Stop polling when component unmounts or chat closes
+  // Stop polling
   useEffect(() => {
     return () => {
       if (pollingRef.current) {
@@ -84,49 +89,81 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     };
   }, []);
 
-  // Start/stop polling based on authentication and chat state
+  // Start/stop polling
   useEffect(() => {
-    if (isAuthenticated && isOpen) {
+    if (isAuthenticated && isOpen && userInfo) {
       startPolling();
     } else {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
       }
     }
-  }, [isAuthenticated, isOpen, startPolling]);
+  }, [isAuthenticated, isOpen, userInfo, startPolling]);
 
-  // Check if user has existing session
+  // Check if user has valid token on component mount
   useEffect(() => {
-    const savedUser = localStorage.getItem('chatUser');
-    if (savedUser) {
-      const user = JSON.parse(savedUser);
-      setUserData(user);
-      setIsAuthenticated(true);
-      loadChatHistory(user.email, user.password);
-    }
+    const checkTokenValidity = async () => {
+      const token = localStorage.getItem('userToken');
+      
+      if (token) {
+        try {
+          // Verify token is still valid and get user info
+          const response = await fetch(`/api/chat/auth?token=${token}`);
+          const result = await response.json();
+          
+          if (result.success) {
+            setUserInfo(result.data.user);
+            setIsAuthenticated(true);
+            await loadChatHistory();
+          } else {
+            // Token is invalid, clear storage
+            localStorage.removeItem('userToken');
+          }
+        } catch (error) {
+          console.error('Token validation failed:', error);
+          localStorage.removeItem('userToken');
+        }
+      }
+    };
+
+    checkTokenValidity();
   }, []);
 
-  // Load chat history - returns true if new messages were found
-  const loadChatHistory = async (email: string, password: string, silent = false): Promise<boolean> => {
+  // Load chat history with token authentication
+  const loadChatHistory = async (silent = false): Promise<boolean> => {
+    const token = localStorage.getItem('userToken');
+    if (!token || !userInfo?.email) return false;
+
     try {
-      const response = await fetch(`/api/chat?email=${encodeURIComponent(email)}&t=${Date.now()}`);
-      const result = await response.json();
+      const response = await fetch(`/api/chat?email=${encodeURIComponent(userInfo.email)}&t=${Date.now()}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
+      const result = await response.json();
+
       if (result.success) {
-        // Ensure every message has a unique ID
         const messagesWithIds = (result.data.messages || []).map((msg: any) => ({
           ...msg,
           id: msg.id || msg._id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
         }));
         
-        // Check if there are new messages
         const currentMessageIds = new Set(messages.map(m => m.id));
         const hasNewMessages = messagesWithIds.some((msg: ChatMessage) => !currentMessageIds.has(msg.id));
         
         setMessages(messagesWithIds);
         return hasNewMessages;
       } else {
-        if (!silent) throw new Error(result.error);
+        if (!silent) {
+          if (response.status === 401) {
+            // Token expired
+            handleLogout();
+            toast.error('Session expired. Please login again.');
+          } else {
+            throw new Error(result.error);
+          }
+        }
         return false;
       }
     } catch (error) {
@@ -149,9 +186,9 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          name: userData.name,
-          email: userData.email,
-          password: authMode === 'login' ? userData.password : undefined,
+          name: authData.name,
+          email: authData.email,
+          password: authMode === 'login' ? authData.password : undefined,
           mode: authMode
         }),
       });
@@ -159,34 +196,35 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
       const result = await response.json();
 
       if (result.success) {
-        const userWithPassword = {
-          name: result.data.user.name,
-          email: result.data.user.email,
-          password: result.data.password
-        };
-        
-        setUserData(userWithPassword);
+        if (result.data.message === 'existing_user_please_login') {
+          // Existing user - show success message and switch to login mode
+          toast.success(`You're already our valued customer! We sent your password to your email. Please login with your password.`);
+          setAuthMode('login');
+          // Clear the password field for security
+          setAuthData(prev => ({ ...prev, password: '' }));
+          setLoading(false);
+          return;
+        }
+
+        // Successful authentication
+        setUserInfo(result.data.user);
         setIsAuthenticated(true);
         setIsNewUser(result.data.isNewUser);
         
-        // Save to localStorage
-        localStorage.setItem('chatUser', JSON.stringify(userWithPassword));
+        // Store ONLY the token in localStorage (no user data)
+        localStorage.setItem('userToken', result.data.token);
         
         // Load chat history
-        await loadChatHistory(userData.email, userData.password);
+        await loadChatHistory();
         
         if (result.data.isNewUser) {
           toast.success(`Welcome! Your password: ${result.data.password} - Save it for future access.`);
         } else {
-          if (authMode === 'register') {
-            toast.success('Welcome back! We sent your password to your email.');
-          } else {
-            toast.success('Welcome back!');
-          }
+          toast.success('Welcome back!');
         }
         
         if (onNewMessage) {
-          onNewMessage(userData.email);
+          onNewMessage(authData.email);
         }
       } else {
         toast.error(result.error || 'Authentication failed');
@@ -200,13 +238,13 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
 
   const sendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim() || loading) return;
+    const token = localStorage.getItem('userToken');
+    if (!newMessage.trim() || loading || !token) return;
 
     const messageToSend = newMessage.trim();
     setNewMessage('');
     setLoading(true);
 
-    // Create unique ID for temporary message
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     
     const tempMessage: ChatMessage = {
@@ -216,10 +254,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
       createdAt: new Date().toISOString()
     };
     
-    // Optimistically update messages
     setMessages(prev => [...prev, tempMessage]);
-    
-    // Auto-scroll to bottom when sending new message
     setTimeout(smartScrollToBottom, 100);
 
     try {
@@ -227,9 +262,9 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          email: userData.email,
           message: messageToSend,
         }),
       });
@@ -240,15 +275,13 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
         throw new Error(result.error);
       }
 
-      // Reload messages to get proper IDs and any admin replies
-      await loadChatHistory(userData.email, userData.password);
+      await loadChatHistory();
       
       if (onNewMessage) {
-        onNewMessage(userData.email);
+        onNewMessage(userInfo?.email || '');
       }
     } catch (error) {
       toast.error('Failed to send message');
-      // Remove optimistic message on error
       setMessages(prev => prev.filter(msg => msg.id !== tempId));
     } finally {
       setLoading(false);
@@ -256,16 +289,16 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('chatUser');
+    localStorage.removeItem('userToken'); // Only remove token
     setIsAuthenticated(false);
     setIsNewUser(false);
     setAuthMode('register');
     setMessages([]);
-    setUserData({ name: '', email: '', password: '' });
+    setAuthData({ name: '', email: '', password: '' });
+    setUserInfo(null);
     setShowPassword(false);
     setIsAtBottom(true);
     
-    // Stop polling
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
     }
@@ -273,11 +306,10 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
 
   const toggleAuthMode = () => {
     setAuthMode(prev => prev === 'login' ? 'register' : 'login');
-    setUserData(prev => ({ ...prev, password: '' }));
+    setAuthData(prev => ({ ...prev, password: '' })); // Clear password when switching modes
     setShowPassword(false);
   };
 
-  // Scroll to bottom manually
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -285,7 +317,6 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     }
   };
 
-  // Get user initials for avatar
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -295,7 +326,6 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
       .slice(0, 2);
   };
 
-  // Generate unique key for each message
   const getMessageKey = (message: ChatMessage, index: number) => {
     return message.id || `message-${index}-${message.createdAt}-${Math.random().toString(36).substr(2, 9)}`;
   };
@@ -311,16 +341,16 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
         <MessageCircle className="h-6 w-6" />
       </button>
 
-      {/* Chat Modal - Only show when open */}
+      {/* Chat Modal */}
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-end pb-6 pr-6 sm:pb-4 sm:pr-4">
-          {/* Backdrop with lighter overlay */}
+          {/* Backdrop */}
           <div 
             className="absolute inset-0"
             onClick={() => setIsOpen(false)}
           />
           
-          {/* Chat Container - Fixed height with proper layout */}
+          {/* Chat Container */}
           <div className="relative w-full max-w-sm h-[85vh] max-h-[600px] bg-bgLight rounded-2xl shadow-2xl flex flex-col z-10">
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-border bg-primary text-white rounded-t-2xl">
@@ -336,7 +366,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
               </button>
             </div>
 
-            {/* Chat Content - Fixed height sections */}
+            {/* Chat Content */}
             <div className="flex-1 flex flex-col min-h-0">
               {!isAuthenticated ? (
                 // Authentication Form
@@ -388,8 +418,8 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                         </label>
                         <input
                           type="text"
-                          value={userData.name}
-                          onChange={(e) => setUserData(prev => ({ ...prev, name: e.target.value }))}
+                          value={authData.name}
+                          onChange={(e) => setAuthData(prev => ({ ...prev, name: e.target.value }))}
                           className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                           placeholder="Enter your name"
                           required
@@ -403,8 +433,8 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                       </label>
                       <input
                         type="email"
-                        value={userData.email}
-                        onChange={(e) => setUserData(prev => ({ ...prev, email: e.target.value }))}
+                        value={authData.email}
+                        onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
                         className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                         placeholder="your.email@example.com"
                         required
@@ -419,8 +449,8 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                         <div className="relative">
                           <input
                             type={showPassword ? "text" : "password"}
-                            value={userData.password}
-                            onChange={(e) => setUserData(prev => ({ ...prev, password: e.target.value }))}
+                            value={authData.password || ''}
+                            onChange={(e) => setAuthData(prev => ({ ...prev, password: e.target.value }))}
                             className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring pr-10 text-style"
                             placeholder="Enter your password"
                             required
@@ -472,17 +502,21 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                   </div>
                 </div>
               ) : (
-                // Chat Interface - Fixed height sections
+                // Chat Interface
                 <>
                   {/* User Info Bar */}
                   <div className="flex-shrink-0 p-3 border-b border-border bg-input flex items-center justify-between">
                     <div className="flex items-center space-x-2">
                       <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-semibold">
-                        {getInitials(userData.name)}
+                        {userInfo ? getInitials(userInfo.name) : 'U'}
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-headingLight text-style">{userData.name}</div>
-                        <div className="text-xs text-textLight text-style">{userData.email}</div>
+                        <div className="text-sm font-medium text-headingLight text-style">
+                          {userInfo?.name || 'User'}
+                        </div>
+                        <div className="text-xs text-textLight text-style">
+                          {userInfo?.email || ''}
+                        </div>
                       </div>
                     </div>
                     <button
@@ -493,7 +527,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                     </button>
                   </div>
 
-                  {/* Messages Area with scroll tracking */}
+                  {/* Messages Area */}
                   <div 
                     ref={messagesContainerRef}
                     onScroll={handleScroll}
@@ -503,11 +537,10 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                       <div className="bg-greenType/10 border border-greenType/20 rounded-lg p-3 mb-4">
                         <div className="flex items-center space-x-2 text-greenType text-sm">
                           <Key className="h-4 w-4" />
-                          <span className="font-medium text-style">Your Password:</span>
-                          <code className="font-mono bg-white px-2 py-1 rounded text-style">{userData.password}</code>
+                          <span className="font-medium text-style">Account Created Successfully!</span>
                         </div>
                         <p className="text-greenType text-xs mt-2 text-style">
-                          Save this password to access your chat history later.
+                          Check your email for your password. Save it to access your chat history later.
                         </p>
                       </div>
                     )}
@@ -548,7 +581,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                     )}
                   </div>
 
-                  {/* Scroll to bottom button - only show when not at bottom */}
+                  {/* Scroll to bottom button */}
                   {!isAtBottom && messages.length > 3 && (
                     <div className="flex justify-center p-2 bg-white border-t border-border">
                       <button
@@ -561,7 +594,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                     </div>
                   )}
 
-                  {/* Message Input - Fixed at bottom */}
+                  {/* Message Input */}
                   <div className="flex-shrink-0 p-4 border-t border-border">
                     <form onSubmit={sendMessage} className="flex space-x-2">
                       <input
