@@ -49,19 +49,19 @@ const features = [
 const stats = [
   {
     label: 'Projects Completed',
-    value: '50+',
+    value: '350+',
     icon: CheckCircle,
     color: 'text-greenType'
   },
   {
     label: 'Happy Clients',
-    value: '30+',
+    value: '150+',
     icon: Users,
     color: 'text-primary'
   },
   {
     label: 'Years Experience',
-    value: '3+',
+    value: '7+',
     icon: TrendingUp,
     color: 'text-accent'
   },
@@ -270,7 +270,7 @@ export default function Home() {
               </Link>
             </div>
               {/* Trust Badges */}
-              <div className="mt-8 flex items-center space-x-6 justify-center">
+              <div className="mt-8 flex items-center space-x-6 justify-center md:flex-row flex-col text-center">
                 <div className="flex items-center space-x-2">
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((star) => (
@@ -279,8 +279,8 @@ export default function Home() {
                   </div>
                   <span className="text-sm text-textLight text-style">5.0 Rating</span>
                 </div>
-                <div className="text-sm text-textLight text-style">•</div>
-                <div className="text-sm text-textLight text-style">80+ Happy Clients</div>
+                <div className="text-sm text-textLight text-style hidden md:block">•</div>
+                <div className="text-sm text-textLight text-style mt-3 md:mt-0">150+ Happy Clients</div>
               </div>
           </div>
         </div>
