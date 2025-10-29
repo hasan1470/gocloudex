@@ -1,3 +1,5 @@
+'use client';
+
 import ClientHeader from '@/components/client/layout/ClientHeader';
 import ClientFooter from '@/components/client/layout/ClientFooter';
 import ChatWidget from '@/components/ChatWidget';

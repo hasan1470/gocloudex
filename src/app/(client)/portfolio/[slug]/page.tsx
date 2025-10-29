@@ -8,7 +8,6 @@ import {
   Github, 
   Calendar,
   Code,
-  ChevronRight,
   CheckCircle
 } from 'lucide-react';
 import { useEffect, useState } from 'react';

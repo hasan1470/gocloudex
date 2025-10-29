@@ -1,11 +1,11 @@
+'use client';
+
 import Link from 'next/link';
 import { 
   ArrowRight, 
   Star, 
   Quote,
-  TrendingUp,
   Users,
-  Zap,
   Target,
   Calendar,
   Play,
