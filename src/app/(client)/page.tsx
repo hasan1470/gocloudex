@@ -10,14 +10,13 @@ import {
   Sparkles,
   TrendingUp,
   Users,
-  Globe,
   Server,
   Palette,
-  Smartphone,
   Database,
-  ShoppingCart,
   Layout,
-  Cpu
+  Cpu,
+  Star,
+  Quote
 } from 'lucide-react';
 
 const features = [
@@ -200,6 +199,34 @@ const techStacks = [
   }
 ];
 
+// Client testimonials
+const testimonials = [
+  {
+    name: 'Sarah Chen',
+    position: 'CTO, TechInnovate Inc.',
+    company: 'Enterprise SaaS Company',
+    content: 'GoCloudEx transformed our digital infrastructure. Their cloud solutions improved our performance by 300% and reduced costs by 40%. Truly award-winning work!',
+    rating: 5,
+    project: 'Cloud Migration & Optimization'
+  },
+  {
+    name: 'Michael Rodriguez',
+    position: 'Marketing Director',
+    company: 'Global E-commerce Brand',
+    content: 'The SEO strategy developed by GoCloudEx took us from page 3 to #1 rankings for our key terms. Their expertise is unmatched in the industry.',
+    rating: 5,
+    project: 'Enterprise SEO Campaign'
+  },
+  {
+    name: 'Emily Watson',
+    position: 'Product Manager',
+    company: 'FinTech Startup',
+    content: 'Our mobile app developed by GoCloudEx received 4.8-star ratings on both app stores. Their attention to detail and user experience is exceptional.',
+    rating: 5,
+    project: 'Cross-Platform Mobile App'
+  }
+];
+
 export default function Home() {
   return (
     <div className="bg-bgLight">
@@ -242,6 +269,19 @@ export default function Home() {
                 <ArrowUpRight className="ml-2 h-5 w-5" />
               </Link>
             </div>
+              {/* Trust Badges */}
+              <div className="mt-8 flex items-center space-x-6 justify-center">
+                <div className="flex items-center space-x-2">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
+                    ))}
+                  </div>
+                  <span className="text-sm text-textLight text-style">5.0 Rating</span>
+                </div>
+                <div className="text-sm text-textLight text-style">•</div>
+                <div className="text-sm text-textLight text-style">80+ Happy Clients</div>
+              </div>
           </div>
         </div>
       </section>
@@ -560,6 +600,62 @@ export default function Home() {
                 </div>
                 <h3 className="mt-6 text-lg font-semibold text-headingLight heading-style">{feature.name}</h3>
                 <p className="mt-2 text-textLight leading-relaxed text-style">{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Client Testimonials */}
+      <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+              Client Success Stories
+            </h2>
+            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+              Hear from our satisfied clients about their award-winning experiences
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-2xl border-2 border-gray-100 p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 relative"
+              >
+                {/* Quote Icon */}
+                <div className="absolute top-6 right-6 w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                  <Quote className="h-6 w-6 text-yellow-600" />
+                </div>
+
+                {/* Rating */}
+                <div className="flex items-center space-x-1 mb-6">
+                  {[...Array(testimonial.rating)].map((_, i) => (
+                    <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+
+                <p className="text-lg text-textLight leading-relaxed mb-6 text-style italic">
+                  "{testimonial.content}"
+                </p>
+
+                <div className="border-t border-gray-100 pt-6">
+                  <div className="font-semibold text-headingLight heading-style">
+                    {testimonial.name}
+                  </div>
+                  <div className="text-textLight text-sm mt-1 text-style">
+                    {testimonial.position}
+                  </div>
+                  <div className="text-textLight text-sm text-style">
+                    {testimonial.company}
+                  </div>
+                  <div className="mt-3">
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
+                      {testimonial.project}
+                    </span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

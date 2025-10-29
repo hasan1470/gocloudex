@@ -10,10 +10,7 @@ import {
   TrendingUp,
   Globe,
   Shield,
-  CheckCircle,
   Quote,
-  Calendar,
-  MapPin
 } from 'lucide-react';
 
 const awards = [
