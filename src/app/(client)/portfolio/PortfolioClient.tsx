@@ -448,7 +448,7 @@ export default function PortfolioClient() {
 
                     {/* Completion Date */}
                     <div className="absolute top-4 right-4">
-                      <div className="flex items-center space-x-1 bg-bgDark/80 text-bgLight px-2 py-1 rounded text-xs">
+                      <div className="flex items-center space-x-1 bg-bgDark/80 text-textLight px-2 py-1 rounded text-xs">
                         <Calendar className="h-3 w-3" />
                         <span>
                           {new Date(project.completionDate).toLocaleString('default', {

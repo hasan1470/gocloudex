@@ -11,7 +11,7 @@ export const metadata: Metadata = {
     template: '%s | GoCloudEx'
   },
   description: 'Building exceptional digital experiences with cutting-edge cloud technologies. Expert in Next.js, Cloudinary, MongoDB and modern web development.',
-  keywords: ['portfolio', 'cloud solutions', 'web development', 'Next.js', 'React', 'Cloudinary'],
+  keywords: ['portfolio', 'cloud solutions', 'web development', 'Next.js', 'React', 'Cloudinary', 'MongoDB', 'JavaScript', 'TypeScript', 'full-stack', 'developer', 'WordPress', 'headless CMS', 'Web Design', 'API Integration', 'WooCommerce', 'Elementor', 'Digital Experiences', 'SEO', 'Digital Marketing'],
   authors: [{ name: 'GoCloudEx' }],
   creator: 'GoCloudEx',
   metadataBase: new URL('https://gocloudex.com'),

@@ -622,7 +622,7 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-white rounded-2xl border-2 border-gray-100 p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 relative"
+                className=" rounded-2xl border-1 border-gray-100/10 p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 relative"
               >
                 {/* Quote Icon */}
                 <div className="absolute top-6 right-6 w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -640,7 +640,7 @@ export default function Home() {
                   "{testimonial.content}"
                 </p>
 
-                <div className="border-t border-gray-100 pt-6">
+                <div className="border-t border-gray-100/10 pt-6">
                   <div className="font-semibold text-headingLight heading-style">
                     {testimonial.name}
                   </div>

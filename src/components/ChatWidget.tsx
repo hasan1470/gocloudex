@@ -343,7 +343,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-end justify-end pb-6 pr-6 sm:pb-4 sm:pr-4">
+        <div className="fixed inset-0 z-[100] flex items-end justify-end pb-6 pr-3 pl-3 md:pb-5 md:pr-5">
           {/* Backdrop */}
           <div 
             className="absolute inset-0"
