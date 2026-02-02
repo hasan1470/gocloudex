@@ -57,6 +57,8 @@ const contactInfo = [
   }
 ];
 
+const contactMessage = {}
+
 export default function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -77,11 +79,6 @@ export default function ContactPage() {
       const result = await submitContactForm(data);
 
       if (result.success) {
-        if (result.data?.hasAccount) {
-          toast.success('Message sent successfully! We\'ll get back to you soon.');
-        } else {
-          toast.success('Message sent successfully! Check your email for account details.');
-        }
         setIsSubmitted(true);
         reset();
       } else {
@@ -96,6 +93,7 @@ export default function ContactPage() {
   };
 
   if (isSubmitted) {
+
     return (
       <div className="min-h-screen bg-bgLight flex items-center justify-center py-24">
         <div className="max-w-md mx-auto text-center">
@@ -108,7 +106,7 @@ export default function ContactPage() {
             Message Sent!
           </h1>
           <p className="text-textLight text-lg mb-8 text-style">
-            Thank you for reaching out. We've received your message and will get back to you within 24 hours.
+            Thank you for reaching out. We've received your message and will get back to you soon.
           </p>
           <button
             onClick={() => setIsSubmitted(false)}

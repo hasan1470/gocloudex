@@ -127,7 +127,7 @@ export async function sendWelcomeEmail(userData: {
             ${userData.isReminder ? 'Your Account Password' : 'Welcome to GoCloudEx!'}
           </h2>
           <p>Dear ${userData.name},</p>
-          
+          <p>We've received your message and created an account for you for future communication.</p>
           <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
             <h3 style="color: #0369a1; margin-top: 0;">
               ${userData.isReminder ? 'Your Account Credentials' : 'Your Account Details'}
