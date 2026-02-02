@@ -1,10 +1,10 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { 
-  Plus, 
-  Search, 
-  Edit, 
-  Trash2, 
+import {
+  Plus,
+  Search,
+  Edit,
+  Trash2,
   Eye,
   ExternalLink,
   Github,
@@ -15,29 +15,15 @@ import Link from 'next/link';
 import { Project, Category } from '@/types';
 import { toast } from 'react-hot-toast';
 
-interface ProjectsResponse {
-  success: boolean;
-  data: Project[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    pages: number;
-  };
-}
-
-interface CategoriesResponse {
-  success: boolean;
-  data: Category[];
-}
+import { getAdminProjects, deleteProject } from '@/actions/projects';
+import { getAdminCategories } from '@/actions/categories';
 
 export default function ProjectsPage() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [projects, setProjects] = useState<Project[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
-  
+
   // Filters
   const [filters, setFilters] = useState({
     page: 1,
@@ -59,25 +45,9 @@ export default function ProjectsPage() {
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams();
-      params.append('page', filters.page.toString());
-      params.append('limit', filters.limit.toString());
-      
-      if (filters.category !== 'all') params.append('category', filters.category);
-      if (filters.status !== 'all') params.append('status', filters.status);
-      if (filters.featured !== 'all') params.append('featured', filters.featured);
-      if (filters.search) params.append('search', filters.search);
+      const result = await getAdminProjects(filters);
 
-      const response = await fetch(`/api/admin/projects?${params}`,{
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const result: ProjectsResponse = await response.json();
-
-      if (result.success) {
+      if (result.success && result.pagination) {
         setProjects(result.data);
         setPagination(result.pagination);
       }
@@ -92,18 +62,8 @@ export default function ProjectsPage() {
   // Fetch categories
   const fetchCategories = async () => {
     try {
-      const response = await fetch('/api/admin/categories',{
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      const result: CategoriesResponse = await response.json();
-
-      if (result.success) {
-        setCategories(result.data);
-      }
+      const data = await getAdminCategories();
+      setCategories(data);
     } catch (error) {
       toast.error('Failed to fetch categories. Please try again.');
       console.error('Failed to fetch categories:', error);
@@ -120,7 +80,7 @@ export default function ProjectsPage() {
     setFilters(prev => ({ ...prev, [key]: value, page: 1 }));
   };
 
-  // Handle delete project - UPDATED WITH DEBUGGING
+  // Handle delete project
   const handleDeleteProject = async (projectId: string, projectTitle: string) => {
     if (!confirm(`Are you sure you want to delete the project "${projectTitle}"? This action cannot be undone.`)) {
       return;
@@ -128,32 +88,18 @@ export default function ProjectsPage() {
 
     setDeleteLoading(projectId);
     try {
-      
-      const response = await fetch(`/api/admin/projects/${projectId}`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-
-      const result = await response.json();
+      const result = await deleteProject(projectId);
 
       if (result.success) {
-          toast.success('Project deteted successfully!');
-        // Remove the project from the local state immediately for better UX
+        toast.success('Project deleted successfully!');
         setProjects(prev => prev.filter(proj => proj._id !== projectId));
-        // Also update pagination total
         setPagination(prev => ({ ...prev, total: prev.total - 1 }));
       } else {
-          toast.error('Failed to delete project. Please try again.');
-          console.error(' Delete project error:', result.error);
-        // Refresh the list to ensure we have the latest data
-        fetchProjects();
+        toast.error(result.error || 'Failed to delete project. Please try again.');
       }
     } catch (error) {
       toast.error('Failed to delete project. Please try again.');
-      console.error(' Delete project error:', error);
+      console.error('Delete project error:', error);
     } finally {
       setDeleteLoading(null);
     }
@@ -184,11 +130,10 @@ export default function ProjectsPage() {
         <button
           key={i}
           onClick={() => handleFilterChange('page', i)}
-          className={`px-3 py-1 rounded ${
-            pagination.page === i
-              ? 'bg-primary text-bgLight'
-              : 'bg-input text-textLight hover:bg-border'
-          }`}
+          className={`px-3 py-1 rounded ${pagination.page === i
+            ? 'bg-primary text-bgLight'
+            : 'bg-input text-textLight hover:bg-border'
+            }`}
         >
           {i}
         </button>
@@ -359,17 +304,17 @@ export default function ProjectsPage() {
                     <tr key={project._id} className="hover:bg-input/50 transition-colors">
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-4">
-                        <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
-                          {project.image ? (
-                            <img
-                              src={project.image}
-                              alt={project.title}
-                              className="w-12 h-12 rounded-lg object-cover"
-                            />
-                          ) : (
-                            <ImageIcon className="h-6 w-6 text-textLight" />
-                          )}
-                        </div>
+                          <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
+                            {project.image ? (
+                              <img
+                                src={project.image}
+                                alt={project.title}
+                                className="w-12 h-12 rounded-lg object-cover"
+                              />
+                            ) : (
+                              <ImageIcon className="h-6 w-6 text-textLight" />
+                            )}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center space-x-2 mb-1">
                               <h3 className="text-sm font-semibold text-headingLight truncate heading-style">
@@ -443,13 +388,12 @@ export default function ProjectsPage() {
                       </td>
                       <td className="px-6 py-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-style ${
-                            project.status === 'published'
-                              ? 'bg-greenType/10 text-greenType'
-                              : project.status === 'draft'
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium text-style ${project.status === 'published'
+                            ? 'bg-greenType/10 text-greenType'
+                            : project.status === 'draft'
                               ? 'bg-yellow-100 text-yellow-800'
                               : 'bg-redType/10 text-redType'
-                          }`}
+                            }`}
                         >
                           {project.status?.charAt(0).toUpperCase() + project.status?.slice(1)}
                         </span>

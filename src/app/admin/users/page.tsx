@@ -1,19 +1,19 @@
 'use client';
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Copy, 
-  Check, 
-  Eye, 
-  EyeOff, 
-  Search, 
-  Filter, 
-  Mail, 
-  MessageCircle, 
-  User, 
+import {
+  Users,
+  Copy,
+  Check,
+  Eye,
+  EyeOff,
+  Search,
+  Filter,
+  Mail,
+  MessageCircle,
+  User,
   Calendar,
-  Edit, 
-  Trash2, 
+  Edit,
+  Trash2,
   RefreshCw,
   Plus
 } from 'lucide-react';
@@ -42,13 +42,14 @@ interface PaginationInfo {
   totalUsers: number;
 }
 
+import { getAdminUsers, deleteUser } from '@/actions/users';
+
 export default function AdminUsersPage() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
-  const [copiedField, setCopiedField] = useState<{type: string, id: string} | null>(null);
+  const [copiedField, setCopiedField] = useState<{ type: string, id: string } | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<'all' | 'email' | 'chat'>('all');
@@ -61,26 +62,17 @@ export default function AdminUsersPage() {
   });
 
   // Fetch users from API
-  const fetchUsers = async (page: number, limit: number, search: string, status: string) => {
+  const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search }),
-        ...(status !== 'all' && { status })
+      const result = await getAdminUsers({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm,
+        status: statusFilter
       });
 
-      const response = await fetch(`/api/admin/users?${params}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await response.json();
-
-      if (result.success) {
+      if (result.success && result.data) {
         setUsers(result.data.users);
         setPagination(result.data.pagination);
       } else {
@@ -97,7 +89,7 @@ export default function AdminUsersPage() {
 
   // Load users when filters change
   useEffect(() => {
-    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+    fetchUsers();
   }, [currentPage, itemsPerPage, searchTerm, statusFilter]);
 
   const copyToClipboard = async (text: string, type: string, id?: string) => {
@@ -128,21 +120,11 @@ export default function AdminUsersPage() {
     }
 
     try {
-      const response = await fetch(`/api/admin/users`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ id: userId }),
-      });
-
-      const result = await response.json();
+      const result = await deleteUser(userId);
 
       if (result.success) {
         toast.success('User deleted successfully');
-        // Refresh the user list
-        fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+        fetchUsers();
       } else {
         throw new Error(result.error);
       }
@@ -153,7 +135,7 @@ export default function AdminUsersPage() {
   };
 
   const handleRefresh = () => {
-    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+    fetchUsers();
     toast.success('Refreshing users...');
   };
 
@@ -194,7 +176,7 @@ export default function AdminUsersPage() {
           <Link
             href="/admin/users/create"
             className="inline-flex items-center space-x-2 px-4 py-3 bg-bgLight border border-border text-headingLight rounded-lg hover:bg-input transition-colors disabled:opacity-50 text-style"
-            
+
           >
             <Plus className="h-5 w-5" />
             <span>Add New User</span>
@@ -225,7 +207,7 @@ export default function AdminUsersPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -242,7 +224,7 @@ export default function AdminUsersPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
@@ -259,14 +241,14 @@ export default function AdminUsersPage() {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-bgLight border border-border rounded-lg p-4">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Active Today</p>
               <p className="text-2xl font-bold text-headingLight heading-style">
-                {users.filter(user => 
-                  new Date(user.lastEmailDate || user.lastChatDate || user.createdAt).toDateString() === 
+                {users.filter(user =>
+                  new Date(user.lastEmailDate || user.lastChatDate || user.createdAt).toDateString() ===
                   new Date().toDateString()
                 ).length}
               </p>
@@ -297,7 +279,7 @@ export default function AdminUsersPage() {
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
               <Filter className="h-4 w-4" />
               <span>Filter:</span>
-              <select 
+              <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value as 'all' | 'email' | 'chat');
@@ -312,7 +294,7 @@ export default function AdminUsersPage() {
             </div>
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
               <span>Show:</span>
-              <select 
+              <select
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
@@ -424,7 +406,7 @@ export default function AdminUsersPage() {
                           )}
                         </button>
                       </div>
-                      
+
                       {/* Password */}
                       <div className="flex items-center space-x-2">
                         <span className="text-textLight text-sm text-style w-12">Pass:</span>
@@ -537,7 +519,7 @@ export default function AdminUsersPage() {
             <div className="text-sm text-textLight text-style">
               Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, pagination.totalUsers)} of {pagination.totalUsers} users
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {/* Page Navigation */}
               <div className="flex items-center space-x-1">
@@ -548,7 +530,7 @@ export default function AdminUsersPage() {
                 >
                   Previous
                 </button>
-                
+
                 {/* Page Numbers */}
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   let pageNum;
@@ -567,11 +549,10 @@ export default function AdminUsersPage() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={loading}
-                      className={`w-8 h-8 rounded-lg text-sm transition-colors text-style ${
-                        currentPage === pageNum
-                          ? 'bg-primary text-bgLight'
-                          : 'border border-border hover:bg-bgLight text-headingLight'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-8 h-8 rounded-lg text-sm transition-colors text-style ${currentPage === pageNum
+                        ? 'bg-primary text-bgLight'
+                        : 'border border-border hover:bg-bgLight text-headingLight'
+                        } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {pageNum}
                     </button>
@@ -599,8 +580,8 @@ export default function AdminUsersPage() {
             No users found
           </h3>
           <p className="text-textLight text-style">
-            {searchTerm || statusFilter !== 'all' 
-              ? 'Try adjusting your search terms or filters' 
+            {searchTerm || statusFilter !== 'all'
+              ? 'Try adjusting your search terms or filters'
               : 'No users registered yet'
             }
           </p>

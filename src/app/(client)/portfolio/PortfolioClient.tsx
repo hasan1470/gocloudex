@@ -3,10 +3,10 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowRight, 
-  ExternalLink, 
-  Github, 
+import {
+  ArrowRight,
+  ExternalLink,
+  Github,
   Eye,
   Filter,
   X,
@@ -16,12 +16,16 @@ import {
 import { Project, Category } from '@/types';
 import Image from 'next/image';
 
+interface PortfolioClientProps {
+  initialProjects: Project[];
+  initialCategories: Category[];
+}
 
-export default function PortfolioClient() {
+export default function PortfolioClient({ initialProjects, initialCategories }: PortfolioClientProps) {
 
-      const searchParams = useSearchParams();
+  const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // Get initial values from URL
   const initialCategory = searchParams.get('category') || 'all';
   const initialTech = searchParams.get('tech') || '';
@@ -31,60 +35,28 @@ export default function PortfolioClient() {
   const [selectedTech, setSelectedTech] = useState(initialTech);
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [showFilters, setShowFilters] = useState(false);
-  const [loading, setLoading] = useState(true);
-  const [portfolioProjects, setPortfolioProjects] = useState<Project[]>([]);
-  const [portfolioCategories, setPortfolioCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(false); // Set to false since we have data
+  const [portfolioProjects, setPortfolioProjects] = useState<Project[]>(initialProjects);
+  const [portfolioCategories, setPortfolioCategories] = useState<Category[]>(initialCategories);
 
-  // Fetch projects
-  const fetchProjects = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/client/projects/`);
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioProjects(result.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/client/categories/`);
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioCategories(result.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Load data on component mount
+  // Load data from props if they change (though they usually won't in this pattern)
   useEffect(() => {
-    fetchProjects();
-    fetchCategories();
-  }, []);
+    setPortfolioProjects(initialProjects);
+    setPortfolioCategories(initialCategories);
+  }, [initialProjects, initialCategories]);
 
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (activeCategory !== 'all') {
       params.set('category', activeCategory);
     }
-    
+
     if (selectedTech) {
       params.set('tech', selectedTech);
     }
-    
+
     if (searchQuery) {
       params.set('search', searchQuery);
     }
@@ -97,20 +69,20 @@ export default function PortfolioClient() {
   const filteredProjects = useMemo(() => {
     return portfolioProjects.filter(project => {
       // Category filter - updated for multiple categories
-      const categoryMatch = activeCategory === 'all' || 
+      const categoryMatch = activeCategory === 'all' ||
         project.categories?.some(cat => {
           const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
           return category?.slug === activeCategory;
         });
-      
+
       // Technology filter
       const techMatch = !selectedTech || project.technologies.includes(selectedTech);
-      
+
       // Search filter - updated for multiple categories
-      const searchMatch = !searchQuery || 
+      const searchMatch = !searchQuery ||
         project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.technologies.some(tech => 
+        project.technologies.some(tech =>
           tech.toLowerCase().includes(searchQuery.toLowerCase())
         ) ||
         // Search by category names
@@ -118,7 +90,7 @@ export default function PortfolioClient() {
           const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
           return category?.name.toLowerCase().includes(searchQuery.toLowerCase());
         });
-      
+
       return categoryMatch && techMatch && searchMatch;
     });
   }, [portfolioProjects, portfolioCategories, activeCategory, selectedTech, searchQuery]);
@@ -132,16 +104,16 @@ export default function PortfolioClient() {
 
   // Get available technologies for current category
   const availableTechnologies = useMemo(() => {
-    const categoryProjects = activeCategory === 'all' 
-      ? portfolioProjects 
+    const categoryProjects = activeCategory === 'all'
+      ? portfolioProjects
       : portfolioProjects.filter(p => {
-          // Match by category slug in multiple categories
-          return p.categories?.some(cat => {
-            const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
-            return category?.slug === activeCategory;
-          });
+        // Match by category slug in multiple categories
+        return p.categories?.some(cat => {
+          const category = typeof cat === 'object' ? cat : portfolioCategories.find(c => c._id === cat);
+          return category?.slug === activeCategory;
         });
-    
+      });
+
     return Array.from(
       new Set(categoryProjects.flatMap(p => p.technologies))
     ).sort();
@@ -174,7 +146,7 @@ export default function PortfolioClient() {
   // Render categories for a project
   const renderProjectCategories = (project: Project) => {
     const categoryNames = getCategoryNames(project);
-    
+
     if (categoryNames.length === 0) {
       return (
         <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800 text-style">
@@ -217,7 +189,7 @@ export default function PortfolioClient() {
             </span>
           </h1>
           <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
-            Explore our latest projects and see how we&apos;ve helped businesses 
+            Explore our latest projects and see how we&apos;ve helped businesses
             transform their ideas into successful digital solutions.
           </p>
         </div>
@@ -283,7 +255,7 @@ export default function PortfolioClient() {
                     className={`
                       px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-style
                       ${activeCategory === 'all'
-                        ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5'
+                        ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5 border border-transparent'
                         : 'bg-bgLight text-textLight border border-border hover:bg-input hover:text-headingLight hover:-translate-y-0.5'
                       }
                     `}
@@ -297,7 +269,7 @@ export default function PortfolioClient() {
                       className={`
                         px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 text-style
                         ${activeCategory === category.slug
-                          ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5'
+                          ? 'bg-primary text-bgLight shadow-lg transform -translate-y-0.5 border border-transparent'
                           : 'bg-bgLight text-textLight border border-border hover:bg-input hover:text-headingLight hover:-translate-y-0.5'
                         }
                       `}
@@ -398,15 +370,15 @@ export default function PortfolioClient() {
                   {/* Project Image */}
                   <div className="relative overflow-hidden">
                     <div className="w-full h-48 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-                      <Image 
-                        src={project.image} 
-                        width={400} 
-                        height={192} 
+                      <Image
+                        src={project.image}
+                        width={400}
+                        height={192}
                         alt={project.title}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    
+
                     {/* Overlay with Links */}
                     <div className="absolute inset-0 bg-bgDark/80 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center space-x-4">
                       {project.projectUrl && (
@@ -448,8 +420,8 @@ export default function PortfolioClient() {
 
                     {/* Completion Date */}
                     <div className="absolute top-4 right-4">
-                      <div className="flex items-center space-x-1 bg-bgDark/80 text-textLight px-2 py-1 rounded text-xs">
-                        <Calendar className="h-3 w-3" />
+                      <div className="flex items-center space-x-1 bg-black/60 backdrop-blur-md text-white px-3 py-1.5 rounded-full text-xs font-medium border border-white/10 shadow-sm">
+                        <Calendar className="h-3.5 w-3.5" />
                         <span>
                           {new Date(project.completionDate).toLocaleString('default', {
                             month: 'short', // e.g. Jan, Feb, Mar
@@ -457,7 +429,6 @@ export default function PortfolioClient() {
                           })}
                         </span>
                       </div>
-
                     </div>
                   </div>
 
@@ -468,7 +439,7 @@ export default function PortfolioClient() {
                         {project.title}
                       </h3>
                     </div>
-                    
+
                     <p className="text-textLight line-clamp-3 mb-4 text-style">
                       {project.description}
                     </p>
@@ -504,7 +475,7 @@ export default function PortfolioClient() {
                         View Details
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </Link>
-                      
+
                       <div className="flex space-x-2">
                         {project.projectUrl && (
                           <a
@@ -560,6 +531,6 @@ export default function PortfolioClient() {
       </section>
     </div>
   );
-  
+
 
 }

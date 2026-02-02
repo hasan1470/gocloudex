@@ -1,130 +1,46 @@
-'use client';
-
-import { useParams } from 'next/navigation';
 import Link from 'next/link';
-import { 
-  ArrowLeft, 
-  ExternalLink, 
-  Github, 
+import {
+  ArrowLeft,
+  ExternalLink,
+  Github,
   Calendar,
   Code,
   CheckCircle
 } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { Project, Category } from '@/types';
 import Image from 'next/image';
+import { getProjectBySlug, getPublishedProjects, getCategories } from '@/actions/projects';
+import { notFound } from 'next/navigation';
 
-export default function ProjectDetailPage() {
-  const params = useParams();
-  const projectSlug = params.slug as string;
+interface Props {
+  params: Promise<{ slug: string }>;
+}
 
-  const [loading, setLoading] = useState(true);
-  const [portfolioProjects, setPortfolioProjects] = useState<Project[]>([]);
-  const [portfolioCategories, setPortfolioCategories] = useState<Category[]>([]);
+export default async function ProjectDetailPage({ params }: Props) {
+  const { slug } = await params;
 
-  // Fetch projects
-  const fetchProjects = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/client/projects/`);
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioProjects(result.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch categories
-  const fetchCategories = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`/api/client/categories/`);
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioCategories(result.data);
-      }
-    } catch (error) {
-      console.error('Failed to fetch categories:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  useEffect(() => {
-    fetchProjects();
-    fetchCategories();
-  }, []);
-
-  // Find project by slug
-  const project = portfolioProjects.find(p => p.slug === projectSlug);
-
-  // Get categories for project
-  const getProjectCategories = () => {
-    if (!project?.categories || project.categories.length === 0) {
-      return [];
-    }
-    
-    return project.categories.map(cat => {
-      if (typeof cat === 'object') {
-        return cat;
-      } else {
-        return portfolioCategories.find(c => c._id === cat);
-      }
-    }).filter(Boolean) as Category[];
-  };
-
-  // Get related projects (projects that share at least one category)
-  const getRelatedProjects = () => {
-    if (!project) return [];
-    
-    const projectCategories = getProjectCategories();
-    const projectCategoryIds = projectCategories.map(cat => cat._id);
-    
-    return portfolioProjects
-      .filter(p => 
-        p._id !== project._id && 
-        p.categories?.some(cat => {
-          const categoryId = typeof cat === 'object' ? cat._id : cat;
-          return projectCategoryIds.includes(categoryId);
-        })
-      )
-      .slice(0, 3);
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-bgLight flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-textLight text-style">Loading project...</p>
-        </div>
-      </div>
-    );
-  }
+  // Fetch data on the server
+  const [project, allProjects, allCategories] = await Promise.all([
+    getProjectBySlug(slug),
+    getPublishedProjects(),
+    getCategories()
+  ]);
 
   if (!project) {
-    return (
-      <div className="min-h-screen bg-bgLight flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-headingLight mb-4 heading-style">Project not found</h1>
-          <Link 
-            href="/portfolio" 
-            className="inline-flex items-center text-primary hover:text-hoverLinkLight text-style"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Portfolio
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
-  const projectCategories = getProjectCategories();
-  const relatedProjects = getRelatedProjects();
+  // Get related projects (projects that share at least one category)
+  const projectCategoryIds = project.categories.map(cat => cat._id);
+  const relatedProjects = allProjects
+    .filter(p =>
+      p._id !== project._id &&
+      p.categories?.some(cat => {
+        const categoryId = typeof cat === 'object' ? cat._id : cat;
+        return projectCategoryIds.includes(categoryId);
+      })
+    )
+    .slice(0, 3);
 
   return (
     <div className="bg-bgLight min-h-screen">
@@ -157,7 +73,7 @@ export default function ProjectDetailPage() {
                   />
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex space-x-4 mt-6">
                 {project.projectUrl && (
@@ -190,17 +106,17 @@ export default function ProjectDetailPage() {
 
               {/* Featured */}
               {project.featured && (
-              <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-greenType/10 text-greenType border border-greenType/20 text-style">
                     Featured
                   </span>
-                  </div>
-                )}
-              
-              {/* Categories - Updated for multiple categories */}
+                </div>
+              )}
+
+              {/* Categories */}
               <div className="flex flex-wrap gap-2">
-                {projectCategories.map((category) => (
-                  <span 
+                {project.categories.map((category) => (
+                  <span
                     key={category._id}
                     className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary text-style"
                   >
@@ -212,7 +128,7 @@ export default function ProjectDetailPage() {
               <h1 className="text-4xl sm:text-5xl font-bold text-headingLight heading-style">
                 {project.title}
               </h1>
-              
+
               <p className="text-xl text-textLight leading-relaxed text-style">
                 {project.description}
               </p>
@@ -265,23 +181,23 @@ export default function ProjectDetailPage() {
       </section>
 
       {/* Project Overview Section */}
-      {(project.projectOverview || project.keyFeatures?.length > 0) && (
+      {(project.projectOverview || (project.keyFeatures && project.keyFeatures.length > 0)) && (
         <section className="py-16 bg-gradient-to-br from-input to-bgLight border-y border-border">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <h2 className="text-3xl font-bold text-headingLight mb-8 heading-style">Project Details</h2>
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              
+
               {/* Project Overview */}
               {project.projectOverview && (
                 <div className="space-y-6">
                   <h3 className="text-xl font-semibold text-headingLight heading-style">Project Overview</h3>
-                  <div 
+                  <div
                     className="prose prose-lg max-w-none text-textLight leading-relaxed text-style"
                     dangerouslySetInnerHTML={{ __html: project.projectOverview }}
                   />
                 </div>
               )}
-              
+
               {/* Key Features */}
               {project.keyFeatures && project.keyFeatures.length > 0 && (
                 <div className="space-y-6">
@@ -299,7 +215,7 @@ export default function ProjectDetailPage() {
                   </div>
                 </div>
               )}
-              
+
             </div>
           </div>
         </section>
@@ -320,10 +236,7 @@ export default function ProjectDetailPage() {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProjects.map((relatedProject) => {
-                const relatedProjectCategories = relatedProject.categories?.map(cat => {
-                  if (typeof cat === 'object') return cat;
-                  return portfolioCategories.find(c => c._id === cat);
-                }).filter(Boolean) as Category[];
+                const relatedProjectCategories = relatedProject.categories;
 
                 return (
                   <Link
@@ -336,7 +249,7 @@ export default function ProjectDetailPage() {
                         <Image
                           src={relatedProject.image}
                           alt={relatedProject.title}
-                          width={200}
+                          width={400}
                           height={160}
                           className="w-full h-full object-cover"
                         />
@@ -344,19 +257,19 @@ export default function ProjectDetailPage() {
                         <div className="text-textLight text-sm text-style">Project Image</div>
                       )}
                     </div>
-                    
+
                     <h3 className="font-semibold text-headingLight group-hover:text-primary transition-colors mb-2 heading-style">
                       {relatedProject.title}
                     </h3>
-                    
+
                     <p className="text-textLight text-sm line-clamp-2 mb-3 text-style">
                       {relatedProject.description}
                     </p>
-                    
+
                     {/* Related Project Categories */}
                     <div className="flex flex-wrap gap-1 mb-3">
                       {relatedProjectCategories.slice(0, 2).map((category) => (
-                        <span 
+                        <span
                           key={category._id}
                           className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary text-style"
                         >
@@ -369,7 +282,7 @@ export default function ProjectDetailPage() {
                         </span>
                       )}
                     </div>
-                    
+
                     <div className="flex items-center justify-between">
                       <span className="text-xs text-textLight text-style">
                         {relatedProject.technologies.slice(0, 2).join(', ')}

@@ -4,17 +4,18 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Send, 
-  CheckCircle, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  CheckCircle,
   AlertCircle,
   Clock,
   MessageCircle
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { submitContactForm } from '@/actions/contact';
 
 // Form validation schema
 const contactSchema = z.object({
@@ -71,20 +72,12 @@ export default function ContactPage() {
 
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
-    
+
     try {
-      const response = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+      const result = await submitContactForm(data);
 
-      const result = await response.json();
-
-      if (response.ok) {
-        if (result.data.hasAccount) {
+      if (result.success) {
+        if (result.data?.hasAccount) {
           toast.success('Message sent successfully! We\'ll get back to you soon.');
         } else {
           toast.success('Message sent successfully! Check your email for account details.');
@@ -140,7 +133,7 @@ export default function ContactPage() {
             </span>
           </h1>
           <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
-            Have a project in mind or want to discuss how we can help your business? 
+            Have a project in mind or want to discuss how we can help your business?
             We'd love to hear from you. Send us a message and we'll respond promptly.
           </p>
         </div>
@@ -156,8 +149,8 @@ export default function ContactPage() {
                 Let's Talk
               </h2>
               <p className="text-textLight mb-8 text-style">
-                Whether you're ready to start a project or just want to learn more 
-                about our services, we're here to help. Choose the most convenient 
+                Whether you're ready to start a project or just want to learn more
+                about our services, we're here to help. Choose the most convenient
                 way to reach out.
               </p>
 
@@ -218,11 +211,10 @@ export default function ContactPage() {
                         type="text"
                         id="name"
                         {...register('name')}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${
-                          errors.name 
-                            ? 'border-redType focus:border-redType' 
-                            : 'border-border focus:border-ring'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${errors.name
+                          ? 'border-redType focus:border-redType'
+                          : 'border-border focus:border-ring'
+                          }`}
                         placeholder="Your full name"
                       />
                       {errors.name && (
@@ -242,11 +234,10 @@ export default function ContactPage() {
                         type="email"
                         id="email"
                         {...register('email')}
-                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${
-                          errors.email 
-                            ? 'border-redType focus:border-redType' 
-                            : 'border-border focus:border-ring'
-                        }`}
+                        className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${errors.email
+                          ? 'border-redType focus:border-redType'
+                          : 'border-border focus:border-ring'
+                          }`}
                         placeholder="your.email@example.com"
                       />
                       {errors.email && (
@@ -267,11 +258,10 @@ export default function ContactPage() {
                       type="text"
                       id="subject"
                       {...register('subject')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${
-                        errors.subject 
-                          ? 'border-redType focus:border-redType' 
-                          : 'border-border focus:border-ring'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style ${errors.subject
+                        ? 'border-redType focus:border-redType'
+                        : 'border-border focus:border-ring'
+                        }`}
                       placeholder="What's this about?"
                     />
                     {errors.subject && (
@@ -291,11 +281,10 @@ export default function ContactPage() {
                       id="message"
                       rows={6}
                       {...register('message')}
-                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none text-style ${
-                        errors.message 
-                          ? 'border-redType focus:border-redType' 
-                          : 'border-border focus:border-ring'
-                      }`}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring resize-none text-style ${errors.message
+                        ? 'border-redType focus:border-redType'
+                        : 'border-border focus:border-ring'
+                        }`}
                       placeholder="Tell us about your project, questions, or how we can help you..."
                     />
                     {errors.message && (
@@ -344,7 +333,7 @@ export default function ContactPage() {
           <p className="text-textLight text-lg mb-8 text-style">
             Quick answers to common questions about working with us.
           </p>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
             <div className="space-y-4">
               <div>

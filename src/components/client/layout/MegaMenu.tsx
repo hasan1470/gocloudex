@@ -16,19 +16,22 @@ export default function MegaMenu({ isOpen, onClose, menuData }: MegaMenuProps) {
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as HTMLElement;
+      // Ignore clicks on main menu triggers to prevent double-toggling
+      if (target.closest('[data-megamenu-trigger]')) return;
+
+      if (menuRef.current && !menuRef.current.contains(target as Node)) {
         onClose();
       }
     };
 
     if (isOpen) {
       document.addEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'hidden';
+      // Removed body overflow hidden to prevent layout shift
     }
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -38,7 +41,7 @@ export default function MegaMenu({ isOpen, onClose, menuData }: MegaMenuProps) {
     <>
       {/* Backdrop */}
       <div className="fixed inset-0 bg-bgDark/50 backdrop-blur-sm z-40 lg:pt-20" />
-      
+
       {/* Mega Menu */}
       <div
         ref={menuRef}
@@ -82,26 +85,23 @@ export default function MegaMenu({ isOpen, onClose, menuData }: MegaMenuProps) {
                         key={itemIndex}
                         href={item.link}
                         onClick={onClose}
-                        className={`group flex items-start space-x-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${
-                          item.featured 
-                            ? 'border-primary/20 bg-primary/5 hover:bg-primary/10' 
+                        className={`group flex items-start space-x-4 p-4 rounded-xl border transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 ${item.featured
+                            ? 'border-primary/20 bg-primary/5 hover:bg-primary/10'
                             : 'border-border hover:bg-input'
-                        }`}
+                          }`}
                       >
-                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${
-                          item.featured 
-                            ? 'bg-primary text-bgLight' 
+                        <div className={`flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center ${item.featured
+                            ? 'bg-primary text-bgLight'
                             : 'bg-input text-primary'
-                        }`}>
+                          }`}>
                           <Icon className="h-6 w-6" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-start justify-between">
-                            <h4 className={`font-semibold text-style ${
-                              item.featured 
-                                ? 'text-primary' 
+                            <h4 className={`font-semibold text-style ${item.featured
+                                ? 'text-primary'
                                 : 'text-headingLight'
-                            }`}>
+                              }`}>
                               {item.title}
                             </h4>
                             <ArrowRight className="h-4 w-4 text-textLight group-hover:text-primary flex-shrink-0 mt-1 ml-2 transition-colors" />

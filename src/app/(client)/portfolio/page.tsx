@@ -1,13 +1,17 @@
-// app/(client)/portfolio/page.tsx
-'use client';
-
 import { Suspense } from 'react';
 import PortfolioClient from './PortfolioClient';
+import { getPublishedProjects, getCategories } from '@/actions/projects';
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  // Fetch data on the server
+  const [projects, categories] = await Promise.all([
+    getPublishedProjects(),
+    getCategories()
+  ]);
+
   return (
-    <Suspense fallback={<div className="text-center py-16">Loading portfolio...</div>}>
-      <PortfolioClient />
+    <Suspense fallback={null}>
+      <PortfolioClient initialProjects={projects} initialCategories={categories} />
     </Suspense>
   );
 }

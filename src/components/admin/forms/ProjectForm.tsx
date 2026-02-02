@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { 
-  Save, 
-  X, 
+import {
+  Save,
+  X,
   Link as LinkIcon,
   Github,
   Calendar,
@@ -16,6 +16,7 @@ import { Project, Category } from '@/types';
 import SingleImageUpload from './SingleImageUpload';
 import RichTextEditor from './RichTextEditor';
 import toast from 'react-hot-toast';
+import { getPublishedProjects } from '@/actions/projects';
 
 interface ProjectFormProps {
   project?: Project;
@@ -70,17 +71,8 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
   const fetchProjects = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`/api/client/projects/`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const result = await response.json();
-      if (result.success) {
-        setPortfolioProjects(result.data);
-      }
+      const data = await getPublishedProjects();
+      setPortfolioProjects(data);
     } catch (error) {
       console.error('Failed to fetch projects:', error);
     } finally {
@@ -101,9 +93,9 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
         const response = await fetch('/api/admin/categories', {
           method: 'GET',
           headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
         });
         const result = await response.json();
         if (result.success) {
@@ -279,12 +271,12 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     setLoading(true);
 
     try {
-      const url = isEditing && project 
+      const url = isEditing && project
         ? `/api/admin/projects/${project._id}`
         : '/api/admin/projects';
 
       const formDataToSend = new FormData();
-      
+
       // Append all form data
       formDataToSend.append('title', formData.title);
       formDataToSend.append('description', formData.description);
@@ -297,7 +289,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       formDataToSend.append('featured', formData.featured.toString());
       formDataToSend.append('status', formData.status);
       formDataToSend.append('completionDate', formData.completionDate);
-      
+
       // Append image file if exists
       if (imageFile) {
         formDataToSend.append('image', imageFile);
@@ -306,7 +298,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       const response = await fetch(url, {
         method: isEditing ? 'PUT' : 'POST',
         body: formDataToSend,
-        headers: { 
+        headers: {
           'Authorization': `Bearer ${token}`,
         }
       });
@@ -315,12 +307,12 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
 
       if (result.success) {
         toast.success(
-          isEditing 
-            ? 'Project updated successfully!' 
+          isEditing
+            ? 'Project updated successfully!'
             : 'Project created successfully!',
         );
         router.push('/admin/projects');
-        
+
       } else {
         toast.error(result.error || `Failed to ${isEditing ? 'update' : 'create'} project`);
       }
@@ -340,7 +332,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Basic Information
           </h2>
-          
+
           <div className="grid grid-cols-1 gap-6">
             {/* Title */}
             <div>
@@ -377,7 +369,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
               <label className="block text-sm font-medium text-headingLight mb-2 text-style">
                 Categories *
               </label>
-              
+
               {/* Selected Categories */}
               <div className="flex flex-wrap gap-2 mb-3">
                 {formData.categories.map((categoryId) => {
@@ -446,11 +438,10 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                               type="button"
                               onClick={() => handleAddCategory(category._id)}
                               disabled={isSelected}
-                              className={`w-full px-4 py-3 text-left text-sm transition-colors border-b border-border last:border-b-0 text-style ${
-                                isSelected
-                                  ? 'bg-primary/10 text-primary cursor-not-allowed'
-                                  : 'text-textLight hover:bg-input hover:text-headingLight'
-                              }`}
+                              className={`w-full px-4 py-3 text-left text-sm transition-colors border-b border-border last:border-b-0 text-style ${isSelected
+                                ? 'bg-primary/10 text-primary cursor-not-allowed'
+                                : 'text-textLight hover:bg-input hover:text-headingLight'
+                                }`}
                             >
                               <div className="flex items-center justify-between">
                                 <span>{category.name}</span>
@@ -466,7 +457,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                   </div>
                 )}
               </div>
-              
+
               {formData.categories.length === 0 && (
                 <p className="text-sm text-redType mt-2 text-style">Please select at least one category</p>
               )}
@@ -479,7 +470,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Project Overview
           </h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-headingLight mb-2 text-style">
               Detailed Project Overview
@@ -487,7 +478,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
             <RichTextEditor
               value={formData.projectOverview}
               onChange={(value) => handleInputChange('projectOverview', value)}
-              
+
             />
 
           </div>
@@ -498,7 +489,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Project Image
           </h2>
-          
+
           <SingleImageUpload
             image={imageFile}
             onImageChange={setImageFile}
@@ -511,12 +502,12 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Technologies
           </h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-headingLight mb-2 text-style">
               Technologies Used *
             </label>
-            
+
             {/* Selected Technologies */}
             <div className="flex flex-wrap gap-2 mb-4">
               {formData.technologies.map((tech) => (
@@ -550,7 +541,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                     className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                     placeholder="Type to search technologies..."
                   />
-                  
+
                   {/* Suggestions Dropdown */}
                   {showTechSuggestions && (
                     <div className="absolute z-10 w-full mt-1 bg-bgLight border border-border rounded-lg shadow-lg max-h-60 overflow-y-auto">
@@ -567,17 +558,17 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                     </div>
                   )}
                 </div>
-                
+
                 <button
                   type="button"
                   onClick={() => handleAddTechnology()}
                   className="inline-flex items-center space-x-2 px-4 py-2 bg-input text-textLight rounded-lg hover:bg-border transition-colors text-style"
                 >
-                <Plus className="h-4 w-4" />
-                <span>Add</span>
+                  <Plus className="h-4 w-4" />
+                  <span>Add</span>
                 </button>
               </div>
-              
+
               {/* Available Technologies Hint */}
               {techInput.length === 0 && (
                 <p className="mt-2 text-xs text-textLight text-style">
@@ -593,12 +584,12 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Key Features
           </h2>
-          
+
           <div>
             <label className="block text-sm font-medium text-headingLight mb-2 text-style">
               Key Features of the Project
             </label>
-            
+
             {/* Selected Key Features */}
             <div className="flex flex-wrap gap-2 mb-4">
               {formData.keyFeatures.map((feature) => (
@@ -628,7 +619,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                 className="flex-1 px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                 placeholder="Enter a key feature..."
               />
-              
+
               <button
                 type="button"
                 onClick={handleAddKeyFeature}
@@ -646,7 +637,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Project Links
           </h2>
-          
+
           <div className="grid grid-cols-1 gap-6">
             <div>
               <label className="block text-sm font-medium text-headingLight mb-2 text-style">
@@ -683,7 +674,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
             Project Settings
           </h2>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Completion Date */}
             <div>
@@ -741,7 +732,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           >
             Cancel
           </button>
-          
+
           <button
             type="submit"
             disabled={loading || formData.categories.length === 0}

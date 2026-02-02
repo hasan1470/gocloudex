@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { 
-  Search, 
-  Send, 
-  Phone, 
-  Video, 
-  Info, 
-  User, 
-  Check, 
+import {
+  Search,
+  Send,
+  Phone,
+  Video,
+  Info,
+  User,
+  Check,
   CheckCheck,
   Mail,
   MessageCircle,
@@ -37,8 +37,9 @@ interface ChatMessage {
   type?: 'text' | 'image' | 'file';
 }
 
+import { getChatUsers, getChatMessages, markChatAsRead, sendAdminMessage } from '@/actions/chats';
+
 export default function AdminChatsPage() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [users, setUsers] = useState<ChatUser[]>([]);
   const [selectedUser, setSelectedUser] = useState<ChatUser | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -47,9 +48,8 @@ export default function AdminChatsPage() {
   const [sending, setSending] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterUnread, setFilterUnread] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<number>(Date.now());
   const [isAtBottom, setIsAtBottom] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -58,7 +58,7 @@ export default function AdminChatsPage() {
   // Check if user is at the bottom of messages
   const checkIfAtBottom = useCallback(() => {
     if (!messagesContainerRef.current) return true;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     return distanceFromBottom <= 100; // 100px threshold
@@ -83,16 +83,15 @@ export default function AdminChatsPage() {
     }
 
     pollingRef.current = setInterval(async () => {
+      // Basic visibility check is fine
+      if (typeof document !== 'undefined' && document.visibilityState !== 'visible') return;
+
       if (selectedUser) {
-        const hasNewMessages = await fetchMessages(selectedUser.id, true);
-        if (hasNewMessages && isAtBottom) {
-          // Only auto-scroll if there are new messages and user is at bottom
-          setTimeout(smartScrollToBottom, 100);
-        }
+        await fetchMessages(selectedUser.id, true);
       }
       fetchChatUsers(true);
-    }, 3000);
-  }, [selectedUser, isAtBottom, smartScrollToBottom]);
+    }, 4000);
+  }, [selectedUser]);
 
   // Stop polling when component unmounts
   useEffect(() => {
@@ -107,68 +106,47 @@ export default function AdminChatsPage() {
   const fetchChatUsers = async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const response = await fetch(`/api/admin/chats?filter=chat&t=${lastUpdate}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-      const result = await response.json();
+      const result = await getChatUsers();
 
-      if (result.success) {
+      if (result.success && result.data) {
         setUsers(result.data.users);
-        setLastUpdate(Date.now());
-      } else {
-        throw new Error(result.error);
       }
     } catch (error) {
       if (!silent) {
         console.error('Failed to fetch chat users:', error);
-        toast.error('Failed to load chat users');
       }
     } finally {
       if (!silent) setLoading(false);
     }
   };
 
-  // Fetch messages for selected user - returns true if new messages were found
+  // Fetch messages for selected user
   const fetchMessages = async (userId: string, silent = false): Promise<boolean> => {
     try {
-      const response = await fetch(`/api/admin/chats?userId=${userId}&t=${lastUpdate}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-      });
-      const result = await response.json();
+      const result = await getChatMessages(userId);
 
-      if (result.success) {
-        const messagesWithIds = result.data.messages.map((msg: any) => ({
-          ...msg,
-          id: msg.id || msg._id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-        }));
-        
-        // Check if there are new messages
-        const currentMessageIds = new Set(messages.map(m => m.id));
-        const hasNewMessages = messagesWithIds.some((msg: ChatMessage) => !currentMessageIds.has(msg.id));
-        
-        setMessages(messagesWithIds);
-        
-        // Mark messages as read when viewing (only if not silent update)
-        if (!silent && messagesWithIds.some((msg: ChatMessage) => !msg.isRead && msg.sender === 'user')) {
+      if (result.success && result.data) {
+        const newMessages = result.data.messages;
+
+        // Simple but effective: check if we actually have new data before setting state
+        // This prevents the scroll-up reset issue
+        setMessages(prev => {
+          if (JSON.stringify(prev) !== JSON.stringify(newMessages)) {
+            return newMessages;
+          }
+          return prev;
+        });
+
+        if (!silent && newMessages.some((msg: ChatMessage) => !msg.isRead && msg.sender === 'user')) {
           await markMessagesAsRead(userId);
         }
-        
-        return hasNewMessages;
-      } else {
-        throw new Error(result.error);
+
+        return true;
       }
+      return false;
     } catch (error) {
       if (!silent) {
         console.error('Failed to fetch messages:', error);
-        toast.error('Failed to load messages');
       }
       return false;
     }
@@ -177,19 +155,8 @@ export default function AdminChatsPage() {
   // Mark messages as read
   const markMessagesAsRead = async (userId: string) => {
     try {
-      await fetch('/api/admin/chats', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId,
-          action: 'mark-read'
-        }),
-      });
-      
-      setUsers(prev => prev.map(user => 
+      await markChatAsRead(userId);
+      setUsers(prev => prev.map(user =>
         user.id === userId ? { ...user, chatUnreadCount: 0 } : user
       ));
     } catch (error) {
@@ -206,8 +173,7 @@ export default function AdminChatsPage() {
     setNewMessage('');
     setSending(true);
 
-    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+    const tempId = `temp-${Date.now()}`;
     const tempMessage: ChatMessage = {
       id: tempId,
       message: messageToSend,
@@ -217,49 +183,27 @@ export default function AdminChatsPage() {
       type: 'text'
     };
 
-    // Optimistically update messages
     setMessages(prev => [...prev, tempMessage]);
-    
-    // Auto-scroll to bottom when sending new message
-    setTimeout(smartScrollToBottom, 100);
+
+    // Always scroll to bottom on your own sent message
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
 
     try {
-      const response = await fetch('/api/admin/chats', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userId: selectedUser.id,
-          message: messageToSend
-        }),
-      });
+      const result = await sendAdminMessage(selectedUser.id, messageToSend);
 
-      const result = await response.json();
+      if (result.success && result.data) {
+        setMessages(prev => prev.map(msg =>
+          msg.id === tempId ? result.data!.message : msg
+        ));
 
-      if (!result.success) {
+        fetchChatUsers(true);
+      } else {
         throw new Error(result.error);
       }
-
-      // Replace temporary message with actual one
-      setMessages(prev => prev.map(msg => 
-        msg.id === tempId ? result.data.message : msg
-      ));
-
-      // Update user list
-      setUsers(prev => prev.map(user => 
-        user.id === selectedUser.id 
-          ? { 
-              ...user, 
-              lastChatMessage: messageToSend,
-              lastChatDate: new Date().toISOString(),
-              chatCount: user.chatCount + 1
-            } 
-          : user
-      ));
-
-      toast.success('Message sent');
     } catch (error) {
       toast.error('Failed to send message');
       setMessages(prev => prev.filter(msg => msg.id !== tempId));
@@ -286,7 +230,6 @@ export default function AdminChatsPage() {
     if (selectedUser) {
       fetchMessages(selectedUser.id);
       startPolling();
-      setIsAtBottom(true); // Reset to bottom when selecting new user
     } else {
       if (pollingRef.current) {
         clearInterval(pollingRef.current);
@@ -304,15 +247,15 @@ export default function AdminChatsPage() {
   };
 
   const formatTime = (dateString: string) => {
-    return new Date(dateString).toLocaleTimeString([], { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return new Date(dateString).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit'
     });
   };
 
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesFilter = !filterUnread || user.chatUnreadCount > 0;
     return matchesSearch && matchesFilter;
   });
@@ -332,13 +275,13 @@ export default function AdminChatsPage() {
   return (
     <div className="flex h-screen max-h-[86vh] bg-bgLight">
       {/* Left Sidebar - Users List */}
-      <div className="w-80 border-r border-border bg-white flex flex-col">
+      <div className="w-80 border-r border-border bg-bgLight flex flex-col">
         {/* Header */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
             <h1 className="text-xl font-bold text-headingLight">Messages</h1>
             <div className="flex space-x-2">
-              <button 
+              <button
                 onClick={handleRefresh}
                 className="p-2 hover:bg-input rounded-full transition-colors"
                 title="Refresh messages"
@@ -367,21 +310,19 @@ export default function AdminChatsPage() {
           <div className="flex space-x-1 mt-3">
             <button
               onClick={() => setFilterUnread(false)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                !filterUnread
-                  ? 'bg-primary text-white'
-                  : 'text-textLight hover:text-headingLight'
-              }`}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${!filterUnread
+                ? 'bg-primary text-white'
+                : 'text-textLight hover:text-headingLight'
+                }`}
             >
               All
             </button>
             <button
               onClick={() => setFilterUnread(true)}
-              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${
-                filterUnread
-                  ? 'bg-primary text-white'
-                  : 'text-textLight hover:text-headingLight'
-              }`}
+              className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-colors ${filterUnread
+                ? 'bg-primary text-white'
+                : 'text-textLight hover:text-headingLight'
+                }`}
             >
               Unread
             </button>
@@ -404,9 +345,8 @@ export default function AdminChatsPage() {
               <div
                 key={user.id}
                 onClick={() => setSelectedUser(user)}
-                className={`flex items-center p-4 border-b border-border cursor-pointer hover:bg-input transition-colors ${
-                  selectedUser?.id === user.id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
-                }`}
+                className={`flex items-center p-4 border-b border-border cursor-pointer hover:bg-input transition-colors ${selectedUser?.id === user.id ? 'bg-primary/10 border-l-4 border-l-primary' : ''
+                  }`}
               >
                 <div className="relative">
                   <div className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white font-semibold">
@@ -418,7 +358,7 @@ export default function AdminChatsPage() {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="ml-3 flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold text-headingLight truncate text-style">
@@ -448,7 +388,7 @@ export default function AdminChatsPage() {
         {selectedUser ? (
           <>
             {/* Chat Header */}
-            <div className="border-b border-border bg-white p-4">
+            <div className="border-b border-border bg-bgLight p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
                   <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center text-white font-semibold">
@@ -463,16 +403,16 @@ export default function AdminChatsPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center space-x-2">
-                  <button 
+                  <button
                     onClick={scrollToBottom}
                     className="p-2 hover:bg-input rounded-full transition-colors"
                     title="Scroll to bottom"
                   >
                     <MessageCircle className="h-5 w-5 text-textLight" />
                   </button>
-                  <button 
+                  <button
                     onClick={handleRefresh}
                     className="p-2 hover:bg-input rounded-full transition-colors"
                     title="Refresh"
@@ -485,10 +425,10 @@ export default function AdminChatsPage() {
 
             {/* Messages Area with scroll tracking */}
             <div className="flex-1 overflow-hidden flex flex-col">
-              <div 
+              <div
                 ref={messagesContainerRef}
                 onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-white to-input"
+                className="flex-1 overflow-y-auto p-4 bg-gradient-to-b from-bgLight to-input"
               >
                 {messages.length === 0 ? (
                   <div className="text-center py-8">
@@ -502,38 +442,72 @@ export default function AdminChatsPage() {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {messages.map((message, index) => (
-                      <div 
-                        key={getMessageKey(message, index)}
-                        className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-[70%] rounded-2xl px-4 py-2 ${
-                            message.sender === 'admin'
-                              ? 'bg-primary text-white rounded-br-none'
-                              : 'bg-white border border-border text-headingLight rounded-bl-none'
-                          }`}
-                        >
-                          <p className="text-style break-words">{message.message}</p>
-                          <div className={`flex items-center space-x-1 mt-1 ${
-                            message.sender === 'admin' ? 'justify-end' : 'justify-start'
-                          }`}>
-                            <span className={`text-xs ${
-                              message.sender === 'admin' ? 'text-primary-light' : 'text-textLight'
-                            } text-style`}>
-                              {formatTime(message.createdAt)}
-                            </span>
-                            {message.sender === 'admin' && (
-                              message.isRead ? (
-                                <CheckCheck className="h-3 w-3 text-primary-light" />
-                              ) : (
-                                <Check className="h-3 w-3 text-primary-light" />
-                              )
-                            )}
+                    {(() => {
+                      const groups: { [key: string]: ChatMessage[] } = {};
+                      messages.forEach(msg => {
+                        const date = new Date(msg.createdAt).toDateString();
+                        if (!groups[date]) groups[date] = [];
+                        groups[date].push(msg);
+                      });
+
+                      return Object.entries(groups).map(([date, groupMessages]) => {
+                        const messageDate = new Date(date);
+                        const today = new Date();
+                        const yesterday = new Date();
+                        yesterday.setDate(today.getDate() - 1);
+
+                        let dateLabel = messageDate.toLocaleDateString('en-US', {
+                          month: 'long',
+                          day: 'numeric',
+                          year: messageDate.getFullYear() !== today.getFullYear() ? 'numeric' : undefined
+                        });
+
+                        if (date === today.toDateString()) {
+                          dateLabel = 'Today';
+                        } else if (date === yesterday.toDateString()) {
+                          dateLabel = 'Yesterday';
+                        }
+
+                        return (
+                          <div key={date} className="space-y-4">
+                            <div className="flex justify-center my-6">
+                              <span className="bg-input px-4 py-1 rounded-full text-xs font-medium text-textLight shadow-sm border border-border">
+                                {dateLabel}
+                              </span>
+                            </div>
+                            {groupMessages.map((message, index) => (
+                              <div
+                                key={getMessageKey(message, index)}
+                                className={`flex ${message.sender === 'admin' ? 'justify-end' : 'justify-start'}`}
+                              >
+                                <div
+                                  className={`max-w-[70%] rounded-2xl px-4 py-2 shadow-sm ${message.sender === 'admin'
+                                    ? 'bg-primary text-white rounded-br-none'
+                                    : 'bg-bgLight border border-border text-headingLight rounded-bl-none'
+                                    }`}
+                                >
+                                  <p className="text-style break-words">{message.message}</p>
+                                  <div className={`flex items-center space-x-1 mt-1 ${message.sender === 'admin' ? 'justify-end' : 'justify-start'
+                                    }`}>
+                                    <span className={`text-xs ${message.sender === 'admin' ? 'text-primary-light' : 'text-textLight'
+                                      } text-style`}>
+                                      {formatTime(message.createdAt)}
+                                    </span>
+                                    {message.sender === 'admin' && (
+                                      message.isRead ? (
+                                        <CheckCheck className="h-3 w-3 text-primary-light" />
+                                      ) : (
+                                        <Check className="h-3 w-3 text-primary-light" />
+                                      )
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      });
+                    })()}
                     <div ref={messagesEndRef} />
                   </div>
                 )}
@@ -541,7 +515,7 @@ export default function AdminChatsPage() {
 
               {/* Scroll to bottom button - only show when not at bottom */}
               {!isAtBottom && messages.length > 5 && (
-                <div className="flex justify-center p-2 bg-white border-t border-border">
+                <div className="flex justify-center p-2 bg-bgLight border-t border-border">
                   <button
                     onClick={scrollToBottom}
                     className="px-4 py-2 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors text-sm flex items-center space-x-2"
@@ -554,14 +528,14 @@ export default function AdminChatsPage() {
             </div>
 
             {/* Message Input */}
-            <div className="border-t border-border bg-white p-4">
+            <div className="border-t border-border bg-bgLight p-4">
               <form onSubmit={sendMessage} className="flex space-x-4">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-3 border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-style"
+                  className="flex-1 px-4 py-3 bg-input border border-border rounded-full focus:outline-none focus:ring-2 focus:ring-primary text-style"
                   disabled={sending}
                 />
                 <button
@@ -586,7 +560,7 @@ export default function AdminChatsPage() {
           </>
         ) : (
           /* Empty State - No User Selected */
-          <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-white to-input">
+          <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-bgLight to-input">
             <MessageCircle className="h-24 w-24 text-textLight mb-6" />
             <h2 className="text-2xl font-bold text-headingLight mb-2 text-style">
               Your Messages

@@ -5,13 +5,9 @@ import Link from 'next/link';
 import { Category } from '@/types';
 import toast from 'react-hot-toast';
 
-interface CategoriesResponse {
-  success: boolean;
-  data: Category[];
-}
+import { getAdminCategories, deleteCategory } from '@/actions/categories';
 
 export default function CategoriesPage() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
@@ -21,33 +17,23 @@ export default function CategoriesPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/admin/categories', {
-      method: 'GET',
-      headers: {
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      }
-    });
-      const result: CategoriesResponse = await response.json();
-
-      if (result.success) {
-        setCategories(result.data);
-      }
+      const data = await getAdminCategories();
+      setCategories(data);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
+      toast.error('Failed to load categories');
     } finally {
       setLoading(false);
     }
   };
 
-  
-  
+
 
   useEffect(() => {
     fetchCategories();
   }, []);
 
-  // Handle delete category - UPDATED WITH ALERT DEBUGGING
+  // Handle delete category
   const handleDeleteCategory = async (categoryId: string, categoryName: string) => {
     if (!confirm(`Are you sure you want to delete the category "${categoryName}"? This action cannot be undone.`)) {
       return;
@@ -55,32 +41,18 @@ export default function CategoriesPage() {
 
     setDeleteLoading(categoryId);
     try {
-      
-      const response = await fetch(`/api/admin/categories/${categoryId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
-
-
-      const result = await response.json();
+      const result = await deleteCategory(categoryId);
 
       if (result.success) {
         toast.success(`Category "${categoryName}" deleted successfully.`);
         // Remove the category from the local state immediately for better UX
         setCategories(prev => prev.filter(cat => cat._id !== categoryId));
       } else {
-        toast.error(`Failed to delete category "${categoryName}": ${result.error || 'Unknown error'}`);
-        console.error('❌ Delete failed:', result.error);
-        alert(result.error || 'Failed to delete category');
-        // Refresh the list to ensure we have the latest data
-        fetchCategories();
+        toast.error(result.error || 'Failed to delete category');
       }
     } catch (error) {
       toast.error(`An error occurred while deleting category "${categoryName}".`);
-      console.error('💥 Delete category error:', error);
+      console.error('Delete category error:', error);
     } finally {
       setDeleteLoading(null);
     }

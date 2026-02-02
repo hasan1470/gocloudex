@@ -38,7 +38,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   });
   const [userInfo, setUserInfo] = useState<{ name: string; email: string } | null>(null);
   const [isAtBottom, setIsAtBottom] = useState(true);
-  
+
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
@@ -46,7 +46,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   // Check if user is at the bottom of messages
   const checkIfAtBottom = useCallback(() => {
     if (!messagesContainerRef.current) return true;
-    
+
     const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current;
     const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
     return distanceFromBottom <= 100;
@@ -71,14 +71,13 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     }
 
     pollingRef.current = setInterval(async () => {
+      if (document.visibilityState !== 'visible' || !isOpen) return;
+
       if (isAuthenticated && userInfo?.email) {
-        const hasNewMessages = await loadChatHistory(true);
-        if (hasNewMessages && isAtBottom) {
-          setTimeout(smartScrollToBottom, 100);
-        }
+        await loadChatHistory(true);
       }
-    }, 3000);
-  }, [isAuthenticated, userInfo?.email, isAtBottom, smartScrollToBottom]);
+    }, 4000);
+  }, [isAuthenticated, userInfo?.email, isOpen]);
 
   // Stop polling
   useEffect(() => {
@@ -104,17 +103,17 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
   useEffect(() => {
     const checkTokenValidity = async () => {
       const token = localStorage.getItem('userToken');
-      
+
       if (token) {
         try {
           // Verify token is still valid and get user info
           const response = await fetch(`/api/chat/auth?token=${token}`);
           const result = await response.json();
-          
+
           if (result.success) {
             setUserInfo(result.data.user);
             setIsAuthenticated(true);
-            await loadChatHistory();
+            loadChatHistory();
           } else {
             // Token is invalid, clear storage
             localStorage.removeItem('userToken');
@@ -129,7 +128,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     checkTokenValidity();
   }, []);
 
-  // Load chat history with token authentication
+  // Load chat history
   const loadChatHistory = async (silent = false): Promise<boolean> => {
     const token = localStorage.getItem('userToken');
     if (!token || !userInfo?.email) return false;
@@ -140,29 +139,27 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
           'Authorization': `Bearer ${token}`
         }
       });
-      
+
       const result = await response.json();
 
       if (result.success) {
         const messagesWithIds = (result.data.messages || []).map((msg: any) => ({
           ...msg,
-          id: msg.id || msg._id || `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+          id: msg.id || msg._id || `msg-${Date.now()}`
         }));
-        
-        const currentMessageIds = new Set(messages.map(m => m.id));
-        const hasNewMessages = messagesWithIds.some((msg: ChatMessage) => !currentMessageIds.has(msg.id));
-        
-        setMessages(messagesWithIds);
-        return hasNewMessages;
-      } else {
-        if (!silent) {
-          if (response.status === 401) {
-            // Token expired
-            handleLogout();
-            toast.error('Session expired. Please login again.');
-          } else {
-            throw new Error(result.error);
+
+        setMessages(prev => {
+          if (JSON.stringify(prev) !== JSON.stringify(messagesWithIds)) {
+            return messagesWithIds;
           }
+          return prev;
+        });
+
+        return true;
+      } else {
+        if (!silent && response.status === 401) {
+          handleLogout();
+          toast.error('Session expired. Please login again.');
         }
         return false;
       }
@@ -210,19 +207,19 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
         setUserInfo(result.data.user);
         setIsAuthenticated(true);
         setIsNewUser(result.data.isNewUser);
-        
+
         // Store ONLY the token in localStorage (no user data)
         localStorage.setItem('userToken', result.data.token);
-        
+
         // Load chat history
         await loadChatHistory();
-        
+
         if (result.data.isNewUser) {
           toast.success(`Welcome! Your password: ${result.data.password} - Save it for future access.`);
         } else {
           toast.success('Welcome back!');
         }
-        
+
         if (onNewMessage) {
           onNewMessage(authData.email);
         }
@@ -246,14 +243,14 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     setLoading(true);
 
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    
+
     const tempMessage: ChatMessage = {
       id: tempId,
       message: messageToSend,
       sender: 'user',
       createdAt: new Date().toISOString()
     };
-    
+
     setMessages(prev => [...prev, tempMessage]);
     setTimeout(smartScrollToBottom, 100);
 
@@ -276,7 +273,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
       }
 
       await loadChatHistory();
-      
+
       if (onNewMessage) {
         onNewMessage(userInfo?.email || '');
       }
@@ -298,7 +295,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
     setUserInfo(null);
     setShowPassword(false);
     setIsAtBottom(true);
-    
+
     if (pollingRef.current) {
       clearInterval(pollingRef.current);
     }
@@ -345,11 +342,11 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
       {isOpen && (
         <div className="fixed inset-0 z-[100] flex items-end justify-end pb-6 pr-3 pl-3 md:pb-5 md:pr-5">
           {/* Backdrop */}
-          <div 
+          <div
             className="absolute inset-0"
             onClick={() => setIsOpen(false)}
           />
-          
+
           {/* Chat Container */}
           <div className="relative w-full max-w-sm h-[85vh] max-h-[600px] bg-bgLight rounded-2xl shadow-2xl flex flex-col z-10">
             {/* Header */}
@@ -377,8 +374,8 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                       {authMode === 'login' ? 'Welcome Back!' : 'Start Chatting'}
                     </h3>
                     <p className="text-textLight text-sm text-style">
-                      {authMode === 'login' 
-                        ? 'Enter your email and password to continue' 
+                      {authMode === 'login'
+                        ? 'Enter your email and password to continue'
                         : 'Enter your details to start new conversation'
                       }
                     </p>
@@ -388,22 +385,20 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                   <div className="flex bg-input rounded-lg p-1 mb-6">
                     <button
                       onClick={() => setAuthMode('register')}
-                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors text-style ${
-                        authMode === 'register'
-                          ? 'bg-primary text-white'
-                          : 'text-textLight hover:text-headingLight'
-                      }`}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors text-style ${authMode === 'register'
+                        ? 'bg-primary text-white'
+                        : 'text-textLight hover:text-headingLight'
+                        }`}
                     >
                       <UserPlus className="h-4 w-4 inline mr-2" />
                       New User
                     </button>
                     <button
                       onClick={() => setAuthMode('login')}
-                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors text-style ${
-                        authMode === 'login'
-                          ? 'bg-primary text-white'
-                          : 'text-textLight hover:text-headingLight'
-                      }`}
+                      className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors text-style ${authMode === 'login'
+                        ? 'bg-primary text-white'
+                        : 'text-textLight hover:text-headingLight'
+                        }`}
                     >
                       <LogIn className="h-4 w-4 inline mr-2" />
                       Returning
@@ -420,7 +415,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                           type="text"
                           value={authData.name}
                           onChange={(e) => setAuthData(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
+                          className="w-full px-3 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                           placeholder="Enter your name"
                           required
                         />
@@ -435,7 +430,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                         type="email"
                         value={authData.email}
                         onChange={(e) => setAuthData(prev => ({ ...prev, email: e.target.value }))}
-                        className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
+                        className="w-full px-3 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                         placeholder="your.email@example.com"
                         required
                       />
@@ -451,7 +446,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                             type={showPassword ? "text" : "password"}
                             value={authData.password || ''}
                             onChange={(e) => setAuthData(prev => ({ ...prev, password: e.target.value }))}
-                            className="w-full px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring pr-10 text-style"
+                            className="w-full px-3 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring pr-10 text-style"
                             placeholder="Enter your password"
                             required
                           />
@@ -494,7 +489,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                       onClick={toggleAuthMode}
                       className="text-sm text-primary hover:text-primary-dark transition-colors text-style"
                     >
-                      {authMode === 'login' 
+                      {authMode === 'login'
                         ? <span><span className="text-textLight">Don't have an account?</span> Start new chat</span>
                         : <span><span className="text-textLight">Already have an account?</span> Login with password</span>
                       }
@@ -528,7 +523,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                   </div>
 
                   {/* Messages Area */}
-                  <div 
+                  <div
                     ref={messagesContainerRef}
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto p-4 min-h-0"
@@ -552,30 +547,57 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                       </div>
                     ) : (
                       <div className="space-y-3">
-                        {messages.map((message, index) => (
-                          <div
-                            key={getMessageKey(message, index)}
-                            className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
-                          >
-                            <div
-                              className={`max-w-[80%] rounded-2xl px-4 py-2 ${
-                                message.sender === 'user'
-                                  ? 'bg-primary text-white rounded-br-none'
-                                  : 'bg-input text-headingLight rounded-bl-none'
-                              }`}
-                            >
-                              <p className="text-style break-words">{message.message}</p>
-                              <p className={`text-xs mt-1 ${
-                                message.sender === 'user' ? 'text-primary-light' : 'text-textLight'
-                              } text-style`}>
-                                {new Date(message.createdAt).toLocaleTimeString([], { 
-                                  hour: '2-digit', 
-                                  minute: '2-digit' 
-                                })}
-                              </p>
-                            </div>
-                          </div>
-                        ))}
+                        {(() => {
+                          const groups: { [key: string]: ChatMessage[] } = {};
+                          messages.forEach(msg => {
+                            const date = new Date(msg.createdAt).toDateString();
+                            if (!groups[date]) groups[date] = [];
+                            groups[date].push(msg);
+                          });
+
+                          return Object.entries(groups).map(([date, groupMessages]) => {
+                            const today = new Date().toDateString();
+                            const yesterday = new Date();
+                            yesterday.setDate(yesterday.getDate() - 1);
+                            const yesterdayDate = yesterday.toDateString();
+
+                            let dateLabel = new Date(date).toLocaleDateString([], { month: 'short', day: 'numeric' });
+                            if (date === today) dateLabel = 'Today';
+                            else if (date === yesterdayDate) dateLabel = 'Yesterday';
+
+                            return (
+                              <div key={date} className="space-y-3">
+                                <div className="flex justify-center my-4">
+                                  <span className="text-[10px] font-semibold text-textLight uppercase tracking-wider bg-input px-2 py-0.5 rounded-full border border-border/50">
+                                    {dateLabel}
+                                  </span>
+                                </div>
+                                {groupMessages.map((message, index) => (
+                                  <div
+                                    key={getMessageKey(message, index)}
+                                    className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'}`}
+                                  >
+                                    <div
+                                      className={`max-w-[80%] shadow-sm rounded-2xl px-4 py-2 ${message.sender === 'user'
+                                        ? 'bg-primary text-white rounded-br-none'
+                                        : 'bg-bgLight border border-border text-headingLight rounded-bl-none'
+                                        }`}
+                                    >
+                                      <p className="text-sm text-style break-words">{message.message}</p>
+                                      <p className={`text-[10px] mt-1 ${message.sender === 'user' ? 'text-primary-light' : 'text-textLight'
+                                        } text-style`}>
+                                        {new Date(message.createdAt).toLocaleTimeString([], {
+                                          hour: '2-digit',
+                                          minute: '2-digit'
+                                        })}
+                                      </p>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            );
+                          });
+                        })()}
                         <div ref={messagesEndRef} />
                       </div>
                     )}
@@ -583,7 +605,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
 
                   {/* Scroll to bottom button */}
                   {!isAtBottom && messages.length > 3 && (
-                    <div className="flex justify-center p-2 bg-white border-t border-border">
+                    <div className="flex justify-center p-2 bg-bgLight border-t border-border">
                       <button
                         onClick={scrollToBottom}
                         className="px-3 py-1 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors text-xs flex items-center space-x-1"
@@ -602,7 +624,7 @@ export default function ChatWidget({ onNewMessage }: ChatWidgetProps) {
                         value={newMessage}
                         onChange={(e) => setNewMessage(e.target.value)}
                         placeholder="Type your message..."
-                        className="flex-1 px-3 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
+                        className="flex-1 px-3 py-2 bg-input border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                         disabled={loading}
                       />
                       <button

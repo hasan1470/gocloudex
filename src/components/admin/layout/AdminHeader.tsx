@@ -1,6 +1,7 @@
 'use client';
 
-import { Bell, Search, User, Settings } from 'lucide-react';
+import { Bell, Search, User } from 'lucide-react';
+import ThemeSettings from '@/components/client/layout/ThemeSettings';
 
 export default function AdminHeader() {
 
@@ -32,10 +33,8 @@ export default function AdminHeader() {
             <Bell className="h-5 w-5" />
           </button>
 
-          {/* Settings */}
-          <button className="p-2 rounded-full text-textLight hover:text-hoverTextLight hover:bg-input focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
-            <Settings className="h-5 w-5" />
-          </button>
+          {/* Theme Settings */}
+          <ThemeSettings />
 
           {/* User menu */}
           <div className="flex items-center space-x-3">

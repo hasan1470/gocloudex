@@ -30,18 +30,19 @@ interface UserUnreadState {
 }
 
 const yourEmailCredentials = {
-  email: process.env.NEXT_PUBLIC_EMAIL_USERNAME || 'info@gocloudex.com',
-  password: process.env.NEXT_PUBLIC_EMAIL_PASSWORD || '6PzPXeWIOH@Dosa353sdIGo',
-  webmailUrl: process.env.NEXT_PUBLIC_EMAIL_SERVICE_URL || 'https://mail.hostinger.com',
+  email: process.env.NEXT_PUBLIC_EMAIL_USER || '',
+  password: process.env.NEXT_PUBLIC_EMAIL_PASSWORD || '',
+  webmailUrl: process.env.NEXT_PUBLIC_EMAIL_SERVICE_URL || '',
 };
 
+import { getAdminEmails, toggleEmailReadStatus } from '@/actions/emails';
+
 export default function EmailPage() {
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({});
-  const [copiedField, setCopiedField] = useState<{type: string, id: string} | null>(null);
+  const [copiedField, setCopiedField] = useState<{ type: string, id: string } | null>(null);
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const [currentPage, setCurrentPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState<'all' | 'read' | 'unread'>('all');
@@ -52,37 +53,26 @@ export default function EmailPage() {
     hasNext: false,
     hasPrev: false
   });
-  
+
   // Track original unread states
   const [originalUnreadCounts, setOriginalUnreadCounts] = useState<UserUnreadState>({});
 
-  // Fetch users from API
-  const fetchUsers = async (page: number, limit: number, search: string, status: string) => {
+  // Fetch users
+  const fetchUsers = async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: limit.toString(),
-        ...(search && { search }),
-        ...(status !== 'all' && { status })
+      const result = await getAdminEmails({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchTerm,
+        status: statusFilter
       });
 
-      const response = await fetch(`/api/admin/emails?${params}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        }
-    });
-
-      const result = await response.json();
-
-      if (result.success) {
+      if (result.success && result.data) {
         const fetchedUsers = result.data.users;
         setUsers(fetchedUsers);
         setPagination(result.data.pagination);
-        
-        // Initialize original unread counts
+
         const newOriginalCounts: UserUnreadState = {};
         fetchedUsers.forEach((user: User) => {
           newOriginalCounts[user.id] = user.emailUnreadCount;
@@ -102,7 +92,7 @@ export default function EmailPage() {
 
   // Load users when filters change
   useEffect(() => {
-    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+    fetchUsers();
   }, [currentPage, itemsPerPage, searchTerm, statusFilter]);
 
   const copyToClipboard = async (text: string, type: string, id?: string) => {
@@ -126,52 +116,36 @@ export default function EmailPage() {
       if (!user) return;
 
       const action = user.emailUnreadCount > 0 ? 'mark-read' : 'mark-unread';
-      
-      console.log('Toggling status for user:', userId, 'Action:', action, 'Current unread:', user.emailUnreadCount);
-
-      // Get the original unread count from our state
       const originalUnreadCount = originalUnreadCounts[userId];
 
-      const response = await fetch('/api/admin/emails', {
-        method: 'PATCH',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          id: userId,
-          action: action,
-          originalUnreadCount: action === 'mark-unread' ? originalUnreadCount : undefined
-        }),
-      });
+      const result = await toggleEmailReadStatus(
+        userId,
+        action,
+        action === 'mark-unread' ? originalUnreadCount : undefined
+      );
 
-      const result = await response.json();
-
-      if (result.success) {
-        // Update local state
-        setUsers(users.map(user => 
-          user.id === userId 
-            ? { 
-                ...user, 
-                emailUnreadCount: result.data.unreadCount,
-              }
+      if (result.success && result.data) {
+        setUsers(users.map(user =>
+          user.id === userId
+            ? {
+              ...user,
+              emailUnreadCount: result.data!.unreadCount,
+            }
             : user
         ));
-        
-        // Update original unread counts if we're marking as read
+
         if (action === 'mark-read') {
           setOriginalUnreadCounts(prev => ({
             ...prev,
-            [userId]: user.emailUnreadCount // Store the count before marking as read
+            [userId]: user.emailUnreadCount
           }));
         } else {
-          // When marking unread, update the original count to the new value
           setOriginalUnreadCounts(prev => ({
             ...prev,
-            [userId]: result.data.unreadCount
+            [userId]: result.data!.unreadCount
           }));
         }
-        
+
         toast.success(result.data.message);
       } else {
         throw new Error(result.error);
@@ -200,26 +174,26 @@ export default function EmailPage() {
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    
+
     // Format time in 12-hour format with AM/PM
     const time = date.toLocaleTimeString('en-US', {
       hour: 'numeric',
       minute: '2-digit',
       hour12: true
     });
-    
+
     // Format date as DD/MM/YYYY
     const formattedDate = date.toLocaleDateString('en-GB', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
     });
-    
+
     return `${time} - ${formattedDate}`;
   };
 
   const handleRefresh = () => {
-    fetchUsers(currentPage, itemsPerPage, searchTerm, statusFilter);
+    fetchUsers();
     toast.success('Refreshing messages...');
   };
 
@@ -231,7 +205,7 @@ export default function EmailPage() {
   const totalCustomers = pagination.totalUsers;
   const totalMessages = users.reduce((sum, user) => sum + user.emailCount, 0);
   const totalUnread = users.reduce((sum, user) => sum + user.emailUnreadCount, 0);
-  const activeToday = users.filter(user => 
+  const activeToday = users.filter(user =>
     new Date(user.lastEmailDate).toDateString() === new Date().toDateString()
   ).length;
 
@@ -401,7 +375,7 @@ export default function EmailPage() {
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
               <Filter className="h-4 w-4" />
               <span>Status:</span>
-              <select 
+              <select
                 value={statusFilter}
                 onChange={(e) => {
                   setStatusFilter(e.target.value as 'all' | 'read' | 'unread');
@@ -416,7 +390,7 @@ export default function EmailPage() {
             </div>
             <div className="flex items-center space-x-2 text-sm text-textLight text-style">
               <span>Show:</span>
-              <select 
+              <select
                 value={itemsPerPage}
                 onChange={(e) => {
                   setItemsPerPage(Number(e.target.value));
@@ -520,7 +494,7 @@ export default function EmailPage() {
                           )}
                         </button>
                       </div>
-                      
+
                       {/* Password */}
                       <div className="flex items-center space-x-2">
                         <span className="text-textLight text-sm text-style w-12">Pass:</span>
@@ -611,11 +585,10 @@ export default function EmailPage() {
                   <td className="px-6 py-4">
                     <button
                       onClick={() => toggleReadStatus(user.id)}
-                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors text-style ${
-                        user.emailUnreadCount > 0
-                          ? 'bg-redType/10 text-redType hover:bg-redType/20'
-                          : 'bg-greenType/10 text-greenType hover:bg-greenType/20'
-                      }`}
+                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-lg text-sm font-medium transition-colors text-style ${user.emailUnreadCount > 0
+                        ? 'bg-redType/10 text-redType hover:bg-redType/20'
+                        : 'bg-greenType/10 text-greenType hover:bg-greenType/20'
+                        }`}
                     >
                       {user.emailUnreadCount > 0 ? (
                         <>
@@ -642,7 +615,7 @@ export default function EmailPage() {
             <div className="text-sm text-textLight text-style">
               Showing {((currentPage - 1) * itemsPerPage) + 1}-{Math.min(currentPage * itemsPerPage, pagination.totalUsers)} of {pagination.totalUsers} customers
             </div>
-            
+
             <div className="flex items-center space-x-2">
               {/* Page Navigation */}
               <div className="flex items-center space-x-1">
@@ -653,7 +626,7 @@ export default function EmailPage() {
                 >
                   Previous
                 </button>
-                
+
                 {/* Page Numbers */}
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   let pageNum;
@@ -672,11 +645,10 @@ export default function EmailPage() {
                       key={pageNum}
                       onClick={() => setCurrentPage(pageNum)}
                       disabled={loading}
-                      className={`w-8 h-8 rounded-lg text-sm transition-colors text-style ${
-                        currentPage === pageNum
-                          ? 'bg-primary text-bgLight'
-                          : 'border border-border hover:bg-bgLight text-headingLight'
-                      } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      className={`w-8 h-8 rounded-lg text-sm transition-colors text-style ${currentPage === pageNum
+                        ? 'bg-primary text-bgLight'
+                        : 'border border-border hover:bg-bgLight text-headingLight'
+                        } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                       {pageNum}
                     </button>
@@ -704,8 +676,8 @@ export default function EmailPage() {
             No customers found
           </h3>
           <p className="text-textLight text-style">
-            {searchTerm || statusFilter !== 'all' 
-              ? 'Try adjusting your search terms or filters' 
+            {searchTerm || statusFilter !== 'all'
+              ? 'Try adjusting your search terms or filters'
               : 'No customer emails yet'
             }
           </p>

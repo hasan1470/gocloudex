@@ -4,43 +4,71 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* Color System - Light Theme */
-  --color-primary: rgb(59 130 246);        /* blue-500 */
-  --color-primary-dark: rgb(37 99 235);    /* blue-600 */
-  --color-secondary: rgb(107 114 128);     /* gray-500 */
-  --color-accent: rgb(139 92 246);         /* purple-500 */
-  --color-border: rgb(229 231 235);        /* gray-200 */
-  --color-input: rgb(249 250 251);         /* gray-50 */
-  --color-ring: rgb(59 130 246);           /* blue-500 */
-  
-  /* Text Colors - Light Theme */
-  --color-headingLight: rgb(17 24 39);     /* gray-900 */
-  --color-headingDark: rgb(249 250 251);   /* gray-50 */
-  --color-textLight: rgb(55 65 81);        /* gray-700 */
-  --color-textDark: rgb(156 163 175);      /* gray-400 */
-  --color-linkLight: rgb(37 99 235);       /* blue-600 */
-  --color-linkDark: rgb(96 165 250);       /* blue-400 */
-  
-  /* Hover Colors - Light Theme */
-  --color-hoverHeadingLight: rgb(37 99 235); /* blue-600 */
-  --color-hoverTextLight: rgb(17 24 39);     /* gray-900 */
-  --color-hoverLinkLight: rgb(29 78 216);    /* blue-700 */
-  --color-hoverHeadingDark: rgb(96 165 250); /* blue-400 */
-  --color-hoverTextDark: rgb(249 250 251);   /* gray-50 */
-  --color-hoverHeadingColor: rgb(37 99 235); /* blue-600 */
-  --color-hoverLinkDark: rgb(59 130 246);    /* blue-500 */
-  
-  /* Status Colors */
-  --color-greenType: rgb(34 197 94);         /* green-500 */
-  --color-redType: rgb(239 68 68);           /* red-500 */
-  
-  /* Background Colors */
-  --color-bgLight: rgb(255 255 255);         /* white */
-  --color-bgDark: rgb(17 24 39);             /* gray-900 */
+  /* Dynamic Theme Variables */
+  --primary-color: rgb(59 130 246);
+  /* Default Blue */
+  --primary-color-dark: rgb(37 99 235);
+  /* Default Blue Dark */
+  --heading-font: 'Inter', sans-serif;
+  --body-font: 'Inter', sans-serif;
 
-  /* Font Families */
-  --font-heading: 'Arial', Helvetica, sans-serif;
-  --font-body: 'Inter', sans-serif;
+  /* Color System - Light Theme */
+  --color-primary: var(--primary-color);
+  --color-secondary: rgb(107 114 128);
+  /* gray-500 */
+  --color-accent: rgb(139 92 246);
+  /* purple-500 */
+  --color-border: rgb(229 231 235);
+  /* gray-200 */
+  --color-input: rgb(249 250 251);
+  /* gray-50 */
+  --color-ring: var(--primary-color);
+
+  /* Text Colors - Light Theme */
+  --color-headingLight: rgb(17 24 39);
+  /* gray-900 */
+  --color-headingDark: rgb(249 250 251);
+  /* gray-50 */
+  --color-textLight: rgb(55 65 81);
+  /* gray-700 */
+  --color-textDark: rgb(156 163 175);
+  /* gray-400 */
+  --color-linkLight: rgb(37 99 235);
+  /* blue-600 */
+  --color-linkDark: rgb(96 165 250);
+  /* blue-400 */
+
+  /* Hover Colors - Light Theme */
+  --color-hoverHeadingLight: rgb(37 99 235);
+  /* blue-600 */
+  --color-hoverTextLight: rgb(17 24 39);
+  /* gray-900 */
+  --color-hoverLinkLight: rgb(29 78 216);
+  /* blue-700 */
+  --color-hoverHeadingDark: rgb(96 165 250);
+  /* blue-400 */
+  --color-hoverTextDark: rgb(249 250 251);
+  /* gray-50 */
+  --color-hoverHeadingColor: rgb(37 99 235);
+  /* blue-600 */
+  --color-hoverLinkDark: rgb(59 130 246);
+  /* blue-500 */
+
+  /* Status Colors */
+  --color-greenType: rgb(34 197 94);
+  /* green-500 */
+  --color-redType: rgb(239 68 68);
+  /* red-500 */
+
+  /* Background Colors */
+  --color-bgLight: rgb(255 255 255);
+  /* white */
+  --color-bgDark: rgb(17 24 39);
+  /* gray-900 */
+
+  /* Legacy Font Variables (mapped to dynamic ones) */
+  --font-heading: var(--heading-font);
+  --font-body: var(--body-font);
 }
 
 @theme inline {
@@ -48,14 +76,14 @@
   --color-foreground: var(--foreground);
 
   /* Custom Colors */
-  --color-primary: var(--color-primary);
-  --color-primary-dark: var(--color-primary-dark);
+  --color-primary: var(--primary-color);
+  --color-primary-dark: var(--primary-color-dark);
   --color-secondary: var(--color-secondary);
   --color-accent: var(--color-accent);
   --color-border: var(--color-border);
   --color-input: var(--color-input);
-  --color-ring: var(--color-ring);
-  
+  --color-ring: var(--primary-color);
+
   /* Text Colors */
   --color-headingLight: var(--color-headingLight);
   --color-headingDark: var(--color-headingDark);
@@ -63,7 +91,7 @@
   --color-textDark: var(--color-textDark);
   --color-linkLight: var(--color-linkLight);
   --color-linkDark: var(--color-linkDark);
-  
+
   /* Hover Colors */
   --color-hoverHeadingLight: var(--color-hoverHeadingLight);
   --color-hoverTextLight: var(--color-hoverTextLight);
@@ -72,51 +100,133 @@
   --color-hoverTextDark: var(--color-hoverTextDark);
   --color-hoverHeadingColor: var(--color-hoverHeadingColor);
   --color-hoverLinkDark: var(--color-hoverLinkDark);
-  
+
   /* Status Colors */
   --color-greenType: var(--color-greenType);
   --color-redType: var(--color-redType);
-  
+
   /* Background Colors */
   --color-bgLight: var(--color-bgLight);
   --color-bgDark: var(--color-bgDark);
 
   /* Font Families */
-  --font-heading: var(--font-heading);
-  --font-body: var(--font-body);
+  --font-heading: var(--heading-font);
+  --font-body: var(--body-font);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-    
-    /* Dark Theme Color Overrides */
-    --color-headingLight: rgb(249 250 251); /* gray-50 */
-    --color-textLight: rgb(209 213 219);    /* gray-300 */
-    --color-linkLight: rgb(96 165 250);     /* blue-400 */
-    --color-bgLight: rgb(17 24 39);         /* gray-900 */
-    --color-border: rgb(55 65 81);          /* gray-700 */
-    --color-input: rgb(31 41 55);           /* gray-800 */
-  }
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Dark Theme Color Overrides */
+  --color-headingLight: rgb(249 250 251);
+  /* gray-50 */
+  --color-textLight: rgb(209 213 219);
+  /* gray-300 */
+  --color-linkLight: rgb(96 165 250);
+  /* blue-400 */
+  --color-bgLight: rgb(17 24 39);
+  /* gray-900 */
+  --color-border: rgb(55 65 81);
+  /* gray-700 */
+  --color-input: rgb(31 41 55);
+  /* gray-800 */
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  font-family: var(--body-font), Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
+  overflow-x: hidden;
 }
 
 .heading-style {
-  font-family: var(--font-heading), Arial, Helvetica, sans-serif;
+  font-family: var(--heading-font), Arial, Helvetica, sans-serif;
 }
 
 .text-style {
-  font-family: var(--font-body), Arial, Helvetica, sans-serif;
+  font-family: var(--body-font), Arial, Helvetica, sans-serif;
 }
 
-a, button, [role="button"] {
+a,
+button,
+[role="button"] {
   cursor: pointer;
+  /* Remove global transforms to fix vibration issues */
+  transform: none !important;
 }
 
+/* Re-enable transform only for specific clean animations if needed, 
+   but for now disabling global hover transforms as requested */
+a:hover,
+button:hover {
+  transform: none !important;
+}
 
+/* Page Loader Animations */
+@keyframes progress-indefinite {
+  0% {
+    transform: translateX(-100%);
+    width: 30%;
+  }
+
+  50% {
+    width: 100%;
+  }
+
+  100% {
+    transform: translateX(400%);
+    width: 30%;
+  }
+}
+
+@keyframes shine {
+  0% {
+    transform: translateX(-200%) skewX(-20deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-20deg);
+  }
+}
+
+@keyframes pulse-slow {
+
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.8;
+    transform: scale(0.98);
+  }
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(45deg);
+  }
+
+  to {
+    transform: rotate(405deg);
+  }
+}
+
+.animate-progress-indefinite {
+  animation: progress-indefinite 2s infinite ease-in-out;
+}
+
+.animate-shine {
+  animation: shine 3s infinite linear;
+}
+
+.animate-pulse-slow {
+  animation: pulse-slow 3s infinite ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 1.5s infinite linear;
+}

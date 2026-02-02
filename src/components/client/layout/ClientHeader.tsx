@@ -1,24 +1,29 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { 
-  Cloud, 
-  Menu, 
-  X, 
+import {
+  Cloud,
+  Menu,
+  X,
   ChevronDown,
-  User,
   Mail,
-  Sparkles
+  Sparkles,
 } from 'lucide-react';
 import { mainNavigation, NavigationItem } from '@/data/navigation';
 import MegaMenu from './MegaMenu';
+import ThemeSettings from './ThemeSettings';
 
 export default function ClientHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMegaMenu, setActiveMegaMenu] = useState<string | null>(null);
+  const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleMegaMenuToggle = (menuName: string) => {
     setActiveMegaMenu(activeMegaMenu === menuName ? null : menuName);
@@ -41,16 +46,16 @@ export default function ClientHeader() {
           <div className="flex w-full items-center justify-between py-4">
             {/* Logo */}
             <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-3 group">
-              <div className="relative">
-                <Cloud className="h-10 w-10 text-primary group-hover:text-primary-dark transition-colors" />
-                <Sparkles className="h-4 w-4 text-accent absolute -top-1 -right-1" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-primary heading-style">GoCloudEx</span>
-                <span className="text-sm text-textLight -mt-1 text-style">Cloud Solutions</span>
-              </div>
-            </Link>
+              <Link href="/" className="flex items-center space-x-3 group">
+                <div className="relative">
+                  <Cloud className="h-10 w-10 text-primary group-hover:text-primary-dark transition-colors" />
+                  <Sparkles className="h-4 w-4 text-accent absolute -top-1 -right-1" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-2xl font-bold text-primary heading-style">GoCloudEx</span>
+                  <span className="text-sm text-textLight -mt-1 text-style">Cloud Solutions</span>
+                </div>
+              </Link>
             </div>
 
             {/* Desktop Navigation */}
@@ -59,31 +64,29 @@ export default function ClientHeader() {
                 const isActive = pathname === item.href;
                 const hasMegaMenu = item.hasMegaMenu;
                 const isMegaMenuOpen = activeMegaMenu === item.name;
-                
+
                 return (
                   <div key={item.name} className="relative">
                     {hasMegaMenu ? (
                       <button
+                        data-megamenu-trigger
                         onClick={() => handleMegaMenuToggle(item.name)}
-                        className={`flex items-center space-x-1 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-style ${
-                          isActive || isMegaMenuOpen
-                            ? 'text-primary bg-primary/10 border border-primary/20' 
-                            : 'text-textLight hover:text-hoverHeadingLight hover:bg-input'
-                        }`}
+                        className={`flex items-center space-x-1 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-style ${isActive || isMegaMenuOpen
+                          ? 'text-primary bg-primary/10 border border-primary/20'
+                          : 'text-textLight hover:text-primary hover:bg-input border border-transparent'
+                          }`}
                       >
                         <span>{item.name}</span>
-                        <ChevronDown className={`h-4 w-4 transition-transform ${
-                          isMegaMenuOpen ? 'rotate-180' : ''
-                        }`} />
+                        <ChevronDown className={`h-4 w-4 transition-transform ${isMegaMenuOpen ? 'rotate-180' : ''
+                          }`} />
                       </button>
                     ) : (
                       <Link
                         href={item.href}
-                        className={`flex items-center space-x-1 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-style ${
-                          isActive 
-                            ? 'text-primary bg-primary/10 border border-primary/20' 
-                            : 'text-textLight hover:text-hoverHeadingLight hover:bg-input'
-                        }`}
+                        className={`flex items-center space-x-1 text-sm font-medium transition-all duration-200 px-3 py-2 rounded-lg text-style ${isActive
+                          ? 'text-primary bg-primary/10 border border-primary/20'
+                          : 'text-textLight hover:text-primary hover:bg-input border border-transparent'
+                          }`}
                       >
                         <span>{item.name}</span>
                       </Link>
@@ -93,8 +96,9 @@ export default function ClientHeader() {
               })}
             </div>
 
-            {/* Admin Login Button */}
-            <div className="hidden lg:flex">
+            {/* Admin Login Button & Theme Settings */}
+            <div className="hidden lg:flex items-center space-x-4">
+              <ThemeSettings />
 
               <Link
                 href="/contact"
@@ -106,7 +110,11 @@ export default function ClientHeader() {
             </div>
 
             {/* Mobile menu button */}
-            <div className="flex lg:hidden">
+            <div className="flex lg:hidden items-center space-x-4">
+              <div className="md:hidden">
+                <ThemeSettings />
+              </div>
+
               <button
                 type="button"
                 className="inline-flex items-center justify-center rounded-lg p-2 text-white hover:bg-primary-dark hover:text-white transition-colors bg-primary"
@@ -128,30 +136,35 @@ export default function ClientHeader() {
               <div className="flex flex-col space-y-2">
                 {mainNavigation.map((item: NavigationItem) => {
                   const isActive = pathname === item.href;
-                  
+
                   return (
                     <Link
                       key={item.name}
                       href={item.href}
-                      className={`flex items-center space-x-3 px-4 py-3 text-base font-medium rounded-lg transition-all text-style ${
-                        isActive
-                          ? 'text-primary bg-primary/10 border border-primary/20'
-                          : 'text-textLight hover:text-hoverHeadingLight hover:bg-input'
-                      }`}
+                      className={`flex items-center space-x-3 px-4 py-3 text-base font-medium rounded-lg transition-all text-style ${isActive
+                        ? 'text-primary bg-primary/10 border border-primary/20'
+                        : 'text-textLight hover:text-primary hover:bg-input border border-transparent'
+                        }`}
                       onClick={() => setMobileMenuOpen(false)}
                     >
                       <span>{item.name}</span>
                     </Link>
                   );
                 })}
-                <Link
-                  href="/contact"
-                  className="flex items-center space-x-3 px-4 py-3 text-base font-medium text-textLight hover:text-hoverHeadingLight hover:bg-input rounded-lg transition-colors mt-4 border-t border-border pt-4 text-style"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  <Mail className="h-5 w-5" />
-                  <span>Contact Us</span>
-                </Link>
+                <div className="flex flex-col gap-2 mt-4 pt-4 border-t border-border">
+                  <div className="flex justify-between items-center px-4 md:hidden">
+                    <span className="text-textLight text-sm">Theme & Settings</span>
+                    <ThemeSettings />
+                  </div>
+                  <Link
+                    href="/contact"
+                    className="flex items-center space-x-3 px-4 py-3 text-base font-medium text-textLight hover:text-hoverHeadingLight hover:bg-input rounded-lg transition-colors text-style"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <Mail className="h-5 w-5" />
+                    <span>Contact Us</span>
+                  </Link>
+                </div>
               </div>
             </div>
           )}
@@ -159,8 +172,8 @@ export default function ClientHeader() {
       </header>
 
       {/* Generic Mega Menu */}
-      <MegaMenu 
-        isOpen={!!activeMegaMenu} 
+      <MegaMenu
+        isOpen={!!activeMegaMenu}
         onClose={handleMegaMenuClose}
         menuData={getActiveMegaMenuData()}
       />

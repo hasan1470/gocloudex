@@ -10,16 +10,39 @@ export function generatePassword(): string {
   return password;
 }
 
-// Create email transporter for Hostinger
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.hostinger.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: false,
-  auth: {
-    user: process.env.EMAIL_USER || 'info@gocloudex.com',
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
+// Create email transporter dynamically based on service type
+const serviceType = (process.env.EMAIL_SERVICE_TYPE || 'hostinger').toLowerCase();
+
+console.log(`Email Service Initializing: ${serviceType} (User: ${process.env.EMAIL_USER})`);
+
+const createTransporter = () => {
+  if (serviceType === 'gmail') {
+    return nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER?.trim(),
+        pass: process.env.EMAIL_PASSWORD?.trim(),
+      },
+    });
+  }
+
+  // Default to Hostinger/Custom SMTP
+  return nodemailer.createTransport({
+    host: process.env.EMAIL_HOST || 'smtp.hostinger.com',
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_PORT === '465',
+    auth: {
+      user: process.env.EMAIL_USER?.trim(),
+      pass: process.env.EMAIL_PASSWORD?.trim(),
+    },
+    // Add some common defaults for reliability
+    tls: {
+      rejectUnauthorized: false // Helps with some shared hosting certificates
+    }
+  });
+};
+
+const transporter = createTransporter();
 
 // Send email to admin (with reply-to set to customer email)
 export async function sendEmailToAdmin(userData: {
@@ -33,14 +56,15 @@ export async function sendEmailToAdmin(userData: {
 }) {
   try {
     const sourceText = userData.source === 'chat' ? 'Chat System' : 'Contact Form';
-    
+    const adminEmail = process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"GoCloudEx ${sourceText}: ${userData.email}" <${process.env.EMAIL_USER || 'info@gocloudex.com'}>`,
-      to: 'info@gocloudex.com',
+      from: `"GoCloudEx ${sourceText}: ${userData.email}" <${adminEmail}>`,
+      to: adminEmail,
       replyTo: userData.email,
       subject: `${userData.isNewCustomer ? 'New Customer' : 'Existing Customer'}: ${userData.subject}`,
       html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
           <h2 style="color: #3b82f6;">
             ${userData.isNewCustomer ? 'New Customer' : 'Existing Customer'} - ${userData.subject}
           </h2>
@@ -70,8 +94,9 @@ export async function sendEmailToAdmin(userData: {
 
     await transporter.sendMail(mailOptions);
     console.log(`Email sent to admin successfully - ${userData.isNewCustomer ? 'New' : 'Existing'} customer from ${sourceText}`);
-  } catch (error) {
-    console.error('Failed to send email to admin:', error);
+  } catch (error: any) {
+    console.error('Failed to send email to admin:', error.message);
+    if (error.code) console.error('Error Code:', error.code);
     throw error;
   }
 }
@@ -85,15 +110,16 @@ export async function sendWelcomeEmail(userData: {
   isReminder?: boolean;
 }) {
   try {
-    const sourceText = userData.source === 'chat' ? 'chat system' : 
-                      userData.source === 'admin' ? 'admin system' : 'contact form';
-    
+    const sourceText = userData.source === 'chat' ? 'chat system' :
+      userData.source === 'admin' ? 'admin system' : 'contact form';
+    const adminEmail = process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"GoCloudEx" <${process.env.EMAIL_USER || 'info@gocloudex.com'}>`,
+      from: `"GoCloudEx" <${adminEmail}>`,
       to: userData.email,
-      replyTo: 'info@gocloudex.com',
-      subject: userData.isReminder 
-        ? 'Your GoCloudEx Account Password' 
+      replyTo: adminEmail,
+      subject: userData.isReminder
+        ? 'Your GoCloudEx Account Password'
         : 'Welcome to GoCloudEx - Your Account Details',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -146,8 +172,9 @@ export async function sendWelcomeEmail(userData: {
 
     await transporter.sendMail(mailOptions);
     console.log(`${userData.isReminder ? 'Password reminder' : 'Welcome'} email sent to ${userData.source} user successfully`);
-  } catch (error) {
-    console.error(`Failed to send ${userData.isReminder ? 'password reminder' : 'welcome'} email:`, error);
+  } catch (error: any) {
+    console.error(`Failed to send ${userData.isReminder ? 'password reminder' : 'welcome'} email:`, error.message);
+    if (error.code) console.error('Error Code:', error.code);
     throw error;
   }
 }
@@ -160,10 +187,12 @@ export async function sendUpdateEmail(userData: {
   previousEmail?: string;
 }) {
   try {
+    const adminEmail = process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"GoCloudEx" <${process.env.EMAIL_USER || 'info@gocloudex.com'}>`,
+      from: `"GoCloudEx" <${adminEmail}>`,
       to: userData.email,
-      replyTo: 'info@gocloudex.com',
+      replyTo: adminEmail,
       subject: 'Your GoCloudEx Account Has Been Updated',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -223,10 +252,12 @@ export async function sendFollowUpEmail(userData: {
   subject: string;
 }) {
   try {
+    const adminEmail = process.env.EMAIL_USER;
+
     const mailOptions = {
-      from: `"GoCloudEx" <${process.env.EMAIL_USER || 'info@gocloudex.com'}>`,
+      from: `"GoCloudEx" <${adminEmail}>`,
       to: userData.email,
-      replyTo: 'info@gocloudex.com',
+      replyTo: adminEmail,
       subject: 'We\'ve received your message',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -298,7 +329,7 @@ export async function handleCustomerEmail(userData: {
         password: userData.existingPassword,
         source: userData.source || 'contact'
       });
-      
+
       return {
         success: true,
         message: 'Welcome email sent with credentials',
@@ -315,7 +346,7 @@ export async function handleCustomerEmail(userData: {
         });
       }
       // For existing chat users, no separate email needed as they see messages in chat
-      
+
       return {
         success: true,
         message: userData.source === 'contact' ? 'Follow-up email sent' : 'Message processed',
@@ -336,8 +367,9 @@ export async function testEmailConnection() {
     await transporter.verify();
     console.log('Email server connection verified');
     return true;
-  } catch (error) {
-    console.error('Email server connection failed:', error);
+  } catch (error: any) {
+    console.error('Email server connection failed:', error.message);
+    if (error.code) console.error('Error Code:', error.code);
     return false;
   }
 }
