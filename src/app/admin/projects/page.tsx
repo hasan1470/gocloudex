@@ -173,7 +173,7 @@ export default function ProjectsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">Projects</h1>
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">Projects</h1>
           <p className="mt-2 text-textLight text-style">Manage your portfolio projects</p>
         </div>
         <Link

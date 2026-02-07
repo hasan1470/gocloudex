@@ -169,7 +169,7 @@ export default function AdminUsersPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">User Management</h1>
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">User Management</h1>
           <p className="text-textLight text-style mt-2">Manage all users and their communication history</p>
         </div>
         <div className="flex items-center space-x-3">
@@ -200,7 +200,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Users</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">{totalCustomers}</p>
+              <p className="text-xl font-semibold text-headingLight heading-style">{totalCustomers}</p>
             </div>
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
               <Users className="h-5 w-5 text-primary" />
@@ -212,7 +212,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Emails</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {totalEmails}
               </p>
               <p className="text-xs text-textLight text-style">
@@ -229,7 +229,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Chats</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {totalChats}
               </p>
               <p className="text-xs text-textLight text-style">
@@ -246,7 +246,7 @@ export default function AdminUsersPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Active Today</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {users.filter(user =>
                   new Date(user.lastEmailDate || user.lastChatDate || user.createdAt).toDateString() ===
                   new Date().toDateString()

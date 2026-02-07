@@ -63,7 +63,7 @@ export default function EditProjectPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">
             Edit Project
           </h1>
           <p className="mt-2 text-textLight text-style">
@@ -81,7 +81,7 @@ export default function EditProjectPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">
             Error
           </h1>
           <p className="mt-2 text-textLight text-style">
@@ -104,7 +104,7 @@ export default function EditProjectPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">
             Project Not Found
           </h1>
           <p className="mt-2 text-textLight text-style">
@@ -127,7 +127,7 @@ export default function EditProjectPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-headingLight heading-style">
+        <h1 className="text-2xl font-semibold text-headingLight heading-style">
           Edit Project
         </h1>
         <p className="mt-2 text-textLight text-style">

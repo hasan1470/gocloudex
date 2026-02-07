@@ -167,7 +167,7 @@ export default function SEOServicePage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-500/10 via-green-500/5 to-purple-500/10 py-24">
+      <section className="relative bg-gradient-to-br from-blue-500/10 via-green-500/5 to-purple-500/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -176,13 +176,13 @@ export default function SEOServicePage() {
                 <Star className="h-4 w-4" />
                 <span>Proven Results</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
                 <span className="block bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">
                   SEO Services
                 </span>
                 <span className="block text-headingLight mt-2">That Drive Growth</span>
               </h1>
-              <p className="mt-6 text-xl text-textLight leading-relaxed text-style">
+              <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed text-style">
                 Get found by customers actively searching for your products or services. 
                 Our data-driven SEO strategies deliver sustainable organic growth and 
                 measurable business results.
@@ -286,7 +286,7 @@ export default function SEOServicePage() {
       <section className="py-16 bg-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Proven SEO Results
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -296,7 +296,7 @@ export default function SEOServicePage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {results.map((result, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl font-bold text-headingLight heading-style">{result.metric}</div>
+                <div className="text-2xl font-semibold text-headingLight heading-style">{result.metric}</div>
                 <div className="text-textLight mt-2 text-style">{result.description}</div>
               </div>
             ))}
@@ -308,7 +308,7 @@ export default function SEOServicePage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Comprehensive SEO Services
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -326,7 +326,7 @@ export default function SEOServicePage() {
                   <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-white to-gray-50 group-hover:scale-110 transition-transform duration-300 ${feature.color}`}>
                     <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">
+                  <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-textLight leading-relaxed text-style">
@@ -343,7 +343,7 @@ export default function SEOServicePage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our SEO Process
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -391,7 +391,7 @@ export default function SEOServicePage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Professional SEO Tools
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -416,10 +416,10 @@ export default function SEOServicePage() {
       {/* <section id="pricing" className="py-24 bg-bgDark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               SEO Service Packages
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               Choose the plan that matches your business goals and budget
             </p>
           </div>
@@ -441,7 +441,7 @@ export default function SEOServicePage() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">{plan.name}</h3>
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">{plan.name}</h3>
                   <div className="mt-4 flex items-baseline justify-center">
                     <span className="text-4xl font-bold text-headingLight heading-style">{plan.price}</span>
                     <span className="text-textLight text-style ml-2">{plan.period}</span>
@@ -485,10 +485,10 @@ export default function SEOServicePage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 to-green-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl heading-style">
             Ready to Dominate Search Results?
           </h2>
-          <p className="mt-4 text-xl text-blue-100 max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-blue-100 max-w-2xl mx-auto text-style">
             Let's develop an SEO strategy that drives sustainable organic growth for your business.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

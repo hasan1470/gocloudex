@@ -103,7 +103,7 @@ export default function ThemeSettings() {
                             }`}
                     >
                         <div className="flex items-center justify-between mb-8">
-                            <h2 className="text-xl font-bold text-headingLight heading-style">Theme Settings</h2>
+                            <h2 className="text-lg font-semibold text-headingLight heading-style">Theme Settings</h2>
                             <button
                                 onClick={() => setIsOpen(false)}
                                 className="p-1 hover:bg-input rounded-full text-textLight"

@@ -226,7 +226,7 @@ export default async function ProjectDetailPage({ params }: Props) {
         <section className="py-16 bg-gradient-to-br from-primary/5 to-accent/5">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-3xl font-bold text-headingLight heading-style">Related Projects</h2>
+              <h2 className="text-2xl font-semibold text-headingLight heading-style">Related Projects</h2>
               <Link
                 href="/portfolio"
                 className="text-primary hover:text-hoverLinkLight text-style"
@@ -304,7 +304,7 @@ export default async function ProjectDetailPage({ params }: Props) {
           <h2 className="text-3xl font-bold text-headingDark sm:text-4xl heading-style">
             Like What You See?
           </h2>
-          <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
             Let&apos;s work together to bring your next project to life with the same level of quality and attention to detail.
           </p>
           <div className="mt-8">

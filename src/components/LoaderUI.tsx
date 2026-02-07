@@ -23,7 +23,10 @@ export default function LoaderUI() {
                 {/* Premium Geometric Spinner */}
                 <div className="relative w-20 h-20">
                     <div className="absolute inset-0 border-4 border-primary/5 rounded-2xl rotate-45"></div>
-                    <div className="absolute inset-0 border-4 border-t-primary rounded-2xl rotate-45 animate-spin-slow"></div>
+                    <div
+                        className="absolute inset-0 border-4 rounded-2xl rotate-45 animate-spin-slow"
+                        style={{ borderColor: 'white', borderTopColor: 'var(--primary-color)' }}
+                    ></div>
                     <div className="absolute inset-4 border-2 border-primary/20 rounded-full animate-pulse"></div>
                 </div>
 

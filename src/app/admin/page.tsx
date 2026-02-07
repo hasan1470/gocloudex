@@ -231,7 +231,7 @@ export default function AdminDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">Dashboard</h1>
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">Dashboard</h1>
           <p className="mt-2 text-textLight text-style">Welcome to your admin dashboard</p>
         </div>
         <button
@@ -263,7 +263,7 @@ export default function AdminDashboard() {
                     <p className="text-sm font-medium text-textLight truncate text-style">
                       {stat.name}
                     </p>
-                    <p className="text-2xl font-bold text-headingLight heading-style mt-1">
+                    <p className="text-xl font-semibold text-headingLight heading-style mt-1">
                       {loading ? '...' : stat.value}
                     </p>
                     <p className="text-xs text-textLight mt-1 text-style">

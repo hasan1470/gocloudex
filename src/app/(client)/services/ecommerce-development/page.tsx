@@ -168,7 +168,7 @@ export default function EcommerceDevelopmentPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-green-500/10 via-blue-500/5 to-orange-500/10 py-24">
+      <section className="relative bg-gradient-to-br from-green-500/10 via-blue-500/5 to-orange-500/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -177,13 +177,13 @@ export default function EcommerceDevelopmentPage() {
                 <Star className="h-4 w-4" />
                 <span>High-Converting Stores</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
                 <span className="block bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
                   E-commerce
                 </span>
                 <span className="block text-headingLight mt-2">Development</span>
               </h1>
-              <p className="mt-6 text-xl text-textLight leading-relaxed text-style">
+              <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed text-style">
                 Build powerful online stores that drive sales and grow your business. 
                 From custom marketplaces to Shopify stores, we create e-commerce solutions 
                 that convert visitors into loyal customers.
@@ -299,19 +299,19 @@ export default function EcommerceDevelopmentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">45%</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">45%</div>
               <div className="text-textLight mt-2 text-style">Average Sales Increase</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">2.1x</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">2.1x</div>
               <div className="text-textLight mt-2 text-style">Faster Load Times</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">99.9%</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">99.9%</div>
               <div className="text-textLight mt-2 text-style">Uptime Guarantee</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">24/7</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">24/7</div>
               <div className="text-textLight mt-2 text-style">E-commerce Support</div>
             </div>
           </div>
@@ -322,7 +322,7 @@ export default function EcommerceDevelopmentPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Complete E-commerce Solutions
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -340,7 +340,7 @@ export default function EcommerceDevelopmentPage() {
                   <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-white to-gray-50 group-hover:scale-110 transition-transform duration-300 ${feature.color}`}>
                     <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">
+                  <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-textLight leading-relaxed text-style">
@@ -357,7 +357,7 @@ export default function EcommerceDevelopmentPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Choose Your Platform
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -370,7 +370,7 @@ export default function EcommerceDevelopmentPage() {
                 key={index}
                 className="bg-bgLight border border-border rounded-2xl p-8 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <h3 className="text-2xl font-bold text-headingLight mb-4 heading-style">
+                <h3 className="text-xl font-semibold text-headingLight mb-4 heading-style">
                   {platform.name}
                 </h3>
                 <p className="text-textLight mb-6 text-style">
@@ -399,7 +399,7 @@ export default function EcommerceDevelopmentPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our E-commerce Development Process
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -431,7 +431,7 @@ export default function EcommerceDevelopmentPage() {
               })}
             </div>
             <div className="bg-bgLight border border-border rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-headingLight mb-6 heading-style">What You Get</h3>
+              <h3 className="text-xl font-semibold text-headingLight mb-6 heading-style">What You Get</h3>
               <div className="space-y-4">
                 {[
                   'Fully functional online store',
@@ -459,7 +459,7 @@ export default function EcommerceDevelopmentPage() {
       <section className="py-24 bg-gradient-to-br from-green-500/5 to-blue-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Seamless Integrations
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -484,10 +484,10 @@ export default function EcommerceDevelopmentPage() {
       {/* <section className="py-24 bg-bgDark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               E-commerce Development Packages
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               All-inclusive packages to get your online store up and running.
             </p>
           </div>
@@ -509,7 +509,7 @@ export default function EcommerceDevelopmentPage() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">{plan.name}</h3>
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">{plan.name}</h3>
                   <div className="mt-4">
                     <span className="text-4xl font-bold text-headingLight heading-style">{plan.price}</span>
                     <span className="text-textLight text-style"> one-time</span>
@@ -553,10 +553,10 @@ export default function EcommerceDevelopmentPage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-green-600 to-blue-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl heading-style">
             Ready to Launch Your Online Store?
           </h2>
-          <p className="mt-4 text-xl text-green-100 max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-green-100 max-w-2xl mx-auto text-style">
             Let's build an e-commerce platform that drives sales and grows your business.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

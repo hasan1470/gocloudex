@@ -180,15 +180,15 @@ export default function PortfolioClient({ initialProjects, initialCategories }: 
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-24">
+      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
             <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               Our Portfolio
             </span>
           </h1>
-          <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
+          <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed max-w-3xl mx-auto text-style">
             Explore our latest projects and see how we&apos;ve helped businesses
             transform their ideas into successful digital solutions.
           </p>
@@ -512,10 +512,10 @@ export default function PortfolioClient({ initialProjects, initialCategories }: 
       {/* CTA Section */}
       <section className="py-24 bg-bgDark">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
             Have a Project in Mind?
           </h2>
-          <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
             Let&apos;s discuss how we can bring your ideas to life with our expertise and creativity.
           </p>
           <div className="mt-12">

@@ -308,7 +308,7 @@ export default function EmailPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Customers</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">{totalCustomers}</p>
+              <p className="text-xl font-semibold text-headingLight heading-style">{totalCustomers}</p>
             </div>
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
               <User className="h-5 w-5 text-primary" />
@@ -319,7 +319,7 @@ export default function EmailPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Total Emails</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {totalMessages}
               </p>
             </div>
@@ -332,7 +332,7 @@ export default function EmailPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Unread Emails</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {totalUnread}
               </p>
             </div>
@@ -345,7 +345,7 @@ export default function EmailPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-textLight text-sm text-style">Active Today</p>
-              <p className="text-2xl font-bold text-headingLight heading-style">
+              <p className="text-xl font-semibold text-headingLight heading-style">
                 {activeToday}
               </p>
             </div>

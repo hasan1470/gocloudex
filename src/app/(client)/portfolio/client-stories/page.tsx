@@ -142,20 +142,20 @@ export default function ClientStoriesPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-greenType/10 py-24">
+      <section className="relative bg-gradient-to-br from-primary/10 via-accent/5 to-greenType/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium mb-6 text-style">
             <Star className="h-4 w-4" />
             <span>Success Stories</span>
           </div>
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
             <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               Client Stories
             </span>
             <span className="block text-headingLight mt-2">That Inspire</span>
           </h1>
-          <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
+          <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed max-w-3xl mx-auto text-style">
             Discover how businesses across industries have transformed their operations, 
             accelerated growth, and achieved remarkable results with our custom solutions.
           </p>
@@ -177,7 +177,7 @@ export default function ClientStoriesPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             {metrics.map((metric, index) => (
               <div key={index}>
-                <div className="text-3xl font-bold text-headingLight heading-style">{metric.number}</div>
+                <div className="text-2xl font-semibold text-headingLight heading-style">{metric.number}</div>
                 <div className="text-textLight mt-2 text-style">{metric.label}</div>
               </div>
             ))}
@@ -189,7 +189,7 @@ export default function ClientStoriesPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Featured Success Stories
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -207,7 +207,7 @@ export default function ClientStoriesPage() {
                       <div className="text-textLight text-xs text-center">Client Logo</div>
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-headingLight heading-style">{story.client}</h3>
+                      <h3 className="text-xl font-semibold text-headingLight heading-style">{story.client}</h3>
                       <p className="text-textLight text-style">{story.industry}</p>
                     </div>
                   </div>
@@ -231,7 +231,7 @@ export default function ClientStoriesPage() {
                   <div className="grid grid-cols-2 gap-4 mb-8">
                     {Object.entries(story.results).map(([key, value]) => (
                       <div key={key} className="text-center p-4 bg-input rounded-lg">
-                        <div className="text-xl font-bold text-headingLight heading-style">{value}</div>
+                        <div className="text-lg font-semibold text-headingLight heading-style">{value}</div>
                         <div className="text-xs text-textLight capitalize mt-1 text-style">
                           {key.replace(/([A-Z])/g, ' $1').trim()}
                         </div>
@@ -286,7 +286,7 @@ export default function ClientStoriesPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               More Success Stories
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -352,7 +352,7 @@ export default function ClientStoriesPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Industries We Serve
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -381,10 +381,10 @@ export default function ClientStoriesPage() {
             <Star className="h-4 w-4" />
             <span>Your Success Story Awaits</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
             Ready to Write Your Success Story?
           </h2>
-          <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
             Join our growing list of successful clients and let us help you achieve remarkable results.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

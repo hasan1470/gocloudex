@@ -205,7 +205,7 @@ export default function AwardsPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-yellow-500/10 via-purple-500/10 to-blue-500/10 py-24 overflow-hidden">
+      <section className="relative bg-gradient-to-br from-yellow-500/10 via-purple-500/10 to-blue-500/10 py-16 sm:py-20 overflow-hidden">
         {/* Animated Background Elements */}
         <div className="absolute inset-0">
           <div className="absolute top-10 left-10 w-20 h-20 bg-yellow-400/10 rounded-full blur-xl"></div>
@@ -220,7 +220,7 @@ export default function AwardsPage() {
             <span>Award-Winning Excellence</span>
           </div>
 
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight heading-style">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold tracking-tight heading-style">
             <span className="block bg-gradient-to-r from-yellow-600 via-purple-600 to-blue-600 bg-clip-text text-transparent">
               Award-Winning
             </span>
@@ -268,7 +268,7 @@ export default function AwardsPage() {
                     </div>
                   </div>
                   <div className="mt-6">
-                    <div className="text-3xl font-bold text-headingLight heading-style">{achievement.number}</div>
+                    <div className="text-2xl font-semibold text-headingLight heading-style">{achievement.number}</div>
                     <div className="text-lg font-semibold text-headingLight mt-2 heading-style">{achievement.label}</div>
                     <div className="text-textLight mt-2 text-style">{achievement.description}</div>
                   </div>
@@ -283,10 +283,10 @@ export default function AwardsPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+            <h2 className="text-3xl font-semibold tracking-tight text-headingLight sm:text-4xl heading-style">
               Our Awards & Recognition
             </h2>
-            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+            <p className="mt-5 text-base sm:text-lg text-textLight max-w-3xl mx-auto text-style">
               Celebrating excellence and innovation across multiple industries and disciplines
             </p>
           </div>
@@ -341,7 +341,7 @@ export default function AwardsPage() {
                                 <Icon className="h-8 w-8 text-white" />
                               </div>
                               <div className="flex-1">
-                                <h3 className="text-2xl font-bold text-headingLight heading-style">
+                                <h3 className="text-xl font-semibold text-headingLight heading-style">
                                   {award.title}
                                 </h3>
                                 <div className="flex items-center space-x-2 mt-2">
@@ -381,10 +381,10 @@ export default function AwardsPage() {
       <section className="py-24 bg-gradient-to-br from-gray-50 to-white border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+            <h2 className="text-3xl font-semibold tracking-tight text-headingLight sm:text-4xl heading-style">
               Industry Recognition
             </h2>
-            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+            <p className="mt-5 text-base sm:text-lg text-textLight max-w-3xl mx-auto text-style">
               Recognized by leading industry platforms and review sites
             </p>
           </div>
@@ -398,7 +398,7 @@ export default function AwardsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-yellow-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6">
                   <Trophy className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-headingLight mb-2 heading-style">
+                <h3 className="text-lg font-semibold text-headingLight mb-2 heading-style">
                   {item.organization}
                 </h3>
                 <div className="flex items-center justify-center mb-4">
@@ -420,10 +420,10 @@ export default function AwardsPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+            <h2 className="text-3xl font-semibold tracking-tight text-headingLight sm:text-4xl heading-style">
               Client Success Stories
             </h2>
-            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+            <p className="mt-5 text-base sm:text-lg text-textLight max-w-3xl mx-auto text-style">
               Hear from our satisfied clients about their award-winning experiences
             </p>
           </div>
@@ -476,10 +476,10 @@ export default function AwardsPage() {
       <section className="py-24 bg-gradient-to-br from-gray-50 to-white border-y border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+            <h2 className="text-3xl font-semibold tracking-tight text-headingLight sm:text-4xl heading-style">
               Featured in Press
             </h2>
-            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+            <p className="mt-5 text-base sm:text-lg text-textLight max-w-3xl mx-auto text-style">
               Recognized by leading publications for innovation and excellence
             </p>
           </div>
@@ -505,7 +505,7 @@ export default function AwardsPage() {
                     </div>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold text-headingLight mb-4 heading-style">
+                <h3 className="text-lg font-semibold text-headingLight mb-4 heading-style">
                   {feature.title}
                 </h3>
                 <p className="text-textLight leading-relaxed text-style">
@@ -533,7 +533,7 @@ export default function AwardsPage() {
             <span>Award-Winning Partnership</span>
           </div>
 
-          <h2 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight text-white heading-style">
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight text-white heading-style">
             Ready to Start Your
             <span className="block bg-gradient-to-r from-yellow-300 to-white bg-clip-text text-transparent">
               Award-Winning Project?

@@ -139,7 +139,7 @@ export default function WebsiteDesignPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-purple-500/10 via-blue-500/5 to-pink-500/10 py-24">
+      <section className="relative bg-gradient-to-br from-purple-500/10 via-blue-500/5 to-pink-500/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -148,13 +148,13 @@ export default function WebsiteDesignPage() {
                 <Star className="h-4 w-4" />
                 <span>Most Popular Service</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
                 <span className="block bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
                   Website Design
                 </span>
                 <span className="block text-headingLight mt-2">That Converts Visitors</span>
               </h1>
-              <p className="mt-6 text-xl text-textLight leading-relaxed text-style">
+              <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed text-style">
                 We create stunning, responsive websites that not only look amazing but also 
                 drive results. From small business sites to complex web applications, we build 
                 digital experiences that engage your audience and grow your business.
@@ -283,19 +283,19 @@ export default function WebsiteDesignPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">50+</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">50+</div>
               <div className="text-textLight mt-2 text-style">Websites Designed</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">98%</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">98%</div>
               <div className="text-textLight mt-2 text-style">Client Satisfaction</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">24/7</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">24/7</div>
               <div className="text-textLight mt-2 text-style">Support Available</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">2-4</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">2-4</div>
               <div className="text-textLight mt-2 text-style">Weeks Delivery</div>
             </div>
           </div>
@@ -306,7 +306,7 @@ export default function WebsiteDesignPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Why Our Website Design Stands Out
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -325,7 +325,7 @@ export default function WebsiteDesignPage() {
                   <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-white to-gray-50 group-hover:scale-110 transition-transform duration-300 ${feature.color}`}>
                     <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">
+                  <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-textLight leading-relaxed text-style">
@@ -342,7 +342,7 @@ export default function WebsiteDesignPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Design Process
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -374,7 +374,7 @@ export default function WebsiteDesignPage() {
               })}
             </div>
             <div className="bg-bgLight border border-border rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-headingLight mb-6 heading-style">What You Get</h3>
+              <h3 className="text-xl font-semibold text-headingLight mb-6 heading-style">What You Get</h3>
               <div className="space-y-4">
                 {[
                   'Fully responsive website design',
@@ -401,7 +401,7 @@ export default function WebsiteDesignPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Technologies We Use
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -426,10 +426,10 @@ export default function WebsiteDesignPage() {
       {/* <section className="py-24 bg-bgDark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               Transparent Pricing
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               Choose the plan that fits your needs. All packages include our signature quality and support.
             </p>
           </div>
@@ -451,7 +451,7 @@ export default function WebsiteDesignPage() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">{plan.name}</h3>
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">{plan.name}</h3>
                   <div className="mt-4">
                     <span className="text-4xl font-bold text-headingLight heading-style">{plan.price}</span>
                     <span className="text-textLight text-style"> one-time</span>
@@ -495,10 +495,10 @@ export default function WebsiteDesignPage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-purple-600 to-blue-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl heading-style">
             Ready to Transform Your Online Presence?
           </h2>
-          <p className="mt-4 text-xl text-purple-100 max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-purple-100 max-w-2xl mx-auto text-style">
             Let's discuss your project and create a website that drives results for your business.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

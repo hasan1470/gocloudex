@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AdminSidebar from '@/components/admin/layout/AdminSidebar';
 import AdminHeader from '@/components/admin/layout/AdminHeader';
+import RouteScrollReset from '@/components/RouteScrollReset';
 
 export default function AdminLayout({
   children,
@@ -78,10 +79,11 @@ export default function AdminLayout({
 
   return (
     <div className="flex h-screen bg-input">
+      <RouteScrollReset targetSelector="#admin-main-scroll" />
       <AdminSidebar />
       <div className="flex-1 flex flex-col lg:ml-0">
         <AdminHeader />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 admin-scrollbar">
+        <main id="admin-main-scroll" className="flex-1 overflow-x-hidden overflow-y-auto p-4 sm:p-6 lg:p-8 admin-scrollbar">
           {children}
         </main>
       </div>

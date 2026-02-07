@@ -122,15 +122,15 @@ export default function ContactPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-24">
+      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
             <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               Get In Touch
             </span>
           </h1>
-          <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
+          <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed max-w-3xl mx-auto text-style">
             Have a project in mind or want to discuss how we can help your business?
             We'd love to hear from you. Send us a message and we'll respond promptly.
           </p>
@@ -193,7 +193,7 @@ export default function ContactPage() {
                   <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
                     <MessageCircle className="h-5 w-5 text-primary" />
                   </div>
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">
                     Send us a Message
                   </h3>
                 </div>

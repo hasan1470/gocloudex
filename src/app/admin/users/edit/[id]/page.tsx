@@ -85,7 +85,7 @@ export default function EditUserPage() {
           <ArrowLeft className="h-5 w-5 text-textLight" />
         </Link>
         <div>
-          <h1 className="text-3xl font-bold text-headingLight heading-style">Edit User</h1>
+          <h1 className="text-2xl font-semibold text-headingLight heading-style">Edit User</h1>
           <p className="text-textLight text-style mt-2">Update user information and credentials</p>
         </div>
       </div>

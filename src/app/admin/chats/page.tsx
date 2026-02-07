@@ -279,7 +279,7 @@ export default function AdminChatsPage() {
         {/* Header */}
         <div className="p-4 border-b border-border">
           <div className="flex items-center justify-between mb-4">
-            <h1 className="text-xl font-bold text-headingLight">Messages</h1>
+            <h1 className="text-lg font-semibold text-headingLight">Messages</h1>
             <div className="flex space-x-2">
               <button
                 onClick={handleRefresh}
@@ -562,7 +562,7 @@ export default function AdminChatsPage() {
           /* Empty State - No User Selected */
           <div className="flex-1 flex flex-col items-center justify-center bg-gradient-to-b from-bgLight to-input">
             <MessageCircle className="h-24 w-24 text-textLight mb-6" />
-            <h2 className="text-2xl font-bold text-headingLight mb-2 text-style">
+            <h2 className="text-xl font-semibold text-headingLight mb-2 text-style">
               Your Messages
             </h2>
             <p className="text-textLight text-lg mb-8 text-style text-center max-w-md">

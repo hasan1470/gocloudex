@@ -169,7 +169,7 @@ export default function MobileAppDevelopmentPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 py-24">
+      <section className="relative bg-gradient-to-br from-blue-500/10 via-purple-500/5 to-pink-500/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -178,13 +178,13 @@ export default function MobileAppDevelopmentPage() {
                 <Star className="h-4 w-4" />
                 <span>Native & Cross-Platform</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
                 <span className="block bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                   Mobile App
                 </span>
                 <span className="block text-headingLight mt-2">Development</span>
               </h1>
-              <p className="mt-6 text-xl text-textLight leading-relaxed text-style">
+              <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed text-style">
                 Transform your ideas into powerful mobile applications. We build native and 
                 cross-platform apps that deliver exceptional user experiences and drive 
                 business growth across iOS and Android platforms.
@@ -384,19 +384,19 @@ export default function MobileAppDevelopmentPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8 text-center">
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">50M+</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">50M+</div>
               <div className="text-textLight mt-2 text-style">App Downloads</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">4.8★</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">4.8★</div>
               <div className="text-textLight mt-2 text-style">Average Rating</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">99.5%</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">99.5%</div>
               <div className="text-textLight mt-2 text-style">Crash-Free Sessions</div>
             </div>
             <div>
-              <div className="text-3xl font-bold text-headingLight heading-style">24/7</div>
+              <div className="text-2xl font-semibold text-headingLight heading-style">24/7</div>
               <div className="text-textLight mt-2 text-style">App Monitoring</div>
             </div>
           </div>
@@ -407,7 +407,7 @@ export default function MobileAppDevelopmentPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Powerful Mobile App Features
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -425,7 +425,7 @@ export default function MobileAppDevelopmentPage() {
                   <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-white to-gray-50 group-hover:scale-110 transition-transform duration-300 ${feature.color}`}>
                     <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">
+                  <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-textLight leading-relaxed text-style">
@@ -442,7 +442,7 @@ export default function MobileAppDevelopmentPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Choose Your Development Approach
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -462,7 +462,7 @@ export default function MobileAppDevelopmentPage() {
                       <Icon className="h-8 w-8 text-white" />
                     </div>
                   </div>
-                  <h3 className="text-2xl font-bold text-headingLight mb-2 heading-style">
+                  <h3 className="text-xl font-semibold text-headingLight mb-2 heading-style">
                     {platform.name}
                   </h3>
                   <p className="text-textLight mb-6 text-style">
@@ -492,7 +492,7 @@ export default function MobileAppDevelopmentPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our App Development Process
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -524,7 +524,7 @@ export default function MobileAppDevelopmentPage() {
               })}
             </div>
             <div className="bg-bgLight border border-border rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-headingLight mb-6 heading-style">App Store Ready</h3>
+              <h3 className="text-xl font-semibold text-headingLight mb-6 heading-style">App Store Ready</h3>
               <div className="space-y-4">
                 {[
                   'App Store & Play Store submission',
@@ -551,7 +551,7 @@ export default function MobileAppDevelopmentPage() {
       <section className="py-24 bg-gradient-to-br from-blue-500/5 to-purple-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Modern Technology Stack
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -576,10 +576,10 @@ export default function MobileAppDevelopmentPage() {
       {/* <section className="py-24 bg-bgDark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               Mobile App Development Packages
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               Comprehensive packages to bring your mobile app idea to life.
             </p>
           </div>
@@ -601,7 +601,7 @@ export default function MobileAppDevelopmentPage() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">{plan.name}</h3>
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">{plan.name}</h3>
                   <div className="mt-4">
                     <span className="text-4xl font-bold text-headingLight heading-style">{plan.price}</span>
                     <span className="text-textLight text-style"> starting from</span>
@@ -645,10 +645,10 @@ export default function MobileAppDevelopmentPage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 to-purple-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl heading-style">
             Ready to Build Your Mobile App?
           </h2>
-          <p className="mt-4 text-xl text-blue-100 max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-blue-100 max-w-2xl mx-auto text-style">
             Let's create a mobile experience that users love and that drives your business forward.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

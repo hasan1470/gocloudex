@@ -231,63 +231,64 @@ export default function Home() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5">
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
-        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
+      <section className="relative overflow-hidden border-b border-border/70 bg-bgLight">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(59,130,246,0.14),transparent_42%),radial-gradient(circle_at_82%_2%,rgba(107,114,128,0.1),transparent_34%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.11)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.11)_1px,transparent_1px)] bg-[size:48px_48px] [mask-image:linear-gradient(to_bottom,white,rgba(255,255,255,0.3))]" />
+        <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
           <div className="text-center">
-            <div className="flex justify-center mb-8">
-              <div className="inline-flex items-center space-x-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-sm font-medium text-style border border-primary/20">
-                <Sparkles className="h-4 w-4" />
+            <div className="mb-7 flex justify-center">
+              <div className="inline-flex items-center space-x-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1.5 text-xs font-medium uppercase tracking-[0.14em] text-primary text-style">
+                <Sparkles className="h-3.5 w-3.5" />
                 <span>Now Building Amazing Digital Experiences</span>
               </div>
             </div>
-            <h1 className="text-4xl sm:text-6xl lg:text-7xl font-bold tracking-tight heading-style">
-              <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
+            <h1 className="text-4xl font-semibold tracking-tight text-headingLight heading-style sm:text-5xl lg:text-6xl">
+              <span className="block text-primary">
                 Cloud-Powered
               </span>
-              <span className="block bg-gradient-to-r from-headingLight to-textLight bg-clip-text text-transparent mt-2">
+              <span className="mt-2 block">
                 Digital Solutions
               </span>
             </h1>
-            <p className="mt-8 text-xl text-textLight max-w-3xl mx-auto leading-relaxed text-style">
+            <p className="mx-auto mt-6 max-w-2xl text-base leading-8 text-textLight text-style sm:text-lg">
               From WordPress to React, Shopify to Next.js - we build exceptional digital experiences 
               using the perfect technology stack for your business needs.
             </p>
-            <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
                 href="/portfolio"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-bgLight bg-primary hover:bg-primary-dark rounded-xl shadow-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl text-style"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-7 py-3.5 text-base font-semibold text-bgLight transition-colors duration-200 hover:bg-primary-dark text-style"
               >
                 View Our Work
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-headingLight bg-bgLight border border-border rounded-xl shadow-sm hover:bg-input transition-all duration-200 transform hover:-translate-y-1 text-style"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-bgLight px-7 py-3.5 text-base font-semibold text-headingLight transition-colors duration-200 hover:bg-input text-style"
               >
                 Get In Touch
                 <ArrowUpRight className="ml-2 h-5 w-5" />
               </Link>
             </div>
               {/* Trust Badges */}
-              <div className="mt-8 flex items-center space-x-6 justify-center md:flex-row flex-col text-center">
+              <div className="mt-7 flex flex-col items-center justify-center gap-2 text-center text-sm text-textLight md:flex-row md:gap-4">
                 <div className="flex items-center space-x-2">
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <Star key={star} className="h-4 w-4 text-yellow-400 fill-current" />
                     ))}
                   </div>
-                  <span className="text-sm text-textLight text-style">5.0 Rating</span>
+                  <span className="text-style">5.0 Rating</span>
                 </div>
-                <div className="text-sm text-textLight text-style hidden md:block">•</div>
-                <div className="text-sm text-textLight text-style mt-3 md:mt-0">150+ Happy Clients</div>
+                <div className="hidden h-1 w-1 rounded-full bg-textLight/55 md:block" />
+                <div className="text-style">150+ Happy Clients</div>
               </div>
           </div>
         </div>
       </section>
 
       {/* Stats Section */}
-      <section className="py-16 bg-bgLight border-b border-border">
+      <section className="border-b border-border py-14 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
             {stats.map((stat, index) => (
@@ -296,7 +297,7 @@ export default function Home() {
                   <stat.icon className="h-8 w-8" />
                 </div>
                 <div className="mt-4">
-                  <div className="text-3xl font-bold text-headingLight heading-style">{stat.value}</div>
+                  <div className="text-2xl font-semibold text-headingLight heading-style">{stat.value}</div>
                   <div className="text-sm text-textLight mt-1 text-style">{stat.label}</div>
                 </div>
               </div>
@@ -309,10 +310,10 @@ export default function Home() {
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Comprehensive Services
             </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-textLight text-style">
               End-to-end solutions covering all aspects of modern web and mobile development.
             </p>
           </div>
@@ -325,7 +326,7 @@ export default function Home() {
                     <category.icon className={`h-6 w-6 ${category.color}`} />
                   </div>
                   <div className="ml-4">
-                    <h3 className="text-2xl font-bold text-headingLight heading-style">{category.name}</h3>
+                    <h3 className="text-xl font-semibold text-headingLight heading-style">{category.name}</h3>
                     <p className="text-textLight text-style">{category.description}</p>
                   </div>
                 </div>
@@ -334,7 +335,7 @@ export default function Home() {
                   {category.services.map((service, serviceIndex) => (
                     <div
                       key={service.name}
-                      className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 group"
+                      className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group"
                     >
                       <h4 className="text-lg font-semibold text-headingLight heading-style group-hover:text-primary transition-colors">
                         {service.name}
@@ -364,10 +365,10 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Technology Stack
             </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-textLight text-style">
               We master a wide range of technologies to deliver the perfect solution for every project.
             </p>
           </div>
@@ -376,7 +377,7 @@ export default function Home() {
             {techStacks.map((stack, index) => (
               <div
                 key={stack.category}
-                className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-lg transition-all duration-300"
+                className="bg-bgLight p-6 rounded-xl border border-border shadow-sm hover:shadow-md transition-all duration-300"
               >
                 <h3 className="text-lg font-semibold text-headingLight heading-style text-center mb-4">
                   {stack.category}
@@ -402,10 +403,10 @@ export default function Home() {
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Platform Specialization
             </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-textLight text-style">
               Expert development across all major platforms and frameworks.
             </p>
           </div>
@@ -415,7 +416,7 @@ export default function Home() {
             <div className="space-y-8">
               <div className="flex items-center">
                 <Layout className="h-8 w-8 text-blue-600 mr-3" />
-                <h3 className="text-2xl font-bold text-headingLight heading-style">WordPress & E-commerce</h3>
+                <h3 className="text-xl font-semibold text-headingLight heading-style">WordPress & E-commerce</h3>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -497,7 +498,7 @@ export default function Home() {
             <div className="space-y-8">
               <div className="flex items-center">
                 <Cpu className="h-8 w-8 text-purple-600 mr-3" />
-                <h3 className="text-2xl font-bold text-headingLight heading-style">Modern Development</h3>
+                <h3 className="text-xl font-semibold text-headingLight heading-style">Modern Development</h3>
               </div>
               
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -582,10 +583,10 @@ export default function Home() {
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Why Choose Our Services?
             </h2>
-            <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-textLight text-style">
               We combine cutting-edge technology with proven methodologies to deliver outstanding results.
             </p>
           </div>
@@ -593,7 +594,7 @@ export default function Home() {
             {features.map((feature) => (
               <div
                 key={feature.name}
-                className="relative bg-bgLight p-8 rounded-2xl border border-border shadow-sm hover:shadow-lg transition-all duration-300 group"
+                className="relative bg-bgLight p-8 rounded-2xl border border-border shadow-sm hover:shadow-md transition-all duration-300 group"
               >
                 <div className="flex items-center justify-center w-12 h-12 bg-primary/10 rounded-xl group-hover:bg-primary transition-colors duration-300">
                   <feature.icon className={`h-6 w-6 ${feature.color} group-hover:text-bgLight transition-colors duration-300`} />
@@ -610,10 +611,10 @@ export default function Home() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold tracking-tight text-headingLight sm:text-5xl heading-style">
+            <h2 className="text-3xl font-semibold tracking-tight text-headingLight sm:text-4xl heading-style">
               Client Success Stories
             </h2>
-            <p className="mt-6 text-xl text-textLight max-w-3xl mx-auto text-style">
+            <p className="mx-auto mt-5 max-w-3xl text-base text-textLight text-style sm:text-lg">
               Hear from our satisfied clients about their award-winning experiences
             </p>
           </div>
@@ -622,7 +623,7 @@ export default function Home() {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className=" rounded-2xl border-1 border-gray-100/10 p-8 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 relative"
+                className="rounded-2xl border-1 border-gray-100/10 p-8 transition-all duration-300 hover:shadow-lg relative"
               >
                 {/* Quote Icon */}
                 <div className="absolute top-6 right-6 w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
@@ -636,8 +637,8 @@ export default function Home() {
                   ))}
                 </div>
 
-                <p className="text-lg text-textLight leading-relaxed mb-6 text-style italic">
-                  "{testimonial.content}"
+                <p className="mb-6 text-base italic leading-relaxed text-textLight text-style">
+                  &ldquo;{testimonial.content}&rdquo;
                 </p>
 
                 <div className="border-t border-gray-100/10 pt-6">
@@ -666,23 +667,23 @@ export default function Home() {
       <section className="py-24 bg-bgDark">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               Ready to Start Your Project?
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mx-auto mt-4 max-w-2xl text-base text-textDark text-style sm:text-lg">
               Whether you need a WordPress site, React application, or full-stack solution - we have the expertise to deliver.
             </p>
             <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 href="/contact"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-bgLight bg-primary hover:bg-primary-dark rounded-xl shadow-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-xl text-style"
+                className="inline-flex items-center justify-center rounded-lg bg-primary px-7 py-3.5 text-base font-semibold text-bgLight transition-colors duration-200 hover:bg-primary-dark text-style"
               >
                 Get Started Today
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
               <Link
                 href="/portfolio"
-                className="inline-flex items-center justify-center px-8 py-4 text-lg font-semibold text-headingDark bg-bgDark border border-border rounded-xl shadow-sm hover:bg-white/5 transition-all duration-200 transform hover:-translate-y-1 text-style"
+                className="inline-flex items-center justify-center rounded-lg border border-border bg-bgDark px-7 py-3.5 text-base font-semibold text-headingDark transition-colors duration-200 hover:bg-white/5 text-style"
               >
                 View Our Work
                 <ArrowUpRight className="ml-2 h-5 w-5" />

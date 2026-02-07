@@ -235,7 +235,7 @@ export default function CloudSolutionsPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-cyan-500/10 py-24">
+      <section className="relative bg-gradient-to-br from-blue-500/10 via-indigo-500/5 to-cyan-500/10 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -244,13 +244,13 @@ export default function CloudSolutionsPage() {
                 <Star className="h-4 w-4" />
                 <span>Scalable & Secure</span>
               </div>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
                 <span className="block bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent">
                   Cloud Solutions
                 </span>
                 <span className="block text-headingLight mt-2">For Modern Businesses</span>
               </h1>
-              <p className="mt-6 text-xl text-textLight leading-relaxed text-style">
+              <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed text-style">
                 Transform your business with scalable, secure, and cost-effective cloud infrastructure. 
                 We design, implement, and manage cloud solutions that drive innovation and growth.
               </p>
@@ -349,7 +349,7 @@ export default function CloudSolutionsPage() {
       <section className="py-16 bg-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Cloud Business Benefits
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -359,7 +359,7 @@ export default function CloudSolutionsPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {benefits.map((benefit, index) => (
               <div key={index} className="text-center">
-                <div className="text-3xl font-bold text-headingLight heading-style">{benefit.metric}</div>
+                <div className="text-2xl font-semibold text-headingLight heading-style">{benefit.metric}</div>
                 <div className="text-textLight mt-2 text-style">{benefit.description}</div>
               </div>
             ))}
@@ -371,7 +371,7 @@ export default function CloudSolutionsPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Comprehensive Cloud Services
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -389,7 +389,7 @@ export default function CloudSolutionsPage() {
                   <div className={`flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-br from-white to-gray-50 group-hover:scale-110 transition-transform duration-300 ${feature.color}`}>
                     <Icon className="h-7 w-7" />
                   </div>
-                  <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">
+                  <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">
                     {feature.title}
                   </h3>
                   <p className="mt-4 text-textLight leading-relaxed text-style">
@@ -406,7 +406,7 @@ export default function CloudSolutionsPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Cloud Platforms We Work With
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -422,7 +422,7 @@ export default function CloudSolutionsPage() {
                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
                   <Cloud className="h-8 w-8 text-white" />
                 </div>
-                <h3 className="text-xl font-bold text-headingLight mb-2 heading-style">
+                <h3 className="text-lg font-semibold text-headingLight mb-2 heading-style">
                   {platform.name}
                 </h3>
                 <p className="text-textLight mb-6 text-style">
@@ -451,7 +451,7 @@ export default function CloudSolutionsPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Cloud Solutions
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -464,7 +464,7 @@ export default function CloudSolutionsPage() {
                 key={index}
                 className="bg-bgLight border border-border rounded-2xl p-6 hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
               >
-                <h3 className="text-xl font-bold text-headingLight mb-4 heading-style">
+                <h3 className="text-lg font-semibold text-headingLight mb-4 heading-style">
                   {solution.category}
                 </h3>
                 <ul className="space-y-3">
@@ -485,7 +485,7 @@ export default function CloudSolutionsPage() {
       <section className="py-24 bg-gradient-to-br from-blue-500/5 to-cyan-500/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Cloud Implementation Process
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -517,7 +517,7 @@ export default function CloudSolutionsPage() {
               })}
             </div>
             <div className="bg-bgLight border border-border rounded-2xl p-8">
-              <h3 className="text-2xl font-bold text-headingLight mb-6 heading-style">What You Get</h3>
+              <h3 className="text-xl font-semibold text-headingLight mb-6 heading-style">What You Get</h3>
               <div className="space-y-4">
                 {[
                   'Scalable cloud infrastructure',
@@ -544,7 +544,7 @@ export default function CloudSolutionsPage() {
       <section className="py-24 bg-bgLight">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Cloud Technologies & Tools
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -569,10 +569,10 @@ export default function CloudSolutionsPage() {
       {/* <section id="pricing" className="py-24 bg-bgDark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               Cloud Management Packages
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               Comprehensive cloud management and support packages
             </p>
           </div>
@@ -594,7 +594,7 @@ export default function CloudSolutionsPage() {
                   </div>
                 )}
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold text-headingLight heading-style">{plan.name}</h3>
+                  <h3 className="text-xl font-semibold text-headingLight heading-style">{plan.name}</h3>
                   <div className="mt-4 flex items-baseline justify-center">
                     <span className="text-4xl font-bold text-headingLight heading-style">{plan.price}</span>
                     <span className="text-textLight text-style ml-2">{plan.period}</span>
@@ -638,10 +638,10 @@ export default function CloudSolutionsPage() {
       {/* CTA Section */}
       <section className="py-24 bg-gradient-to-br from-blue-600 to-cyan-600">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-white sm:text-3xl heading-style">
             Ready to Scale Your Business in the Cloud?
           </h2>
-          <p className="mt-4 text-xl text-blue-100 max-w-2xl mx-auto text-style">
+          <p className="mt-4 text-base sm:text-lg text-blue-100 max-w-2xl mx-auto text-style">
             Let's build a cloud infrastructure that grows with your business and drives innovation.
           </p>
           <div className="mt-12 flex flex-col sm:flex-row gap-4 justify-center">

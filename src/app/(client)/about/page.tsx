@@ -71,15 +71,15 @@ export default function AboutPage() {
   return (
     <div className="bg-bgLight">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-24">
+      <section className="relative bg-gradient-to-br from-primary/5 via-bgLight to-accent/5 py-16 sm:py-20">
         <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))]" />
         <div className="relative mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight heading-style">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-tight heading-style">
             <span className="block bg-gradient-to-r from-primary to-primary-dark bg-clip-text text-transparent">
               About GoCloudEx
             </span>
           </h1>
-          <p className="mt-6 text-xl text-textLight leading-relaxed max-w-3xl mx-auto text-style">
+          <p className="mt-5 text-base sm:text-lg text-textLight leading-relaxed max-w-3xl mx-auto text-style">
             We are passionate developers and cloud specialists dedicated to building 
             exceptional digital experiences that drive business growth and innovation.
           </p>
@@ -91,7 +91,7 @@ export default function AboutPage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 lg:items-center">
             <div>
-              <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+              <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
                 Our Story
               </h2>
               <div className="mt-6 space-y-4 text-textLight text-style">
@@ -160,7 +160,7 @@ export default function AboutPage() {
       <section className="py-24 bg-gradient-to-br from-input to-bgLight border-y border-border">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Values
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -178,7 +178,7 @@ export default function AboutPage() {
                     <value.icon className={`h-8 w-8 ${value.color} group-hover:text-bgLight transition-colors duration-300`} />
                   </div>
                 </div>
-                <h3 className="mt-6 text-xl font-semibold text-headingLight heading-style">{value.name}</h3>
+                <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingLight heading-style">{value.name}</h3>
                 <p className="mt-4 text-textLight leading-relaxed text-style">{value.description}</p>
               </div>
             ))}
@@ -190,7 +190,7 @@ export default function AboutPage() {
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
               Our Technology Stack
             </h2>
             <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
@@ -219,10 +219,10 @@ export default function AboutPage() {
       <section className="py-24 bg-bgDark">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h2 className="text-3xl font-bold tracking-tight text-headingDark sm:text-4xl heading-style">
+            <h2 className="text-2xl font-semibold tracking-tight text-headingDark sm:text-3xl heading-style">
               Why Choose GoCloudEx?
             </h2>
-            <p className="mt-4 text-xl text-textDark max-w-2xl mx-auto text-style">
+            <p className="mt-4 text-base sm:text-lg text-textDark max-w-2xl mx-auto text-style">
               We bring more than just technical expertise to the table.
             </p>
           </div>
@@ -233,7 +233,7 @@ export default function AboutPage() {
                   <Heart className="h-10 w-10 text-primary" />
                 </div>
               </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingDark heading-style">Passionate Team</h3>
+              <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingDark heading-style">Passionate Team</h3>
               <p className="mt-4 text-textDark text-style">
                 We genuinely love what we do. Our passion for technology and design 
                 shines through in every project we undertake.
@@ -245,7 +245,7 @@ export default function AboutPage() {
                   <Globe className="h-10 w-10 text-accent" />
                 </div>
               </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingDark heading-style">Global Perspective</h3>
+              <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingDark heading-style">Global Perspective</h3>
               <p className="mt-4 text-textDark text-style">
                 We understand diverse markets and user behaviors, creating solutions 
                 that work across different cultures and regions.
@@ -257,7 +257,7 @@ export default function AboutPage() {
                   <Cloud className="h-10 w-10 text-greenType" />
                 </div>
               </div>
-              <h3 className="mt-6 text-xl font-semibold text-headingDark heading-style">Future-Proof Solutions</h3>
+              <h3 className="mt-5 text-base sm:text-lg font-semibold text-headingDark heading-style">Future-Proof Solutions</h3>
               <p className="mt-4 text-textDark text-style">
                 We build with scalability in mind, ensuring your digital presence 
                 grows seamlessly with your business.
@@ -270,7 +270,7 @@ export default function AboutPage() {
       {/* CTA Section */}
       <section className="py-24 bg-bgLight">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-headingLight sm:text-4xl heading-style">
+          <h2 className="text-2xl font-semibold tracking-tight text-headingLight sm:text-3xl heading-style">
             Ready to Build Something Amazing?
           </h2>
           <p className="mt-4 text-lg text-textLight max-w-2xl mx-auto text-style">
