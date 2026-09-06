@@ -7,9 +7,9 @@ import ThemeSettings from "./ThemeSettings";
 
 const links = [
   { name: "Home", href: "/" },
-  { name: "Services", href: "/services" },
+  { name: "Our services", href: "/services" },
   { name: "Our work", href: "/portfolio" },
-  { name: "About", href: "/about" },
+  { name: "About us", href: "/about" },
 ];
 
 export default function ClientHeader() {

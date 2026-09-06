@@ -43,3 +43,12 @@ The full dependency audit was reduced to one high-severity finding in the existi
 The original production commit was `1cd9433fb44e54d4d8d98ce3d0f6e69e29c497a0`, deployed by Vercel as `5UGoP4kk2B9d3djdtAXbyvnAUCqT`. This identifies the previous release for rollback if needed.
 
 Local verification evidence is saved outside the repository at `D:/MERN/All New/gocloudex-audit/`.
+
+## Hero and color refinement
+
+- Replaced the homepage project preview with an original layered cloud illustration, rendered as inline SVG and animated with CSS. The hero now links to services and about; portfolio entries remain in the dedicated work section.
+- Added navy navigation and page introductions, mint accents, warmer content surfaces and a dark process section to connect the design with the footer.
+- Renamed the shared navigation links to “Our services” and “About us.”
+- The animation has a keyboard-accessible pause/play control, pauses automatically outside the viewport and becomes static when reduced motion is requested. It adds no video, image request or animation dependency. The previous forced loading screen remains removed.
+- Re-ran the production build, marketing lint, three regression tests and 24 route/metadata checks plus the missing-project and three redirect checks; all passed.
+- Browser verification covered desktop and 390px phone layouts, mobile navigation, light/dark appearance, service and portfolio introductions, pause/play, offscreen pause and emulated reduced motion. No horizontal overflow was found on the checked phone layouts and no browser errors were reported.

@@ -23,7 +23,7 @@ export function SectionHeading({
 }
 export function Process() {
   return (
-    <section className="gc-section gc-soft">
+    <section className="gc-section gc-process-section">
       <div className="gc-container">
         <SectionHeading
           label="How we work"

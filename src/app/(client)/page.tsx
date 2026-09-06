@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowUpRight, ArrowRight, Code2, Globe2, Layers3 } from "lucide-react";
 import { services } from "@/data/services";
 import { showcase } from "@/data/showcase";
 import ProjectCard from "@/components/marketing/ProjectCard";
+import HeroArtwork from "@/components/marketing/HeroArtwork";
 import {
   Process,
   ProjectCTA,
@@ -50,11 +50,11 @@ export default function HomePage() {
                 forward.
               </p>
               <div className="gc-button-row">
-                <Link className="gc-button" href="/portfolio">
-                  Explore our work <ArrowUpRight size={19} />
+                <Link className="gc-button" href="/services">
+                  Explore our services <ArrowUpRight size={19} />
                 </Link>
-                <Link className="gc-text-link" href="/services">
-                  What we do <ArrowRight size={18} />
+                <Link className="gc-text-link" href="/about">
+                  Get to know us <ArrowRight size={18} />
                 </Link>
               </div>
               <div className="gc-hero-footnote">
@@ -65,49 +65,7 @@ export default function HomePage() {
                 <span>E-commerce</span>
               </div>
             </div>
-            <div className="gc-hero-showcase">
-              <div className="gc-showcase-heading">
-                <span>From the studio</span>
-                <span>01 / Selected work</span>
-              </div>
-              <Link
-                href="/portfolio/toolstack"
-                className="gc-hero-window"
-                aria-label="Explore the Toolstack case study"
-              >
-                <div className="gc-browser-bar" aria-hidden="true">
-                  <i />
-                  <i />
-                  <i />
-                  <span>Toolstack / project preview</span>
-                </div>
-                <div className="gc-hero-screen">
-                  <Image
-                    src="/portfolio/toolstack.webp"
-                    alt="Toolstack, our browser-based collection of everyday tools"
-                    fill
-                    priority
-                    sizes="(max-width: 800px) 92vw, 50vw"
-                  />
-                </div>
-                <div className="gc-hero-project-caption">
-                  <div>
-                    <span>Independent product</span>
-                    <strong>Toolstack</strong>
-                  </div>
-                  <ArrowUpRight size={25} />
-                </div>
-              </Link>
-              <div className="gc-floating-note">
-                <span className="gc-note-icon">
-                  <Code2 size={20} />
-                </span>
-                <div>
-                  <strong>Built to be used.</strong>
-                  <span>19 tools. One focused workspace.</span>
-                </div>
-              </div>
-            </div>
+            <HeroArtwork />
           </div>
         </div>
       </section>
