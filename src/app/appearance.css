@@ -140,7 +140,7 @@ body.antialiased {
 .gc-page-hero,
 .gc-detail-hero,
 .gc-case-hero,
-.gc-process-section {
+.gc-cta {
   --gc-ink: #f3f8fa;
   --gc-muted: #c3d5dc;
   --gc-blue: var(--accent-light);
@@ -191,30 +191,35 @@ body.antialiased {
   height: 2.5rem;
   border-color: var(--gc-line);
 }
-.gc-cta {
+.gc-process-section {
+  --gc-ink: var(--ui-ink);
+  --gc-muted: var(--ui-muted);
+  --gc-blue: var(--ui-link);
+  --gc-bg: var(--ui-bg);
+  --gc-soft: var(--ui-soft);
+  --gc-line: var(--ui-line);
   background: var(--ui-bg);
   color: var(--ui-ink);
-  border-top: 1px solid var(--ui-line);
 }
 .gc-cta .gc-eyebrow {
-  color: var(--ui-link);
+  color: var(--accent-light);
 }
 .gc-cta h2 {
-  color: var(--ui-ink);
+  color: var(--gc-ink);
   font-size: clamp(1.875rem, 3.4vw, 2.75rem);
   letter-spacing: -0.035em;
 }
 .gc-cta p {
-  color: var(--ui-muted);
+  color: var(--gc-muted);
 }
 .gc-cta .gc-button {
-  color: white;
-  background: var(--accent-solid);
-  border-color: var(--accent-solid);
+  color: var(--accent-deep);
+  background: var(--accent-light);
+  border-color: var(--accent-light);
 }
 .gc-cta .gc-button:hover {
-  background: var(--primary-color-dark);
-  border-color: var(--primary-color-dark);
+  background: color-mix(in srgb, var(--accent-light) 75%, white);
+  border-color: var(--accent-light);
 }
 .gc-footer .gc-brand-icon,
 .gc-footer .gc-brand-name em {

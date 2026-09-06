@@ -72,3 +72,7 @@ Local verification evidence is saved outside the repository at `D:/MERN/All New/
 - Added CraftLab, the owner's product-designer repository, as the eighth case study and linked it from the e-commerce service. The 44 KB WebP preview is a real desktop capture. Features and demo boundaries were checked against the repository README and public editor; no live payment/store integration is claimed.
 - Verified the production layout on desktop and at 320px with Larger/Mono preferences, including all public introduction types. This exposed an About-page grid minimum-width issue; its children now shrink to fit the narrow column.
 - Final verification passed: production build/TypeScript, both scoped lint commands, six regression tests, 25 public page/metadata routes, the unknown-project 404 and three legacy redirects. The rebuilt About page has no horizontal overflow at 320px with Larger/Mono enabled; its mobile menu opens and closes correctly.
+
+## Closing-section color correction
+
+Following the clarified preference, "How we work" uses the regular page background and text colors. The final call-to-action and footer retain their colored brand backgrounds. Both treatments follow the selected palette and light/dark mode.
