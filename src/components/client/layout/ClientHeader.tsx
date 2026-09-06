@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import { usePathname } from "next/navigation";
 import { Cloud, Menu, X, ArrowUpRight } from "lucide-react";
 import ThemeSettings from "./ThemeSettings";
@@ -43,7 +43,7 @@ export default function ClientHeader() {
             onClick={() => setOpen(false)}
           >
             <span className="gc-brand-icon">
-              <Cloud size={28} strokeWidth={1.8} />
+              <Cloud size={32} strokeWidth={1.8} />
             </span>
             <span className="gc-brand-name">
               GoCloud<em>Ex</em>

@@ -31,7 +31,7 @@ test("public links reject local, private, executable and admin placeholders", ()
 test("portfolio filters combine with search and handle old navigation links", () => {
   assert.deepEqual(
     filterProjects(showcase, "ecommerce", " next ").map((item) => item.slug),
-    ["shopcart"],
+    ["craftlab", "shopcart"],
   );
   assert.deepEqual(filterProjects(showcase, "healthcare", "toolstack"), []);
   assert.deepEqual(

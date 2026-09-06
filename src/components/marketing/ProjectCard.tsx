@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import Image from "next/image";
 import { ArrowUpRight } from "lucide-react";
 import type { ProjectPreview } from "@/data/showcase";

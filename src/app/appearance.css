@@ -95,7 +95,7 @@ body.antialiased {
   gap: 8px;
 }
 .gc-brand-name {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   font-weight: 700;
   letter-spacing: -0.65px;
 }
@@ -192,16 +192,34 @@ body.antialiased {
   border-color: var(--gc-line);
 }
 .gc-cta {
-  background:
-    radial-gradient(ellipse at 85% 85%, var(--hero-raised), transparent 70%),
-    var(--hero-base);
+  background: var(--ui-bg);
+  color: var(--ui-ink);
+  border-top: 1px solid var(--ui-line);
 }
-.gc-cta .gc-eyebrow,
+.gc-cta .gc-eyebrow {
+  color: var(--ui-link);
+}
+.gc-cta h2 {
+  color: var(--ui-ink);
+  font-size: clamp(1.875rem, 3.4vw, 2.75rem);
+  letter-spacing: -0.035em;
+}
+.gc-cta p {
+  color: var(--ui-muted);
+}
+.gc-cta .gc-button {
+  color: white;
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+}
+.gc-cta .gc-button:hover {
+  background: var(--primary-color-dark);
+  border-color: var(--primary-color-dark);
+}
 .gc-footer .gc-brand-icon,
 .gc-footer .gc-brand-name em {
   color: var(--accent-light);
 }
-.gc-cta p,
 .gc-footer p,
 .gc-footer li a,
 .gc-footer-bottom {
@@ -214,7 +232,7 @@ body.antialiased {
   color: var(--ui-ink);
 }
 .gc-home-copy h1 {
-  font-size: clamp(2.75rem, 4.8vw, 4.25rem);
+  font-size: clamp(2.25rem, 3.7vw, 3.25rem);
   letter-spacing: -0.045em;
 }
 .gc-site h1,
@@ -427,7 +445,7 @@ body.antialiased {
   padding: 1rem;
 }
 .gc-admin-wordmark {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
   letter-spacing: -0.4px;
 }
 .gc-admin-sidebar .text-primary {
@@ -462,7 +480,7 @@ body.antialiased {
 }
 @media (max-width: 800px) {
   .gc-home-copy h1 {
-    font-size: clamp(2.5rem, 8vw, 4rem);
+    font-size: clamp(2.125rem, 5.7vw, 3rem);
   }
   .gc-home-grid {
     gap: 25px;
@@ -471,7 +489,7 @@ body.antialiased {
     font-size: 1.0625rem;
   }
   .gc-brand-name {
-    font-size: 1.1875rem;
+    font-size: 1.3125rem;
   }
   .gc-nav {
     min-height: 72px;
@@ -489,7 +507,7 @@ body.antialiased {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .gc-home-copy h1 {
-    font-size: clamp(2rem, 10vw, 2.5rem);
+    font-size: clamp(1.875rem, 8.5vw, 2.375rem);
   }
   .gc-home-copy .gc-button-row {
     gap: 12px 20px;
@@ -514,7 +532,82 @@ body.antialiased {
     grid-template-columns: 1fr;
   }
   .gc-header .gc-brand-icon svg {
-    width: 26px;
-    height: 26px;
+    width: 30px;
+    height: 30px;
   }
+}
+
+/* Keep page introductions proportional to the readable body copy. */
+.gc-site :is(.gc-page-hero, .gc-detail-hero, .gc-case-hero) h1,
+.gc-client-shell #main-content > :not(.gc-site) h1 {
+  font-size: clamp(2rem, 3.65vw, 3.125rem);
+  line-height: 1.13;
+  letter-spacing: -0.035em;
+}
+.gc-page-hero h1 {
+  margin-block: 32px 24px;
+}
+.gc-about-grid > * {
+  min-width: 0;
+}
+
+/* Finite arrival and text motion; page content never waits for an animation. */
+@keyframes gc-text-arrive {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes gc-page-arrive {
+  0% { transform: scaleX(0); opacity: 0; }
+  20% { opacity: 1; }
+  75% { transform: scaleX(1); opacity: 1; }
+  100% { transform: scaleX(1); opacity: 0; }
+}
+@keyframes gc-route-loading {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(250%); }
+}
+.gc-client-shell #main-content h1 {
+  animation: gc-text-arrive 650ms cubic-bezier(.2,.7,.2,1) both;
+}
+.gc-site :is(.gc-home-copy, .gc-hero-bottom) > p {
+  animation: gc-text-arrive 650ms 90ms cubic-bezier(.2,.7,.2,1) both;
+}
+.gc-arrival-line,
+.gc-route-progress {
+  position: fixed;
+  inset: 0 0 auto;
+  height: 3px;
+  z-index: 100;
+  pointer-events: none;
+  background: var(--ui-link);
+  transform-origin: left;
+}
+.gc-arrival-line {
+  animation: gc-page-arrive 850ms ease-out both;
+}
+.gc-route-progress {
+  overflow: hidden;
+  background: var(--ui-soft);
+}
+.gc-route-progress::after {
+  content: "";
+  display: block;
+  width: 40%;
+  height: 100%;
+  background: var(--ui-link);
+  animation: gc-route-loading 1s ease-in-out infinite;
+}
+@media (max-width: 540px) {
+  .gc-site :is(.gc-page-hero, .gc-detail-hero, .gc-case-hero) h1,
+  .gc-client-shell #main-content > :not(.gc-site) h1 {
+    font-size: clamp(1.75rem, 7.5vw, 2.125rem);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .gc-client-shell #main-content h1,
+  .gc-site :is(.gc-home-copy, .gc-hero-bottom) > p,
+  .gc-route-progress::after {
+    animation: none;
+  }
+  .gc-arrival-line { display: none; }
 }

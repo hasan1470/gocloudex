@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import { ArrowUpRight, Check } from "lucide-react";
 import { deliveryProcess } from "@/data/services";
 

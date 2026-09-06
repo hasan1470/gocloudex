@@ -157,7 +157,7 @@ export const services: Service[] = [
       },
     ],
     stack: ["Shopify", "WooCommerce", "Next.js", "Sanity", "Stripe"],
-    projectSlugs: ["shopcart"],
+    projectSlugs: ["shopcart", "craftlab"],
     questions: [
       {
         question: "Which platform should we use?",

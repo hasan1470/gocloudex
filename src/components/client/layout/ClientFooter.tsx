@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import { Cloud, Github, ArrowUpRight } from "lucide-react";
 export default function ClientFooter() {
   return (

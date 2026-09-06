@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import { ArrowUpRight, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { services } from "@/data/services";

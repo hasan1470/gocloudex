@@ -70,6 +70,40 @@ export const showcase: ShowcaseProject[] = [
     note: "The public web demo uses local data. No bank, payment or financial service is connected. Native app-store releases are not part of this showcase.",
   },
   {
+    slug: "craftlab",
+    title: "CraftLab",
+    category: "Product customization",
+    tags: ["ecommerce", "web-apps", "react", "design"],
+    kind: "Portfolio demo",
+    summary:
+      "An interactive product studio that takes custom artwork from editable canvas to a complete demo order.",
+    image: "/portfolio/craftlab.webp",
+    imageAlt:
+      "CraftLab product designer with a shirt preview, artwork tools and size quantities",
+    role: "Product editor, storefront workflow & merchant dashboard development",
+    stack: ["Next.js", "React", "TypeScript", "Konva", "IndexedDB"],
+    liveUrl: "https://product-designer-plugin.vercel.app",
+    githubUrl: "https://github.com/hasan1470/product-designer-plugin",
+    challenge:
+      "Custom product orders need to preserve the customer's artwork, product choices and quantities throughout the design and checkout journey. The editor also needs to make precise artwork changes approachable.",
+    approach:
+      "Build a canvas editor with editable front and back layers, product previews and portable design files. Connect saved designs to a browser-local cart, simulated checkout and a merchant workspace that can inspect designs and update order status.",
+    features: [
+      "Text, image and shape layers with drag, resize and rotate controls",
+      "Front and back artwork, undo/redo and layer management",
+      "Product colors, print areas and quantities by size",
+      "Named saved designs and editable project import/export",
+      "Transparent artwork PNGs and product proof exports",
+      "Demo checkout and merchant product/order management",
+    ],
+    walkthrough: [
+      "Choose a product and add text or artwork to its front and back.",
+      "Save the design, reopen it from My designs and export an artwork PNG or editable project.",
+      "Add the design to the cart, complete a demo order and inspect it in the merchant workspace.",
+    ],
+    note: "The public demo stores designs and orders in the current browser. Payments, delivery and fulfilment are simulated. WooCommerce and Shopify integration packages are provided in the repository; live store installation is not part of this showcase.",
+  },
+  {
     slug: "toolstack",
     title: "Toolstack",
     category: "Productivity",

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import {
   ArrowUpRight,
   LayoutTemplate,

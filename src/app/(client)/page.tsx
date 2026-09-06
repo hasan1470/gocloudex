@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/marketing/NavigationLink";
 import { ArrowUpRight, ArrowRight, Code2, Globe2, Layers3 } from "lucide-react";
 import { services } from "@/data/services";
 import { showcase } from "@/data/showcase";

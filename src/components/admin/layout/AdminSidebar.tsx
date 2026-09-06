@@ -66,7 +66,7 @@ export default function AdminSidebar() {
         <div className="flex items-center justify-between h-16 px-4 border-b border-b-gray-700 border-border">
           <Link href="/admin" className="flex items-center space-x-3 group">
             <div className="relative">
-              <Cloud className="h-7 w-7 text-primary group-hover:text-primary-dark transition-colors" />
+              <Cloud className="h-8 w-8 text-primary group-hover:text-primary-dark transition-colors" />
             </div>
             <div className="flex flex-col">
               <span className="gc-admin-wordmark font-semibold text-headingDark heading-style">

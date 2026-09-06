@@ -4,6 +4,7 @@ Verified on 7 September 2026 against the owner's repositories, the companion pro
 
 | Case study | Public experience | Source | Classification |
 | --- | --- | --- | --- |
+| CraftLab | https://product-designer-plugin.vercel.app | https://github.com/hasan1470/product-designer-plugin | Portfolio demo; browser-local designs and simulated orders |
 | Toolstack | https://toolstack-lovat.vercel.app | https://github.com/hasan1470/Toolstack | Independent product |
 | PocketWise | https://pocketwise-personal-finance-app.vercel.app | https://github.com/hasan1470/pocketwise-personal-finance-app | Independent product, public web demo |
 | Shopcart | https://shopcart-neon.vercel.app | https://github.com/hasan1470/shopcart | Portfolio demo; commerce starter customization |
