@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
-    "lint:marketing": "eslint \"src/app/(client)/page.tsx\" \"src/app/(client)/about/page.tsx\" \"src/app/(client)/services\" \"src/app/(client)/portfolio\" src/components/marketing src/components/client/layout/ClientHeader.tsx src/components/client/layout/ClientFooter.tsx src/components/client/layout/ThemeSettings.tsx src/data/services.ts src/data/showcase.ts src/lib/portfolio-utils.ts src/lib/portfolio.ts src/app/robots.ts src/app/sitemap.ts src/app/opengraph-image.tsx src/app/layout.tsx \"src/app/(client)/layout.tsx\" --max-warnings 0"
+    "lint:marketing": "eslint \"src/app/(client)/page.tsx\" \"src/app/(client)/about/page.tsx\" \"src/app/(client)/services\" \"src/app/(client)/portfolio\" src/components/marketing src/components/client/layout/ClientHeader.tsx src/components/client/layout/ClientFooter.tsx src/components/client/layout/ThemeSettings.tsx src/data/services.ts src/data/showcase.ts src/lib/portfolio-utils.ts src/lib/portfolio.ts src/app/robots.ts src/app/sitemap.ts src/app/opengraph-image.tsx src/app/layout.tsx \"src/app/(client)/layout.tsx\" --max-warnings 0",
+    "lint:appearance": "eslint src/lib/appearance.ts src/components/client/layout/ThemeSettings.tsx src/components/admin/layout/AdminHeader.tsx src/components/admin/layout/AdminSidebar.tsx src/app/admin/layout.tsx src/app/admin/settings/page.tsx src/app/adminlogin/page.tsx --max-warnings 0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

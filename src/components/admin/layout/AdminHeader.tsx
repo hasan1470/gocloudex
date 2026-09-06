@@ -1,16 +1,14 @@
-'use client';
+"use client";
 
-import { Bell, Search, User } from 'lucide-react';
-import ThemeSettings from '@/components/client/layout/ThemeSettings';
+import { Bell, Search, User } from "lucide-react";
+import ThemeSettings from "@/components/client/layout/ThemeSettings";
 
 export default function AdminHeader() {
-
-
-  const user = 'Hasan';
-  const role = 'Administrator';
+  const user = "Hasan";
+  const role = "Administrator";
 
   return (
-    <header className="bg-bgLight shadow-sm border-b border-border">
+    <header className="gc-admin-header bg-bgLight shadow-sm border-b border-border">
       <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
         {/* Search */}
         <div className="flex-1 max-w-lg">
@@ -22,6 +20,7 @@ export default function AdminHeader() {
               type="text"
               className="block w-full pl-10 pr-3 py-2 border border-border rounded-lg leading-5 bg-bgLight placeholder-textLight focus:outline-none focus:placeholder-textDark focus:ring-1 focus:ring-ring focus:border-ring text-style"
               placeholder="Search..."
+              aria-label="Search the admin workspace"
             />
           </div>
         </div>
@@ -29,7 +28,10 @@ export default function AdminHeader() {
         {/* Right section */}
         <div className="flex items-center space-x-4">
           {/* Notifications */}
-          <button className="p-2 rounded-full text-textLight hover:text-hoverTextLight hover:bg-input focus:outline-none focus:ring-2 focus:ring-ring transition-colors">
+          <button
+            aria-label="Notifications"
+            className="p-2 rounded-full text-textLight hover:text-hoverTextLight hover:bg-input focus:outline-none focus:ring-2 focus:ring-ring transition-colors"
+          >
             <Bell className="h-5 w-5" />
           </button>
 
@@ -44,7 +46,9 @@ export default function AdminHeader() {
               </div>
             </div>
             <div className="hidden md:block">
-              <div className="text-sm font-medium text-headingLight heading-style">{user} </div>
+              <div className="text-sm font-medium text-headingLight heading-style">
+                {user}{" "}
+              </div>
               <div className="text-xs text-textLight text-style">{role}</div>
             </div>
           </div>

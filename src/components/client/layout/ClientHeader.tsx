@@ -43,7 +43,7 @@ export default function ClientHeader() {
             onClick={() => setOpen(false)}
           >
             <span className="gc-brand-icon">
-              <Cloud size={33} strokeWidth={1.8} />
+              <Cloud size={28} strokeWidth={1.8} />
             </span>
             <span className="gc-brand-name">
               GoCloud<em>Ex</em>

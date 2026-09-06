@@ -1,0 +1,520 @@
+/* Shared color and reading preferences for public pages and the admin workspace. */
+:root {
+  --accent-solid: #0f746b;
+  --accent-light: #a5e8da;
+  --accent-deep: #143c3c;
+  --reading-size: 16px;
+  --text-xs: 0.875rem;
+  --text-sm: 0.9375rem;
+  --ui-bg: color-mix(in srgb, var(--accent-solid) 2%, #fbfcfa);
+  --ui-surface: #ffffff;
+  --ui-soft: color-mix(in srgb, var(--accent-solid) 7%, #f9fcfb);
+  --ui-ink: #172f3a;
+  --ui-muted: #4e626d;
+  --ui-line: #c9d7d9;
+  --ui-link: var(--accent-solid);
+  --hero-base: color-mix(in srgb, var(--accent-deep) 72%, #112b38);
+  --hero-raised: color-mix(in srgb, var(--accent-solid) 22%, var(--hero-base));
+  --primary-color: var(--accent-solid);
+  --primary-color-dark: color-mix(in srgb, var(--accent-solid) 85%, #111b24);
+  --background: var(--ui-bg);
+  --foreground: var(--ui-ink);
+  --color-primary: var(--accent-solid);
+  --color-accent: var(--ui-link);
+  --color-secondary: var(--ui-muted);
+  --color-border: var(--ui-line);
+  --color-input: var(--ui-soft);
+  --color-ring: var(--ui-link);
+  --color-headingLight: var(--ui-ink);
+  --color-textLight: var(--ui-muted);
+  --color-linkLight: var(--ui-link);
+  --color-bgLight: var(--ui-surface);
+  --color-bgDark: var(--hero-base);
+  --color-headingDark: #f1f6f8;
+  --color-textDark: #bed0d8;
+  --color-hoverHeadingLight: var(--ui-link);
+  --color-hoverTextLight: var(--ui-ink);
+  --color-hoverLinkLight: var(--ui-link);
+  --color-hoverHeadingDark: #ffffff;
+  --color-hoverTextDark: #ffffff;
+  --color-greenType: #1c7545;
+  --color-redType: #b52940;
+  --gc-bg: var(--ui-bg);
+  --gc-soft: var(--ui-soft);
+  --gc-ink: var(--ui-ink);
+  --gc-muted: var(--ui-muted);
+  --gc-line: var(--ui-line);
+  --gc-blue: var(--ui-link);
+  --gc-mint: var(--ui-soft);
+  --gc-navy: var(--hero-base);
+}
+:root.dark {
+  --ui-bg: #0b1c26;
+  --ui-surface: #132c39;
+  --ui-soft: color-mix(in srgb, var(--accent-solid) 12%, #19333f);
+  --ui-ink: #f0f6f8;
+  --ui-muted: #becfd7;
+  --ui-line: #405966;
+  --ui-link: var(--accent-light);
+  --hero-base: color-mix(in srgb, var(--accent-deep) 45%, #091922);
+  --hero-raised: color-mix(in srgb, var(--accent-solid) 16%, var(--hero-base));
+  --color-greenType: #8cd4a7;
+  --color-redType: #ffacb8;
+  --gc-blue: var(--ui-link);
+  --gc-bg: var(--ui-bg);
+  --gc-soft: var(--ui-soft);
+  --gc-ink: var(--ui-ink);
+  --gc-muted: var(--ui-muted);
+  --gc-line: var(--ui-line);
+  --gc-mint: var(--ui-soft);
+  --gc-navy: var(--hero-base);
+}
+html {
+  font-size: var(--reading-size);
+}
+body.antialiased {
+  font-family: var(--body-font);
+}
+.dark .text-primary {
+  color: var(--ui-link);
+}
+
+/* The header follows the chosen mode; its smaller wordmark leaves room for navigation. */
+.gc-header {
+  --gc-ink: var(--ui-ink);
+  --gc-muted: var(--ui-muted);
+  --gc-blue: var(--ui-link);
+  --gc-bg: var(--ui-surface);
+  --gc-soft: var(--ui-soft);
+  --gc-line: var(--ui-line);
+  background: var(--ui-surface);
+  border-color: var(--ui-line);
+}
+.gc-brand {
+  flex-shrink: 0;
+  gap: 8px;
+}
+.gc-brand-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.65px;
+}
+.gc-nav {
+  min-height: 76px;
+  gap: 22px;
+}
+.gc-nav-links {
+  gap: 26px;
+}
+.gc-nav-links a {
+  font-size: 0.9375rem;
+  padding-block: 26px;
+}
+.gc-nav-links a[aria-current="page"]:after {
+  bottom: 15px;
+}
+.gc-nav-actions > .gc-button {
+  font-size: 0.9375rem;
+  padding: 12px 17px;
+}
+.gc-header .gc-button:not(.gc-button-outline),
+.gc-header .gc-button:not(.gc-button-outline):hover {
+  color: white;
+  background: var(--accent-solid);
+  border-color: var(--accent-solid);
+}
+.gc-header .gc-button:not(.gc-button-outline):hover {
+  background: var(--primary-color-dark);
+}
+.gc-theme-trigger,
+.gc-menu-toggle {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Every brand surface and illustration responds to the palette, including dark mode. */
+.gc-home-hero,
+.gc-page-hero,
+.gc-detail-hero,
+.gc-case-hero,
+.gc-process-section {
+  --gc-ink: #f3f8fa;
+  --gc-muted: #c3d5dc;
+  --gc-blue: var(--accent-light);
+  --gc-bg: var(--hero-base);
+  --gc-soft: var(--hero-raised);
+  --gc-line: #66838a;
+  background:
+    radial-gradient(ellipse at 90% 20%, var(--hero-raised), transparent 65%),
+    var(--hero-base);
+}
+.gc-home-copy h1 > span {
+  background-image: linear-gradient(
+    110deg,
+    color-mix(in srgb, var(--accent-light) 65%, white),
+    var(--accent-light)
+  );
+}
+.gc-home-copy > p,
+.gc-art-caption,
+.gc-site .gc-motion-toggle {
+  color: var(--gc-muted);
+}
+.gc-home-hero .gc-status-dot {
+  background: var(--accent-light);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent-light) 8%, transparent);
+}
+.gc-home-hero .gc-text-link:hover {
+  color: var(--accent-light);
+}
+.gc-home-hero .gc-button:not(.gc-button-outline),
+.gc-detail-hero .gc-button:not(.gc-button-outline),
+.gc-case-hero .gc-button:not(.gc-button-outline) {
+  color: var(--accent-deep);
+  background: var(--accent-light);
+  border-color: var(--accent-light);
+}
+.gc-home-hero .gc-button:not(.gc-button-outline):hover,
+.gc-detail-hero .gc-button:not(.gc-button-outline):hover,
+.gc-case-hero .gc-button:not(.gc-button-outline):hover {
+  background: color-mix(in srgb, var(--accent-light) 75%, white);
+  border-color: var(--accent-light);
+}
+.gc-service-brief {
+  background: color-mix(in srgb, var(--accent-light) 5%, transparent);
+}
+.gc-process-section .gc-process article > span {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-color: var(--gc-line);
+}
+.gc-cta {
+  background:
+    radial-gradient(ellipse at 85% 85%, var(--hero-raised), transparent 70%),
+    var(--hero-base);
+}
+.gc-cta .gc-eyebrow,
+.gc-footer .gc-brand-icon,
+.gc-footer .gc-brand-name em {
+  color: var(--accent-light);
+}
+.gc-cta p,
+.gc-footer p,
+.gc-footer li a,
+.gc-footer-bottom {
+  color: #c3d5dc;
+}
+.gc-footer {
+  background: var(--hero-base);
+}
+.gc-stack-strip strong {
+  color: var(--ui-ink);
+}
+.gc-home-copy h1 {
+  font-size: clamp(2.75rem, 4.8vw, 4.25rem);
+  letter-spacing: -0.045em;
+}
+.gc-site h1,
+.gc-site h2,
+.gc-site h3 {
+  overflow-wrap: break-word;
+}
+.gc-site .gc-button-row,
+.gc-hero-footnote {
+  flex-wrap: wrap;
+}
+.gc-tags {
+  flex-wrap: wrap;
+}
+.gc-tags > span {
+  line-height: 1.5;
+}
+.gc-browser-bar {
+  height: 2.3rem;
+}
+.gc-home-hero .gc-small-label {
+  max-width: 45%;
+  text-align: right;
+}
+.gc-art-caption {
+  margin-inline: 16px;
+}
+.gc-site .gc-motion-toggle {
+  min-height: 40px;
+}
+
+/* An independent dialog surface avoids inheriting dark hero/header colors. */
+.gc-theme-dialog {
+  --gc-ink: var(--ui-ink);
+  --gc-muted: var(--ui-muted);
+  --gc-blue: var(--ui-link);
+  --gc-bg: var(--ui-surface);
+  --gc-soft: var(--ui-soft);
+  --gc-line: var(--ui-line);
+  color: var(--ui-ink);
+  background: var(--ui-surface);
+  width: min(30rem, calc(100% - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow-y: auto;
+  box-shadow: 0 24px 90px #07192450;
+  font-family: var(--body-font);
+}
+.gc-theme-inner {
+  padding: 1.5rem;
+}
+.gc-theme-title {
+  margin-bottom: 0.5rem;
+}
+.gc-theme-title h2 {
+  font-size: 1.5rem;
+}
+.gc-theme-title > button {
+  min-width: 40px;
+  min-height: 40px;
+  display: grid;
+  place-items: center;
+}
+.gc-theme-description {
+  font-size: 0.9375rem;
+  color: var(--ui-muted);
+  margin: 0 0 1.5rem;
+  line-height: 1.6;
+}
+.gc-theme-dialog legend {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+.gc-theme-dialog fieldset {
+  margin-bottom: 1.4rem;
+}
+.gc-theme-options button {
+  font-size: 0.9375rem;
+  min-height: 44px;
+  line-height: 1.5;
+}
+.gc-theme-colors {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+.gc-theme-colors button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: auto;
+  padding: 10px 8px;
+  border-radius: 5px;
+  border: 1px solid var(--ui-line);
+  background: var(--ui-surface);
+  color: var(--ui-ink);
+  font-size: 0.875rem;
+}
+.gc-theme-colors button[aria-pressed="true"] {
+  border-color: var(--ui-link);
+  background: var(--ui-soft);
+}
+.gc-theme-swatch {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  color: white;
+}
+.gc-size-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.gc-size-options button {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+}
+.gc-size-options button strong {
+  font-weight: 600;
+}
+.gc-size-options button span {
+  font-size: 0.875rem;
+  color: var(--ui-muted);
+}
+.gc-theme-reset {
+  font-size: 0.9375rem;
+  min-height: 44px;
+}
+.gc-theme-trigger.gc-theme-trigger-labeled {
+  display: inline-flex;
+  width: auto;
+  height: auto;
+  min-height: 44px;
+  gap: 10px;
+  padding: 12px 18px;
+  border: 1px solid var(--ui-link);
+  border-radius: 6px;
+  color: var(--ui-link);
+  font-size: 1rem;
+}
+.gc-admin-settings {
+  max-width: 52rem;
+}
+
+/* Relative text sizes also improve existing forms, tables and dashboard cards. */
+.gc-admin {
+  --text-xs: 0.875rem;
+  --text-sm: 1rem;
+  --text-xs--line-height: 1.5;
+  --text-sm--line-height: 1.6;
+  font-size: 1rem;
+  line-height: 1.6;
+  color: var(--ui-ink);
+  font-family: var(--body-font);
+}
+.gc-admin :is(input, select, textarea) {
+  font-size: 1rem;
+}
+.gc-admin :is(input, textarea)::placeholder {
+  color: var(--ui-muted);
+  opacity: 1;
+}
+.gc-admin :is(.bg-primary, .bg-primary-dark).text-bgLight,
+.gc-admin :is(.bg-primary, .bg-primary-dark) .text-bgLight {
+  color: white;
+}
+.gc-admin main .text-textDark {
+  color: var(--ui-muted);
+}
+.gc-admin .text-primary {
+  color: var(--ui-link);
+}
+.gc-admin-header > div {
+  min-height: 76px;
+  height: auto;
+  padding-block: 12px;
+  gap: 24px;
+}
+.gc-admin-header > div > div:first-child {
+  min-width: 0;
+}
+.gc-admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  flex-shrink: 0;
+  background: var(--hero-base);
+}
+.gc-admin-sidebar > div:first-child {
+  min-height: 76px;
+  height: auto;
+  padding-block: 10px;
+  flex-shrink: 0;
+}
+.gc-admin-sidebar nav {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  margin-top: 1.5rem;
+}
+.gc-admin-sidebar > div:last-child {
+  position: static;
+  margin-top: auto;
+  padding: 1rem;
+}
+.gc-admin-wordmark {
+  font-size: 1.25rem;
+  letter-spacing: -0.4px;
+}
+.gc-admin-sidebar .text-primary {
+  color: var(--accent-light);
+}
+.gc-admin-sidebar .text-textDark {
+  color: #c3d5dc;
+}
+.gc-admin-sidebar a,
+.gc-admin-sidebar button {
+  min-height: 44px;
+}
+.gc-admin main h1 {
+  line-height: 1.2;
+}
+
+@media (max-width: 1100px) {
+  .gc-nav-links {
+    display: none;
+  }
+  .gc-menu-toggle {
+    display: inline-flex;
+  }
+}
+@media (max-width: 1023px) {
+  .gc-admin-header {
+    padding-left: 64px;
+  }
+  .gc-admin-sidebar:not([data-open="true"]) {
+    visibility: hidden;
+  }
+}
+@media (max-width: 800px) {
+  .gc-home-copy h1 {
+    font-size: clamp(2.5rem, 8vw, 4rem);
+  }
+  .gc-home-grid {
+    gap: 25px;
+  }
+  .gc-home-copy > p {
+    font-size: 1.0625rem;
+  }
+  .gc-brand-name {
+    font-size: 1.1875rem;
+  }
+  .gc-nav {
+    min-height: 72px;
+    gap: 12px;
+  }
+  .gc-nav-actions {
+    gap: 8px;
+  }
+}
+@media (max-width: 540px) {
+  .gc-theme-inner {
+    padding: 1.15rem;
+  }
+  .gc-theme-colors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .gc-home-copy h1 {
+    font-size: clamp(2rem, 10vw, 2.5rem);
+  }
+  .gc-home-copy .gc-button-row {
+    gap: 12px 20px;
+  }
+  .gc-hero-footnote {
+    gap: 9px;
+  }
+  .gc-admin-header > div {
+    justify-content: flex-end;
+    padding-left: 8px;
+  }
+  .gc-admin-header > div > div:first-child {
+    display: none;
+  }
+  .gc-theme-options {
+    gap: 6px;
+  }
+  .gc-theme-options button {
+    padding: 9px 10px;
+  }
+  .gc-size-options {
+    grid-template-columns: 1fr;
+  }
+  .gc-header .gc-brand-icon svg {
+    width: 26px;
+    height: 26px;
+  }
+}

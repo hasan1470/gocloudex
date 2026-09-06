@@ -52,3 +52,13 @@ Local verification evidence is saved outside the repository at `D:/MERN/All New/
 - The animation has a keyboard-accessible pause/play control, pauses automatically outside the viewport and becomes static when reduced motion is requested. It adds no video, image request or animation dependency. The previous forced loading screen remains removed.
 - Re-ran the production build, marketing lint, three regression tests and 24 route/metadata checks plus the missing-project and three redirect checks; all passed.
 - Browser verification covered desktop and 390px phone layouts, mobile navigation, light/dark appearance, service and portfolio introductions, pause/play, offscreen pause and emulated reduced motion. No horizontal overflow was found on the checked phone layouts and no browser errors were reported.
+
+## Readability and appearance refinement
+
+- Raised small public labels to at least 14px at the standard reading size, with larger body copy, navigation, tags, controls and footer links. Converted marketing type to relative units so the new Larger reading option scales it consistently.
+- Reduced the public wordmark to 19–20px at standard size and simplified the admin logo. Adjusted navigation breakpoints and mobile admin header spacing to accommodate readable text.
+- Rebuilt appearance around six coordinated palettes, including a default Teal palette. The hero artwork, buttons, footer, navigation, settings dialog and admin surfaces now use the same color tokens. Light and dark surfaces have their own text and border colors.
+- Added labeled color choices, Standard/Larger text settings, validated preference restoration, cross-tab synchronization and a fix for incorrect Light/Dark selection after a saved dark-mode reload.
+- Added the missing `/admin/settings` page for appearance and reading preferences. Admin labels, form inputs and table text use the shared reading scale; the sidebar scrolls on short screens and supports Escape dismissal on mobile.
+- Verification includes all six palettes in both modes, reading preferences after reload, cross-tab synchronization, 320px larger-monospace and 390px phone layouts, and the admin header/sidebar/settings with representative form and table content. The temporary admin presentation fixture was removed before the production build. Authenticated dashboard verification is pending a signed-in session; no admin data was edited during these checks.
+- Six regression tests cover portfolio behavior, palette contrast, preference restoration and rejection of invalid stored preferences. `lint:appearance` provides a strict check for the shared appearance and modified admin components alongside `lint:marketing`.

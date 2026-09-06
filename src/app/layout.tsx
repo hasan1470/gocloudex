@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import "./marketing.css";
+import "./appearance.css";
+import { appearanceBootstrap } from "@/lib/appearance";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
@@ -95,34 +97,7 @@ export default function RootLayout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `
-              (function() {
-                try {
-                  const savedColor = localStorage.getItem('theme-color');
-                  const savedFont = localStorage.getItem('theme-font');
-                  if (savedColor) {
-                    const colors = {
-                      'rgb(59 130 246)': 'rgb(37 99 235)',
-                      'rgb(147 51 234)': 'rgb(126 34 206)',
-                      'rgb(22 163 74)': 'rgb(21 128 61)',
-                      'rgb(220 26 26)': 'rgb(185 28 28)',
-                      'rgb(234 88 12)': 'rgb(194 65 12)'
-                    };
-                    document.documentElement.style.setProperty('--primary-color', savedColor);
-                    if (colors[savedColor]) {
-                      document.documentElement.style.setProperty('--primary-color-dark', colors[savedColor]);
-                    }
-                  }
-                  if (savedFont) {
-                    const fonts = { "'Inter', sans-serif": 'var(--font-inter), Arial, sans-serif', "'Merriweather', serif": 'Georgia, serif', "'JetBrains Mono', monospace": 'ui-monospace, monospace', "'Plus Jakarta Sans', sans-serif": 'system-ui, sans-serif' };
-                    if (fonts[savedFont]) {
-                      document.documentElement.style.setProperty('--heading-font', fonts[savedFont]);
-                      document.documentElement.style.setProperty('--body-font', fonts[savedFont]);
-                    }
-                  }
-                } catch (e) {}
-              })();
-            `,
+            __html: appearanceBootstrap,
           }}
         />
       </head>
