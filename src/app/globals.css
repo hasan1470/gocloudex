@@ -9,8 +9,8 @@
   /* Default Blue */
   --primary-color-dark: rgb(37 99 235);
   /* Default Blue Dark */
-  --heading-font: 'Inter', sans-serif;
-  --body-font: 'Inter', sans-serif;
+  --heading-font: var(--font-inter), Arial, sans-serif;
+  --body-font: var(--font-inter), Arial, sans-serif;
 
   /* Color System - Light Theme */
   --color-primary: var(--primary-color);

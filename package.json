@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "lint:marketing": "eslint \"src/app/(client)/page.tsx\" \"src/app/(client)/about/page.tsx\" \"src/app/(client)/services\" \"src/app/(client)/portfolio\" src/components/marketing src/components/client/layout/ClientHeader.tsx src/components/client/layout/ClientFooter.tsx src/components/client/layout/ThemeSettings.tsx src/data/services.ts src/data/showcase.ts src/lib/portfolio-utils.ts src/lib/portfolio.ts src/app/robots.ts src/app/sitemap.ts src/app/opengraph-image.tsx src/app/layout.tsx \"src/app/(client)/layout.tsx\" --max-warnings 0"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
@@ -21,14 +23,15 @@
     "clsx": "^2.1.1",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.546.0",
-    "mongoose": "^8.19.2",
-    "next": "16.0.10",
+    "mongoose": "^8.24.4",
+    "next": "^16.3.4",
     "next-themes": "^0.4.6",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.65.0",
     "react-hot-toast": "^2.6.0",
+    "sanitize-html": "^2.17.7",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.1.12"
   },
@@ -38,8 +41,9 @@
     "@types/nodemailer": "^7.0.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/sanitize-html": "^2.16.1",
     "eslint": "^9",
-    "eslint-config-next": "16.0.10",
+    "eslint-config-next": "^16.3.4",
     "nodemailer": "^7.0.10",
     "typescript": "^5"
   }

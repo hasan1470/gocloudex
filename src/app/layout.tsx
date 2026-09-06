@@ -1,44 +1,72 @@
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import { Toaster } from 'react-hot-toast';
-import './globals.css';
-import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { Suspense } from 'react';
-import PageLoader from '@/components/PageLoader';
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
+import "./globals.css";
+import "./marketing.css";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: {
-    default: 'GoCloudEx - Professional Portfolio & Cloud Solutions',
-    template: '%s | GoCloudEx'
+    default: "GoCloudEx — Websites & Digital Products",
+    template: "%s | GoCloudEx",
   },
-  description: 'Building exceptional digital experiences with cutting-edge cloud technologies. Expert in Next.js, Cloudinary, MongoDB and modern web development.',
-  keywords: ['portfolio', 'cloud solutions', 'web development', 'Next.js', 'React', 'Cloudinary', 'MongoDB', 'JavaScript', 'TypeScript', 'full-stack', 'developer', 'WordPress', 'headless CMS', 'Web Design', 'API Integration', 'WooCommerce', 'Elementor', 'Digital Experiences', 'SEO', 'Digital Marketing'],
-  authors: [{ name: 'GoCloudEx' }],
-  creator: 'GoCloudEx',
-  metadataBase: new URL('https://gocloudex.com'),
+  description:
+    "Thoughtful business websites, e-commerce stores and useful digital products. Explore GoCloudEx services, live projects and development approach.",
+  icons: { icon: "/icon.svg", shortcut: "/icon.svg" },
+  keywords: [
+    "portfolio",
+    "cloud solutions",
+    "web development",
+    "Next.js",
+    "React",
+    "Cloudinary",
+    "MongoDB",
+    "JavaScript",
+    "TypeScript",
+    "full-stack",
+    "developer",
+    "WordPress",
+    "headless CMS",
+    "Web Design",
+    "API Integration",
+    "WooCommerce",
+    "Elementor",
+    "Digital Experiences",
+    "SEO",
+    "Digital Marketing",
+  ],
+  authors: [{ name: "GoCloudEx" }],
+  creator: "GoCloudEx",
+  metadataBase: new URL("https://gocloudex.com"),
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: 'https://gocloudex.com',
-    title: 'GoCloudEx - Professional Portfolio & Cloud Solutions',
-    description: 'Building exceptional digital experiences with cutting-edge cloud technologies.',
-    siteName: 'GoCloudEx',
+    type: "website",
+    locale: "en_US",
+    url: "https://gocloudex.com",
+    title: "GoCloudEx — Websites & Digital Products",
+    description:
+      "Thoughtful websites and useful digital products. Designed with purpose, built with care.",
+    siteName: "GoCloudEx",
     images: [
       {
-        url: '/og-image.jpg',
+        url: "/opengraph-image",
         width: 1200,
         height: 630,
-        alt: 'GoCloudEx Portfolio',
+        alt: "GoCloudEx Portfolio",
       },
     ],
   },
   twitter: {
-    card: 'summary_large_image',
-    title: 'GoCloudEx - Professional Portfolio & Cloud Solutions',
-    description: 'Building exceptional digital experiences with cutting-edge cloud technologies.',
-    images: ['/twitter-image.jpg'],
+    card: "summary_large_image",
+    title: "GoCloudEx — Websites & Digital Products",
+    description:
+      "Thoughtful websites and useful digital products. Designed with purpose, built with care.",
+    images: ["/opengraph-image"],
   },
   robots: {
     index: true,
@@ -46,14 +74,12 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
     },
   },
 };
-
-import LoaderUI from '@/components/LoaderUI';
 
 export default function RootLayout({
   children,
@@ -61,7 +87,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`scroll-smooth ${inter.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         <script
           dangerouslySetInnerHTML={{
@@ -84,8 +114,11 @@ export default function RootLayout({
                     }
                   }
                   if (savedFont) {
-                    document.documentElement.style.setProperty('--heading-font', savedFont);
-                    document.documentElement.style.setProperty('--body-font', savedFont);
+                    const fonts = { "'Inter', sans-serif": 'var(--font-inter), Arial, sans-serif', "'Merriweather', serif": 'Georgia, serif', "'JetBrains Mono', monospace": 'ui-monospace, monospace', "'Plus Jakarta Sans', sans-serif": 'system-ui, sans-serif' };
+                    if (fonts[savedFont]) {
+                      document.documentElement.style.setProperty('--heading-font', fonts[savedFont]);
+                      document.documentElement.style.setProperty('--body-font', fonts[savedFont]);
+                    }
                   }
                 } catch (e) {}
               })();
@@ -100,30 +133,27 @@ export default function RootLayout({
           enableSystem={false}
           disableTransitionOnChange
         >
-          <Suspense fallback={<LoaderUI />}>
-            <PageLoader />
-          </Suspense>
           {children}
           <Toaster
             position="top-right"
             toastOptions={{
               duration: 4000,
               style: {
-                background: '#363636',
-                color: '#fff',
+                background: "#363636",
+                color: "#fff",
               },
               success: {
                 duration: 3000,
                 iconTheme: {
-                  primary: '#10B981',
-                  secondary: '#fff',
+                  primary: "#10B981",
+                  secondary: "#fff",
                 },
               },
               error: {
                 duration: 5000,
                 iconTheme: {
-                  primary: '#EF4444',
-                  secondary: '#fff',
+                  primary: "#EF4444",
+                  secondary: "#fff",
                 },
               },
             }}
