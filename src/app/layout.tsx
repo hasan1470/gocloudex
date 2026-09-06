@@ -4,6 +4,7 @@ import { Toaster } from "react-hot-toast";
 import "./globals.css";
 import "./marketing.css";
 import "./appearance.css";
+import "./communication.css";
 import { appearanceBootstrap } from "@/lib/appearance";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 

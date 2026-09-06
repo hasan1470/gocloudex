@@ -70,7 +70,7 @@ export default function AdminUsersPage() {
         limit: itemsPerPage,
         search: searchTerm,
         status: statusFilter
-      });
+      }, localStorage.getItem('adminToken') || '');
 
       if (result.success && result.data) {
         setUsers(result.data.users);
@@ -120,7 +120,7 @@ export default function AdminUsersPage() {
     }
 
     try {
-      const result = await deleteUser(userId);
+      const result = await deleteUser(userId, localStorage.getItem('adminToken') || '');
 
       if (result.success) {
         toast.success('User deleted successfully');

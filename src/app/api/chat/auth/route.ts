@@ -1,240 +1,129 @@
-import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/database';
-import User from '@/models/User';
-import { generatePassword, sendWelcomeEmail } from '@/lib/email';
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || '6ca5bc34a15ae62ac4a4abccb5c5177d7802e7d44b3ab47467d79a3e92462d0791161dd8';
-
-// Helper function to verify token
-const verifyToken = (token: string) => {
-  try {
-    return jwt.verify(token, JWT_SECRET) as any;
-  } catch (error) {
-    return null;
-  }
+import { NextRequest, NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { timingSafeEqual } from "node:crypto";
+import { z } from "zod";
+import User from "@/models/User";
+import connectDB from "@/lib/database";
+import { chatCookie, chatIdentity, chatSecret } from "@/lib/chat-auth";
+import { emailAddress, plainLine } from "@/lib/communication-validation";
+import {
+  allowed,
+  clientKey,
+  jsonError,
+  sameOrigin,
+  smallJson,
+} from "@/lib/communication-server";
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 7 * 86400,
 };
-
-// POST - Authenticate user (login/register)
 export async function POST(request: NextRequest) {
+  if (!sameOrigin(request)) return jsonError("Invalid origin", 403);
   try {
-    await connectDB();
-
-    const { name, email, password, mode } = await request.json();
-
-    // Validate required fields
-    if (!email) {
-      return NextResponse.json(
-        { error: 'Email is required' },
-        { status: 400 }
+    const input = z
+      .object({
+        mode: z.enum(["login", "register"]),
+        name: plainLine(100).optional(),
+        email: emailAddress,
+        password: z.string().min(1).max(72),
+      })
+      .safeParse(await smallJson(request));
+    if (!input.success) return jsonError("Enter a valid email and password.");
+    if (!(await allowed(`auth:${clientKey(request)}`, 15, 600000)))
+      return jsonError(
+        "Too many attempts. Please try again in a few minutes.",
+        429,
       );
-    }
-
-    if (mode === 'login' && !password) {
-      return NextResponse.json(
-        { error: 'Password is required for login' },
-        { status: 400 }
-      );
-    }
-
-    if (mode === 'register' && !name) {
-      return NextResponse.json(
-        { error: 'Name is required for new registration' },
-        { status: 400 }
-      );
-    }
-
-    // Validate email format
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Please provide a valid email address' },
-        { status: 400 }
-      );
-    }
-
-    // Find existing user
+    const { email, name, password, mode } = input.data;
     let user = await User.findOne({ email });
-    let isNewUser = false;
-
-    if (mode === 'login') {
-      // Login mode - verify credentials
-      if (!user) {
-        return NextResponse.json(
-          { error: 'No account found with this email. Please register as new user.' },
-          { status: 404 }
+    if (mode === "register") {
+      if (
+        !name ||
+        password.length < 8 ||
+        Buffer.byteLength(password, "utf8") > 72
+      )
+        return jsonError("Use your name and a password of 8–72 bytes.");
+      if (user && (!user.chatRegistrationPending || user.chats?.length))
+        return jsonError(
+          "If you already have an account, sign in with your existing password.",
+          409,
         );
-      }
-
-      if (user.password !== password) {
-        return NextResponse.json(
-          { error: 'Invalid password. Please check your password or use "New User" to get password via email.' },
-          { status: 401 }
-        );
-      }
-      
+      const hashed = await bcrypt.hash(password, 12);
+      user = user
+        ? await User.findOneAndUpdate(
+            {
+              _id: user._id,
+              chatRegistrationPending: true,
+              chats: { $size: 0 },
+            },
+            {
+              $set: { name, password: hashed, chatRegistrationPending: false },
+            },
+            { new: true },
+          )
+        : await User.create({ email, name, password: hashed });
+      if (!user)
+        return jsonError("Please sign in with your existing password.", 409);
     } else {
-      // Register mode - create new or handle existing
-      if (!user) {
-        // Create new user
-        const userPassword = generatePassword();
-        user = new User({
-          name,
-          email,
-          password: userPassword,
-          emailCount: 0,
-          emailUnreadCount: 0,
-          chatCount: 0,
-          chatUnreadCount: 0
-        });
-        await user.save();
-        isNewUser = true;
-
-        // Send welcome email with password
-        try {
-          await sendWelcomeEmail({
-            name,
-            email,
-            password: userPassword,
-            source: 'chat'
-          });
-          console.log('Welcome email sent to new chat user:', email);
-        } catch (emailError) {
-          console.error('Failed to send welcome email to chat user:', emailError);
-          // Don't fail the request if email fails
-        }
-
-      } else {
-        // Existing user trying to register again - send password reminder
-        try {
-          await sendWelcomeEmail({
-            name: user.name,
-            email: user.email,
-            password: user.password,
-            source: 'chat',
-            isReminder: true
-          });
-          console.log('Password reminder sent to existing user:', email);
-        } catch (emailError) {
-          console.error('Failed to send password reminder:', emailError);
-        }
-
-        // Return success but don't create token - force them to login
-        return NextResponse.json({
-          success: true,
-          data: {
-            isNewUser: false,
-            message: 'existing_user_please_login',
-            user: {
-              id: user._id,
-              name: user.name,
-              email: user.email
-            }
-          }
-        });
-      }
+      const stored = user?.password || "";
+      const valid = stored.startsWith("$2")
+        ? await bcrypt.compare(password, stored)
+        : !!stored &&
+          Buffer.byteLength(stored) === Buffer.byteLength(password) &&
+          timingSafeEqual(Buffer.from(stored), Buffer.from(password));
+      if (!user || !valid)
+        return jsonError("Email or password is incorrect.", 401);
+      if (!stored.startsWith("$2"))
+        await User.updateOne(
+          { _id: user._id, password: stored },
+          { $set: { password: await bcrypt.hash(password, 12) } },
+        );
     }
-
-    // Create JWT token for authenticated users
-    const token = jwt.sign(
-      { 
-        userId: user._id.toString(),
-        email: user.email,
-        name: user.name
-      },
-      JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    // Prepare response data
-    const responseData: any = {
-      isNewUser,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email
-      },
-      token
-    };
-
-    // Only return password for new users
-    if (isNewUser) {
-      responseData.password = user.password;
-    }
-
-    return NextResponse.json({
-      success: true,
-      data: responseData
+    const token = jwt.sign({ userId: String(user._id) }, chatSecret(), {
+      expiresIn: "7d",
     });
-
-  } catch (error) {
-    console.error('Chat auth error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
-  }
-}
-
-// GET - Verify token and get user info
-export async function GET(request: NextRequest) {
-  try {
-    const { searchParams } = new URL(request.url);
-    const token = searchParams.get('token');
-
-    if (!token) {
-      return NextResponse.json(
-        { error: 'Token is required' },
-        { status: 400 }
-      );
-    }
-
-    const decoded = verifyToken(token);
-    
-    if (!decoded) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'Invalid or expired token' 
-        },
-        { status: 401 }
-      );
-    }
-
-    // Get fresh user data from database
-    await connectDB();
-    const user = await User.findById(decoded.userId).select('name email');
-    
-    if (!user) {
-      return NextResponse.json(
-        { 
-          success: false,
-          error: 'User not found' 
-        },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
+    const response = NextResponse.json({
       success: true,
       data: {
-        valid: true,
-        user: {
-          id: user._id,
-          name: user.name,
-          email: user.email
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Token verification error:', error);
-    return NextResponse.json(
-      { 
-        success: false,
-        error: 'Token verification failed' 
+        user: { id: String(user._id), name: user.name, email: user.email },
       },
-      { status: 500 }
-    );
+    });
+    response.cookies.set(chatCookie, token, cookieOptions);
+    return response;
+  } catch {
+    return jsonError("Unable to connect. Please try again.", 503);
   }
+}
+export async function GET(request: NextRequest) {
+  const auth = chatIdentity(request);
+  if (!auth) return jsonError("Not signed in", 401);
+  await connectDB();
+  const user = await User.findById(auth.userId).select("name email");
+  if (!user) return jsonError("Not signed in", 401);
+  const response = NextResponse.json(
+    {
+      success: true,
+      data: {
+        user: { id: String(user._id), name: user.name, email: user.email },
+      },
+    },
+    { headers: { "Cache-Control": "no-store" } },
+  );
+  if (!request.cookies.get(chatCookie))
+    response.cookies.set(
+      chatCookie,
+      jwt.sign({ userId: String(user._id) }, chatSecret(), { expiresIn: "7d" }),
+      cookieOptions,
+    );
+  return response;
+}
+export async function DELETE(request: NextRequest) {
+  if (!sameOrigin(request)) return jsonError("Invalid origin", 403);
+  const response = NextResponse.json({ success: true });
+  response.cookies.set(chatCookie, "", { ...cookieOptions, maxAge: 0 });
+  return response;
 }

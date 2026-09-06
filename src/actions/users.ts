@@ -2,7 +2,7 @@
 
 import connectDB from '@/lib/database';
 import User from '@/models/User';
-import { revalidateTag } from 'next/cache';
+import { verifyAdminAuth } from '@/middlewares/authAdmin';
 
 interface UsersFilter {
     page?: number;
@@ -14,7 +14,9 @@ interface UsersFilter {
 /**
  * Fetches users with filtering and pagination.
  */
-export async function getAdminUsers(filters: UsersFilter = {}) {
+export async function getAdminUsers(filters: UsersFilter = {}, token = '') {
+    const auth = await verifyAdminAuth(new Request('https://gocloudex.com', { headers: { Authorization: `Bearer ${token}` } }));
+    if ('error' in auth) return { success: false, error: 'Administrator sign-in required' };
     try {
         await connectDB();
         const { page = 1, limit = 10, search = '', status = 'all' } = filters;
@@ -61,7 +63,9 @@ export async function getAdminUsers(filters: UsersFilter = {}) {
 /**
  * Deletes a user by ID.
  */
-export async function deleteUser(id: string) {
+export async function deleteUser(id: string, token = '') {
+    const auth = await verifyAdminAuth(new Request('https://gocloudex.com', { headers: { Authorization: `Bearer ${token}` } }));
+    if ('error' in auth) return { success: false, error: 'Administrator sign-in required' };
     try {
         await connectDB();
         const result = await User.findByIdAndDelete(id);

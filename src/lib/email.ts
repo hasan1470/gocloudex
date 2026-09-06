@@ -1,376 +1,141 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
+import { randomBytes } from "node:crypto";
+import { lookup } from "node:dns/promises";
+import { BlockList, isIP } from "node:net";
+import {
+  getMailSettings,
+  decryptMailPassword,
+  type MailSettings,
+} from "@/lib/communication-settings";
+import { escapeHtml } from "@/lib/communication-validation";
 
-// Generate random password (8 characters: letters and numbers)
-export function generatePassword(): string {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let password = '';
-  for (let i = 0; i < 8; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
+export function generatePassword() {
+  return randomBytes(18).toString("base64url");
 }
-
-// Create email transporter dynamically based on service type
-const serviceType = (process.env.EMAIL_SERVICE_TYPE || 'hostinger').toLowerCase();
-
-console.log(`Email Service Initializing: ${serviceType} (User: ${process.env.EMAIL_USER})`);
-
-const createTransporter = () => {
-  if (serviceType === 'gmail') {
-    return nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USER?.trim(),
-        pass: process.env.EMAIL_PASSWORD?.trim(),
-      },
-    });
+const blocked = new BlockList();
+for (const [network, prefix] of [
+  ["0.0.0.0", 8],
+  ["10.0.0.0", 8],
+  ["100.64.0.0", 10],
+  ["127.0.0.0", 8],
+  ["169.254.0.0", 16],
+  ["172.16.0.0", 12],
+  ["192.168.0.0", 16],
+  ["192.0.0.0", 24],
+  ["198.18.0.0", 15],
+  ["224.0.0.0", 4],
+  ["240.0.0.0", 4],
+] as const)
+  blocked.addSubnet(network, prefix);
+blocked.addAddress("::", "ipv6");
+blocked.addAddress("::1", "ipv6");
+blocked.addSubnet("fc00::", 7, "ipv6");
+blocked.addSubnet("fe80::", 10, "ipv6");
+blocked.addSubnet("ff00::", 8, "ipv6");
+async function transport(settings: MailSettings) {
+  const environment = settings.provider === "environment";
+  const user = environment ? process.env.EMAIL_USER?.trim() : settings.smtpUser;
+  const password = environment
+    ? process.env.EMAIL_PASSWORD?.trim()
+    : settings.encryptedPassword
+      ? decryptMailPassword(settings.encryptedPassword)
+      : "";
+  if (!user || !password) throw new Error("MAIL_NOT_CONFIGURED");
+  const gmail =
+    settings.provider === "gmail" ||
+    (environment && process.env.EMAIL_SERVICE_TYPE === "gmail");
+  const hostname = gmail
+    ? "smtp.gmail.com"
+    : environment
+      ? process.env.EMAIL_HOST || "smtp.hostinger.com"
+      : settings.smtpHost;
+  const port = gmail
+    ? 465
+    : environment
+      ? Number(process.env.EMAIL_PORT || 587)
+      : settings.smtpPort;
+  let host = hostname;
+  // Pin checked public addresses for dashboard-supplied SMTP hosts.
+  if (!environment) {
+    const addresses = await lookup(hostname, { all: true });
+    if (
+      !addresses.length ||
+      addresses.some(({ address }) =>
+        blocked.check(address, isIP(address) === 6 ? "ipv6" : "ipv4"),
+      )
+    )
+      throw new Error("MAIL_HOST_NOT_PUBLIC");
+    host =
+      addresses.find(({ family }) => family === 4)?.address ||
+      addresses[0].address;
   }
-
-  // Default to Hostinger/Custom SMTP
-  return nodemailer.createTransport({
-    host: process.env.EMAIL_HOST || 'smtp.hostinger.com',
-    port: parseInt(process.env.EMAIL_PORT || '587'),
-    secure: process.env.EMAIL_PORT === '465',
-    auth: {
-      user: process.env.EMAIL_USER?.trim(),
-      pass: process.env.EMAIL_PASSWORD?.trim(),
-    },
-    // Add some common defaults for reliability
-    tls: {
-      rejectUnauthorized: false // Helps with some shared hosting certificates
-    }
+  const client = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465,
+    requireTLS: port !== 465,
+    auth: { user, pass: password },
+    connectionTimeout: 10000,
+    greetingTimeout: 10000,
+    socketTimeout: 15000,
+    tls: { servername: hostname, minVersion: "TLSv1.2" },
+    disableFileAccess: true,
+    disableUrlAccess: true,
   });
-};
-
-const transporter = createTransporter();
-
-// Send email to admin (with reply-to set to customer email)
-export async function sendEmailToAdmin(userData: {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  password?: string;
-  isNewCustomer: boolean;
-  source?: 'contact' | 'chat';
-}) {
-  try {
-    const sourceText = userData.source === 'chat' ? 'Chat System' : 'Contact Form';
-    const adminEmail = process.env.EMAIL_USER;
-
-    const mailOptions = {
-      from: `"GoCloudEx ${sourceText}: ${userData.email}" <${adminEmail}>`,
-      to: adminEmail,
-      replyTo: userData.email,
-      subject: `${userData.isNewCustomer ? 'New Customer' : 'Existing Customer'}: ${userData.subject}`,
-      html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6;">
-            ${userData.isNewCustomer ? 'New Customer' : 'Existing Customer'} - ${userData.subject}
-          </h2>
-          <div style="background: #f8fafc; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <p><strong>Name:</strong> ${userData.name}</p>
-            <p><strong>Email:</strong> ${userData.email}</p>
-            <p><strong>Source:</strong> ${sourceText}</p>
-            ${userData.isNewCustomer && userData.password ? `<p><strong>Generated Password:</strong> ${userData.password}</p>` : ''}
-            <p><strong>Subject:</strong> ${userData.subject}</p>
-            <p><strong>Message:</strong></p>
-            <div style="background: white; padding: 15px; border-radius: 4px; margin-top: 10px;">
-              ${userData.message.replace(/\n/g, '<br>')}
-            </div>
-          </div>
-          <div style="background: #f0fdf4; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 0; color: #166534;">
-              <strong>💡 Quick Reply:</strong> Simply hit "Reply" in your email client to respond directly to ${userData.name}.
-            </p>
-          </div>
-          <p style="color: #64748b; font-size: 14px;">
-            This message was sent from your website ${sourceText.toLowerCase()}.
-            ${userData.isNewCustomer ? 'This is a new customer.' : 'This customer already exists in the system.'}
-          </p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`Email sent to admin successfully - ${userData.isNewCustomer ? 'New' : 'Existing'} customer from ${sourceText}`);
-  } catch (error: any) {
-    console.error('Failed to send email to admin:', error.message);
-    if (error.code) console.error('Error Code:', error.code);
-    throw error;
-  }
+  return { client, user };
 }
-
-// Send welcome email to customer (only for new customers)
-export async function sendWelcomeEmail(userData: {
+export function mailErrorMessage(error: unknown) {
+  if ((error as { code?: string })?.code === "EAUTH")
+    return "Mailbox authentication failed. Check the address and app password in Settings.";
+  if (error instanceof Error && error.message === "MAIL_NOT_CONFIGURED")
+    return "Connect a sending mailbox in Settings.";
+  return "The mail server could not confirm delivery. Check the connection in Settings before retrying.";
+}
+export async function deliverMail(
+  input: { to: string; subject: string; text: string; replyTo?: string },
+  supplied?: MailSettings,
+) {
+  const settings = supplied || (await getMailSettings());
+  const { client, user } = await transport(settings);
+  const info = await client.sendMail({
+    from: { name: settings.senderName, address: user },
+    to: input.to,
+    replyTo: input.replyTo || settings.inboxEmail,
+    subject: input.subject,
+    text: input.text,
+    html: `<div style="font:16px/1.7 Arial,sans-serif;color:#172f3a;max-width:640px;margin:auto"><h2>${escapeHtml(settings.senderName)}</h2><div style="white-space:pre-wrap">${escapeHtml(input.text)}</div></div>`,
+  });
+  if (!info.accepted?.length) throw new Error("MAIL_NOT_ACCEPTED");
+  return String(info.messageId);
+}
+export async function testEmailConnection(settings?: MailSettings) {
+  const { client } = await transport(settings || (await getMailSettings()));
+  await client.verify();
+  return true;
+}
+// Compatibility with explicit account actions in the existing user manager.
+export async function sendWelcomeEmail(data: {
   name: string;
   email: string;
   password: string;
-  source?: 'contact' | 'chat' | 'admin';
+  source?: string;
   isReminder?: boolean;
 }) {
-  try {
-    const sourceText = userData.source === 'chat' ? 'chat system' :
-      userData.source === 'admin' ? 'admin system' : 'contact form';
-    const adminEmail = process.env.EMAIL_USER;
-
-    const mailOptions = {
-      from: `"GoCloudEx" <${adminEmail}>`,
-      to: userData.email,
-      replyTo: adminEmail,
-      subject: userData.isReminder
-        ? 'Your GoCloudEx Account Password'
-        : 'Welcome to GoCloudEx - Your Account Details',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6;">
-            ${userData.isReminder ? 'Your Account Password' : 'Welcome to GoCloudEx!'}
-          </h2>
-          <p>Dear ${userData.name},</p>
-          <p>We've received your message and created an account for you for future communication.</p>
-          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #0369a1; margin-top: 0;">
-              ${userData.isReminder ? 'Your Account Credentials' : 'Your Account Details'}
-            </h3>
-            <p><strong>Name:</strong> ${userData.name}</p>
-            <p><strong>Email:</strong> ${userData.email}</p>
-            <p><strong>Password:</strong> ${userData.password}</p>
-            ${!userData.isReminder && userData.source ? `<p><strong>Source:</strong> Created via ${sourceText}</p>` : ''}
-          </div>
-
-          ${userData.isReminder ? `
-            <p>We noticed you tried to create a new account, but you're already our valued customer!</p>
-            <div style="background: #fffbeb; padding: 15px; border-radius: 6px; margin: 20px 0;">
-              <p style="margin: 0; color: #92400e;">
-                <strong>💡 You're our existing customer!</strong> Use the password above to access your chat history and account.
-              </p>
-            </div>
-          ` : `
-            <p>You can use these credentials to:</p>
-            <ul>
-              <li>Access your chat history in our floating chat system</li>
-              <li>Track your email communications with us</li>
-              <li>Access your client portal in the future</li>
-            </ul>
-          `}
-          
-          <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 0; color: #475569;">
-              <strong>To access chat:</strong> Use the chat widget on our website and select "Returning User" to login with these credentials.
-            </p>
-          </div>
-
-          <p>Best regards,<br>The GoCloudEx Team</p>
-          
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
-          <p style="color: #64748b; font-size: 12px;">
-            This is an automated message. Please do not reply to this email.
-          </p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log(`${userData.isReminder ? 'Password reminder' : 'Welcome'} email sent to ${userData.source} user successfully`);
-  } catch (error: any) {
-    console.error(`Failed to send ${userData.isReminder ? 'password reminder' : 'welcome'} email:`, error.message);
-    if (error.code) console.error('Error Code:', error.code);
-    throw error;
-  }
+  await deliverMail({
+    to: data.email,
+    subject: "Your GoCloudEx account",
+    text: `Hello ${data.name},\n\nYour account has been created by GoCloudEx.\nEmail: ${data.email}\nTemporary password: ${data.password}\n\nYou can sign in through the website chat.`,
+  });
 }
-
-// Send update notification email when user credentials are modified
-export async function sendUpdateEmail(userData: {
+export async function sendUpdateEmail(data: {
   name: string;
   email: string;
   password: string;
   previousEmail?: string;
 }) {
-  try {
-    const adminEmail = process.env.EMAIL_USER;
-
-    const mailOptions = {
-      from: `"GoCloudEx" <${adminEmail}>`,
-      to: userData.email,
-      replyTo: adminEmail,
-      subject: 'Your GoCloudEx Account Has Been Updated',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6;">Account Updated</h2>
-          <p>Dear ${userData.name},</p>
-          
-          <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="color: #0369a1; margin-top: 0;">Your Updated Account Details</h3>
-            <p><strong>Name:</strong> ${userData.name}</p>
-            <p><strong>Email:</strong> ${userData.email}</p>
-            <p><strong>Password:</strong> ${userData.password}</p>
-            ${userData.previousEmail ? `
-              <div style="background: #fffbeb; padding: 10px; border-radius: 4px; margin-top: 10px;">
-                <p style="margin: 0; color: #92400e;">
-                  <strong>Note:</strong> Your email has been updated from ${userData.previousEmail}
-                </p>
-              </div>
-            ` : ''}
-          </div>
-
-          <p>Your account credentials have been updated by our admin team. You can now use these new credentials to:</p>
-          <ul>
-            <li>Access your chat history in our floating chat system</li>
-            <li>Track your email communications with us</li>
-            <li>Access your client portal</li>
-          </ul>
-          
-          <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 0; color: #475569;">
-              <strong>To access your account:</strong> Use the credentials above with our chat system or contact forms.
-              If you didn't request this change, please contact us immediately.
-            </p>
-          </div>
-
-          <p>Best regards,<br>The GoCloudEx Team</p>
-          
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
-          <p style="color: #64748b; font-size: 12px;">
-            This is an automated message. Please do not reply to this email.
-          </p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log('Update notification email sent successfully to:', userData.email);
-  } catch (error) {
-    console.error('Failed to send update notification email:', error);
-    throw error;
-  }
+  await deliverMail({
+    to: data.email,
+    subject: "Your GoCloudEx account was updated",
+    text: `Hello ${data.name},\n\nYour account details were updated by the GoCloudEx team.\nEmail: ${data.email}\nPassword: ${data.password}\n\nIf you did not request this, please contact us.`,
+  });
 }
-
-// Send follow-up email to existing customers (without password)
-export async function sendFollowUpEmail(userData: {
-  name: string;
-  email: string;
-  subject: string;
-}) {
-  try {
-    const adminEmail = process.env.EMAIL_USER;
-
-    const mailOptions = {
-      from: `"GoCloudEx" <${adminEmail}>`,
-      to: userData.email,
-      replyTo: adminEmail,
-      subject: 'We\'ve received your message',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #3b82f6;">Message Received</h2>
-          <p>Dear ${userData.name},</p>
-          
-          <p>Thank you for contacting us again. We've received your message regarding:</p>
-          
-          <div style="background: #f0f9ff; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 0; font-style: italic;">"${userData.subject}"</p>
-          </div>
-
-          <p>We'll review your message and get back to you as soon as possible.</p>
-          
-          <div style="background: #f1f5f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
-            <p style="margin: 0; color: #475569;">
-              <strong>Your existing credentials are still active.</strong> You can use them to access your client portal.
-            </p>
-          </div>
-
-          <p>Best regards,<br>The GoCloudEx Team</p>
-          
-          <hr style="border: none; border-top: 1px solid #e2e8f0; margin: 30px 0;">
-          <p style="color: #64748b; font-size: 12px;">
-            This is an automated message. Please do not reply to this email.
-          </p>
-        </div>
-      `,
-    };
-
-    await transporter.sendMail(mailOptions);
-    console.log('Follow-up email sent to existing customer successfully');
-  } catch (error) {
-    console.error('Failed to send follow-up email:', error);
-    throw error;
-  }
-}
-
-// Main function to handle customer emails
-// Update the handleCustomerEmail function to properly handle contact form emails
-export async function handleCustomerEmail(userData: {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-  isNewCustomer: boolean;
-  existingPassword?: string;
-  source?: 'contact' | 'chat';
-}) {
-  try {
-    console.log(`Handling email for ${userData.isNewCustomer ? 'NEW' : 'EXISTING'} customer from ${userData.source}: ${userData.email}`);
-
-    // Send email to admin with customer's email as reply-to
-    await sendEmailToAdmin({
-      name: userData.name,
-      email: userData.email,
-      subject: userData.subject,
-      message: userData.message,
-      password: userData.isNewCustomer ? userData.existingPassword : undefined,
-      isNewCustomer: userData.isNewCustomer,
-      source: userData.source
-    });
-
-    // Send welcome email to new customers (both contact form and chat)
-    if (userData.isNewCustomer && userData.existingPassword) {
-      await sendWelcomeEmail({
-        name: userData.name,
-        email: userData.email,
-        password: userData.existingPassword,
-        source: userData.source || 'contact'
-      });
-
-      return {
-        success: true,
-        message: 'Welcome email sent with credentials',
-        customerType: 'new',
-        source: userData.source
-      };
-    } else {
-      // For existing customers from contact form, send follow-up email
-      if (userData.source === 'contact') {
-        await sendFollowUpEmail({
-          name: userData.name,
-          email: userData.email,
-          subject: userData.subject
-        });
-      }
-      // For existing chat users, no separate email needed as they see messages in chat
-
-      return {
-        success: true,
-        message: userData.source === 'contact' ? 'Follow-up email sent' : 'Message processed',
-        customerType: 'existing',
-        source: userData.source
-      };
-    }
-
-  } catch (error) {
-    console.error('Failed to handle customer email:', error);
-    throw error;
-  }
-}
-
-// Test email connection
-export async function testEmailConnection() {
-  try {
-    await transporter.verify();
-    console.log('Email server connection verified');
-    return true;
-  } catch (error: any) {
-    console.error('Email server connection failed:', error.message);
-    if (error.code) console.error('Error Code:', error.code);
-    return false;
-  }
-}
-

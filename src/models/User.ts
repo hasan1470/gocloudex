@@ -33,6 +33,7 @@ const UserSchema: Schema = new Schema(
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    chatRegistrationPending: { type: Boolean, default: false },
     
     // Email System (simplified - no emails array)
     emailCount: { type: Number, default: 0 },
@@ -46,7 +47,12 @@ const UserSchema: Schema = new Schema(
     chatUnreadCount: { type: Number, default: 0 },
     lastChatMessage: { type: String, default: '' },
     lastChatDate: { type: Date, default: Date.now },
+    lastSeenAt: Date,
+    adminSeenAt: Date,
+    userTypingUntil: Date,
+    adminTypingUntil: Date,
     chats: [{
+      clientId: String,
       message: { type: String, required: true },
       sender: { type: String, enum: ['user', 'admin'], required: true },
       isRead: { type: Boolean, default: false },
@@ -57,7 +63,6 @@ const UserSchema: Schema = new Schema(
 );
 
 // Create indexes for better performance
-UserSchema.index({ email: 1 });
 UserSchema.index({ lastEmailDate: -1 });
 UserSchema.index({ lastChatDate: -1 });
 UserSchema.index({ 'chats.createdAt': -1 });

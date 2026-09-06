@@ -76,3 +76,11 @@ Local verification evidence is saved outside the repository at `D:/MERN/All New/
 ## Closing-section color correction
 
 Following the clarified preference, "How we work" uses the regular page background and text colors. The final call-to-action and footer retain their colored brand backgrounds. Both treatments follow the selected palette and light/dark mode.
+
+## Chat and contact update
+
+- Rebuilt visitor chat and the dashboard Team inbox with message bubbles, date groups, emoji, optimistic sending/retry, real activity and typing indicators, unread counts and sent/read ticks. Drafts survive minimizing; mobile chat locks background scrolling and follows the selected palette, mode, font and reading size.
+- Replaced simulated presence and unprotected chat/email server actions with authenticated routes. Protected the remaining user-management actions; new chat passwords are hashed and visitor authentication uses an HttpOnly cookie with legacy-session migration.
+- Rebuilt Contact and added full enquiry storage, dashboard replies and visible delivery/retry status. Settings now control receiving/public addresses and the sending mailbox, with encrypted Gmail/SMTP secrets and a connection check. The initial contact address is pandawebservice@gmail.com; sending as Gmail requires the owner's app password.
+- Production build/TypeScript, three scoped lint checks, six existing regression tests and the isolated communication integration suite passed. Integration checks use temporary MongoDB and a local TLS mail sink; no real customers were contacted. Browser checks covered signup, two-sided messaging/read status, enquiry submission/reply, mailbox fields, dark/light layouts and 320px Larger/Mono chat without horizontal overflow.
+- Setup, limitations and repeatable test instructions are in `docs/communication.md`. Production Gmail authentication has not been verified without the owner's app password.

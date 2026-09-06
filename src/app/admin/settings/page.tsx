@@ -1,5 +1,6 @@
 import Link from "next/link";
 import ThemeSettings from "@/components/client/layout/ThemeSettings";
+import MailSettings from "@/components/communication/MailSettings";
 
 export default function AdminSettings() {
   return (
@@ -8,8 +9,9 @@ export default function AdminSettings() {
         Workspace settings
       </h1>
       <p className="text-textLight mt-3">
-        A more comfortable space for your everyday work.
+        Manage your contact mailbox and customize your workspace.
       </p>
+      <MailSettings />
       <section className="bg-bgLight border border-border rounded-xl p-6 sm:p-8 mt-8">
         <h2 className="text-xl font-semibold text-headingLight">
           Appearance & readability

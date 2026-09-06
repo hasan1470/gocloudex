@@ -1,186 +1,164 @@
-import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/database';
-import User from '@/models/User';
-import { verifyAdminAuth } from '@/middlewares/authAdmin';
-
-// GET - Fetch users with pagination and filtering (only those with email activity)
+import { NextRequest, NextResponse } from "next/server";
+import { z } from "zod";
+import { Types } from "mongoose";
+import { verifyAdminAuth } from "@/middlewares/authAdmin";
+import Message from "@/models/Message";
+import User from "@/models/User";
+import connectDB from "@/lib/database";
+import { deliverContactMessage } from "@/lib/contact-delivery";
+import { allowed, jsonError, smallJson } from "@/lib/communication-server";
+import { escapeRegex } from "@/lib/communication-validation";
+const idSchema = z.string().regex(/^[a-f0-9]{24}$/i);
 export async function GET(request: NextRequest) {
+  const auth = await verifyAdminAuth(request);
+  if ("error" in auth) return auth.error;
   try {
-
-    // Verify authentication and admin role
-    const authResult = await verifyAdminAuth(request);
-    if ('error' in authResult) {
-        return authResult.error;
-    }
-
     await connectDB();
-
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
-    const search = searchParams.get('search') || '';
-    const status = searchParams.get('status') || 'all';
-
-    const skip = (page - 1) * limit;
-
-    // Build query - Only users who have email activity
-    let query: any = {
-      $and: [
-        { lastEmailMessage: { $exists: true, $ne: '' } },
-        { lastEmailSubject: { $exists: true, $ne: '' } }
-      ]
-    };
-    
-    // Search filter
-    if (search) {
-      query.$and.push({
-        $or: [
-          { name: { $regex: search, $options: 'i' } },
-          { email: { $regex: search, $options: 'i' } }
-        ]
-      });
+    const id = request.nextUrl.searchParams.get("id");
+    if (id) {
+      if (!idSchema.safeParse(id).success) return jsonError("Invalid enquiry");
+      const message = await Message.findOne({ _id: id, isReply: false }).lean();
+      if (!message) return jsonError("Enquiry not found", 404);
+      const replies = await Message.find({ repliedTo: id, isReply: true })
+        .sort({ createdAt: 1 })
+        .lean();
+      return NextResponse.json({ success: true, data: { message, replies } });
     }
-
-    // Status filter - using emailUnreadCount for email-specific filtering
-    if (status === 'unread') {
-      query.$and.push({ emailUnreadCount: { $gt: 0 } });
-    } else if (status === 'read') {
-      query.$and.push({ emailUnreadCount: 0 });
-    }
-
-    // Get users with pagination - sort by lastEmailDate
-    const users = await User.find(query)
-      .sort({ lastEmailDate: -1 })
-      .skip(skip)
-      .limit(limit)
-      .select('name email password emailCount emailUnreadCount lastEmailSubject lastEmailMessage lastEmailDate createdAt')
-      .lean();
-
-    // Get total count for pagination
-    const total = await User.countDocuments(query);
-    const totalPages = Math.ceil(total / limit);
-
-    // Transform data for frontend
-    const transformedUsers = users.map(user => ({
-      id: user._id,
-      name: user.name,
-      email: user.email,
-      password: user.password,
-      emailCount: user.emailCount || 0,
-      emailUnreadCount: user.emailUnreadCount || 0,
-      lastEmailSubject: user.lastEmailSubject || '',
-      lastEmailMessage: user.lastEmailMessage || '',
-      lastEmailDate: user.lastEmailDate || user.createdAt,
-      createdAt: user.createdAt
-    }));
-
-    return NextResponse.json({
-      success: true,
-      data: {
-        users: transformedUsers,
-        pagination: {
-          currentPage: page,
-          totalPages,
-          totalUsers: total,
-          hasNext: page < totalPages,
-          hasPrev: page > 1
-        }
-      }
-    });
-
-  } catch (error) {
-    console.error('Users API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    const search = escapeRegex(
+      (request.nextUrl.searchParams.get("q") || "").slice(0, 100),
     );
+    const page = Math.max(
+      1,
+      Math.min(10000, Number(request.nextUrl.searchParams.get("page")) || 1),
+    );
+    const query = {
+      isReply: false,
+      ...(request.nextUrl.searchParams.get("unread") === "1"
+        ? { isRead: false }
+        : {}),
+      ...(search
+        ? {
+            $or: ["name", "email", "subject"].map((field) => ({
+              [field]: { $regex: search, $options: "i" },
+            })),
+          }
+        : {}),
+    };
+    const [messages, total] = await Promise.all([
+      Message.find(query)
+        .sort({ createdAt: -1 })
+        .skip((page - 1) * 25)
+        .limit(25)
+        .lean(),
+      Message.countDocuments(query),
+    ]);
+    // Preserve access to older enquiries for which only a summary was ever stored.
+    const legacy =
+      page === 1 && !search
+        ? await User.aggregate([
+            { $match: { emailCount: { $gt: 0 } } },
+            {
+              $lookup: {
+                from: "messages",
+                localField: "_id",
+                foreignField: "user",
+                as: "savedMessages",
+              },
+            },
+            { $match: { "savedMessages.0": { $exists: false } } },
+            { $sort: { lastEmailDate: -1 } },
+            { $limit: 25 },
+            {
+              $project: {
+                name: 1,
+                email: 1,
+                lastEmailSubject: 1,
+                lastEmailMessage: 1,
+                lastEmailDate: 1,
+              },
+            },
+          ])
+        : [];
+    return NextResponse.json(
+      { success: true, data: { messages, legacy, page, total } },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch {
+    return jsonError("Could not load enquiries", 503);
   }
 }
-
-// PATCH - Update user read status
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
+  const auth = await verifyAdminAuth(request);
+  if ("error" in auth) return auth.error;
   try {
-
-    // Verify authentication and admin role
-    const authResult = await verifyAdminAuth(request);
-    if ('error' in authResult) {
-        return authResult.error;
-    }
-
+    const input = z
+      .object({ id: idSchema, action: z.enum(["read", "unread", "retry"]) })
+      .parse(await smallJson(request));
     await connectDB();
-
-    const { id, action, originalUnreadCount } = await request.json();
-
-    if (!id) {
-      return NextResponse.json(
-        { error: 'User ID is required' },
-        { status: 400 }
-      );
-    }
-
-    // Find the user
-    const user = await User.findById(id);
-    if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      );
-    }
-
-    if (action === 'mark-read') {
-      // Mark ALL email messages as read by setting emailUnreadCount to 0
-      user.emailUnreadCount = 0;
-      
-      await user.save();
-      
-      return NextResponse.json({
-        success: true,
-        data: {
-          unreadCount: 0,
-          message: 'All emails marked as read'
-        }
-      });
-      
-    } else if (action === 'mark-unread') {
-      // Restore to original unread count or use smart default
-      let messagesToMarkUnread = 0;
-      
-      if (originalUnreadCount && originalUnreadCount > 0) {
-        // Use the original unread count if provided
-        messagesToMarkUnread = Math.min(originalUnreadCount, user.emailCount);
-      } else {
-        // If no original count, use a smart default
-        if (user.emailUnreadCount === 0) {
-          // If all are read, mark 25% of emails as unread (minimum 1)
-          messagesToMarkUnread = Math.max(1, Math.ceil(user.emailCount * 0.25));
-        } else {
-          // If some are already unread, double the unread count (but don't exceed total emails)
-          messagesToMarkUnread = Math.min(user.emailUnreadCount * 2, user.emailCount);
-        }
-      }
-      
-      user.emailUnreadCount = messagesToMarkUnread;
-      await user.save();
-      
-      return NextResponse.json({
-        success: true,
-        data: {
-          unreadCount: messagesToMarkUnread,
-          message: `${messagesToMarkUnread} emails marked as unread`
-        }
-      });
+    if (input.action === "retry") {
+      await deliverContactMessage(input.id);
     } else {
-      return NextResponse.json(
-        { error: 'Invalid action' },
-        { status: 400 }
+      const message = await Message.findOneAndUpdate(
+        { _id: input.id, isReply: false },
+        { $set: { isRead: input.action === "read" } },
+        { new: true },
+      );
+      if (!message) return jsonError("Enquiry not found", 404);
+      const count = await Message.countDocuments({
+        user: message.user,
+        isReply: false,
+        isRead: false,
+      });
+      await User.updateOne(
+        { _id: message.user },
+        { $set: { emailUnreadCount: count } },
       );
     }
-
-  } catch (error) {
-    console.error('Update read status error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
+    return NextResponse.json({ success: true });
+  } catch {
+    return jsonError("Could not update enquiry");
+  }
+}
+export async function POST(request: Request) {
+  const auth = await verifyAdminAuth(request);
+  if ("error" in auth) return auth.error;
+  try {
+    const input = z
+      .object({
+        id: idSchema,
+        message: z.string().trim().min(1).max(10000),
+        requestId: z.string().uuid(),
+      })
+      .parse(await smallJson(request));
+    if (!(await allowed(`reply:${auth.user.email}`, 40, 60000)))
+      return jsonError("Please wait before sending more replies.", 429);
+    const parent = await Message.findOne({ _id: input.id, isReply: false });
+    if (!parent) return jsonError("Enquiry not found", 404);
+    const reply = await Message.findOneAndUpdate(
+      { requestId: input.requestId },
+      {
+        $setOnInsert: {
+          _id: new Types.ObjectId(),
+          requestId: input.requestId,
+          user: parent.user,
+          name: parent.name,
+          email: parent.email,
+          subject: `Re: ${parent.subject}`,
+          message: input.message,
+          isReply: true,
+          isRead: true,
+          repliedTo: parent._id,
+          deliveryStatus: "pending",
+        },
+      },
+      { upsert: true, new: true },
     );
+    if (String(reply.repliedTo) !== input.id)
+      return jsonError("Invalid reply request");
+    await deliverContactMessage(String(reply._id));
+    const saved = await Message.findById(reply._id).lean();
+    return NextResponse.json({ success: true, data: saved });
+  } catch {
+    return jsonError("Could not save the reply. Please try again.", 500);
   }
 }

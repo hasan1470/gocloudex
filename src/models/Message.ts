@@ -25,6 +25,11 @@ const MessageSchema: Schema = new Schema(
     isReply: { type: Boolean, default: false },
     repliedTo: { type: Schema.Types.ObjectId, ref: 'Message' },
     adminReply: { type: String },
+    requestId: { type: String },
+    deliveryStatus: { type: String, enum: ['pending', 'sent', 'failed'], default: 'pending' },
+    deliveryError: String,
+    sentAt: Date,
+    sendingAt: Date,
   },
   { timestamps: true }
 );
@@ -33,5 +38,6 @@ const MessageSchema: Schema = new Schema(
 MessageSchema.index({ user: 1, createdAt: -1 });
 MessageSchema.index({ isRead: 1 });
 MessageSchema.index({ email: 1 });
+MessageSchema.index({ requestId: 1 }, { unique: true, sparse: true });
 
 export default mongoose.models.Message || mongoose.model<IMessage>('Message', MessageSchema);
