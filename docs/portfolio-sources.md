@@ -4,6 +4,9 @@ Verified on 7 September 2026 against the owner's repositories, the companion pro
 
 | Case study | Public experience | Source | Classification |
 | --- | --- | --- | --- |
+| ThemeFoundry | https://themefoundry-marketplace.vercel.app | https://github.com/hasan1470/themefoundry-marketplace | Portfolio demo; browser-local catalog, customizer and free source exports |
+| Vettedly | https://vettedly.vercel.app | https://github.com/hasan1470/vettedly | Portfolio demo; illustrative products and browser-local publishing |
+| StoreMind | https://storemind-ai-chatbot.vercel.app | https://github.com/hasan1470/storemind-ai-chatbot | Portfolio demo; deterministic retrieval, optional connected integrations require configuration |
 | CraftLab | https://product-designer-plugin.vercel.app | https://github.com/hasan1470/product-designer-plugin | Portfolio demo; browser-local designs and simulated orders |
 | Toolstack | https://toolstack-lovat.vercel.app | https://github.com/hasan1470/Toolstack | Independent product |
 | PocketWise | https://pocketwise-personal-finance-app.vercel.app | https://github.com/hasan1470/pocketwise-personal-finance-app | Independent product, public web demo |
@@ -14,6 +17,12 @@ Verified on 7 September 2026 against the owner's repositories, the companion pro
 | Jeniffer Urbáez | https://jeniffer-urbaez-world.andreas-stahl632934.chatgpt.site | https://github.com/hasan1470/jenifurro-realstate-deco-collection-website | Client website implementation, public project preview |
 
 ## Editorial rules
+
+### Preview update — 8 September 2026
+
+The three recent repositories above were checked against their public GitHub descriptions and READMEs. ThemeFoundry and Vettedly public pages were inspected. StoreMind's public URL timed out during this check; its preview was captured from a local production build of the clean repository at commit `3c4104b944361a9bd7933ee67396d0868294d09a`, matching GitHub HEAD. Its live URL remains the repository's published homepage, not a newly verified availability claim.
+
+All 11 case studies now have separate lossless WebP assets in `public/portfolio/detail`, encoded from the original browser captures at their native dimensions (1265–1425 pixels wide). ThemeFoundry and StoreMind use fresh PNG captures; the remaining captures include original JPEG browser output. Lossless encoding preserves those source pixels; it does not invent higher resolution. Detail pages bypass a second lossy optimization pass, use accurate intrinsic dimensions, avoid cropping, and link to the full-size file. Cards retain smaller compressed assets. Future captures should use PNG directly, without resizing or JPEG intermediates.
 
 - Describe the implementation and the work performed. Do not invent client counts, awards, revenue, conversion uplifts or testimonials.
 - Keep prototype/demo limitations visible next to each case study. Simulated orders, payments and appointments are not real transactions or bookings.

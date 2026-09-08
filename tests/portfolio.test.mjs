@@ -3,6 +3,20 @@ import assert from "node:assert/strict";
 import { publicUrl, filterProjects } from "../src/lib/portfolio-utils.ts";
 import { showcase } from "../src/data/showcase.ts";
 import { services } from "../src/data/services.ts";
+import { readFile } from "node:fs/promises";
+import sharp from "sharp";
+
+test("case studies have separate lossless previews with accurate intrinsic dimensions", async () => {
+  for (const project of showcase) {
+    assert.notEqual(project.detailImage, project.image, project.slug);
+    const bytes = await readFile(new URL(`../public${project.detailImage}`, import.meta.url));
+    const metadata = await sharp(bytes).metadata();
+    assert.equal(metadata.width, project.detailWidth, project.slug);
+    assert.equal(metadata.height, project.detailHeight, project.slug);
+    assert.ok(metadata.width >= 1200, project.slug);
+    assert.equal(bytes.toString("ascii", 12, 16), "VP8L", project.slug + " must preserve screenshot pixels");
+  }
+});
 
 test("public links reject local, private, executable and admin placeholders", () => {
   for (const url of [
@@ -31,7 +45,7 @@ test("public links reject local, private, executable and admin placeholders", ()
 test("portfolio filters combine with search and handle old navigation links", () => {
   assert.deepEqual(
     filterProjects(showcase, "ecommerce", " next ").map((item) => item.slug),
-    ["craftlab", "shopcart"],
+    ["themefoundry", "vettedly", "storemind", "craftlab", "shopcart"],
   );
   assert.deepEqual(filterProjects(showcase, "healthcare", "toolstack"), []);
   assert.deepEqual(

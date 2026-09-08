@@ -49,7 +49,7 @@ export const services: Service[] = [
       },
     ],
     stack: ["WordPress", "Elementor", "Next.js", "Tailwind CSS"],
-    projectSlugs: ["jenifurro", "journal"],
+    projectSlugs: ["themefoundry", "jenifurro", "journal"],
     questions: [
       {
         question: "Can you improve our current website?",
@@ -103,7 +103,7 @@ export const services: Service[] = [
       },
     ],
     stack: ["React", "Next.js", "TypeScript", "Node.js", "MongoDB"],
-    projectSlugs: ["toolstack", "recast", "prescripto"],
+    projectSlugs: ["storemind", "toolstack", "recast", "prescripto"],
     questions: [
       {
         question: "Can we start with a smaller first release?",
@@ -157,7 +157,7 @@ export const services: Service[] = [
       },
     ],
     stack: ["Shopify", "WooCommerce", "Next.js", "Sanity", "Stripe"],
-    projectSlugs: ["shopcart", "craftlab"],
+    projectSlugs: ["vettedly", "shopcart", "craftlab"],
     questions: [
       {
         question: "Which platform should we use?",

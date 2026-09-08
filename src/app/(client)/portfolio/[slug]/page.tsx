@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: project.title + " | GoCloudEx",
       description: project.summary,
       url: "/portfolio/" + project.slug,
-      images: [{ url: project.image, alt: project.imageAlt }],
+      images: [{ url: project.detailImage || project.image, alt: project.imageAlt }],
     },
   };
 }
@@ -112,15 +112,23 @@ export default async function ProjectPage({ params }: Props) {
               <dd>{project.stack.join(" · ")}</dd>
             </div>
           </dl>
-          <div className="gc-case-cover">
+          <figure className="gc-case-cover">
+            <figcaption className="gc-case-preview-bar">
+              <span><strong>{project.title}</strong><span className="gc-case-preview-label">Project preview</span></span>
+              <a href={project.detailImage || project.image} target="_blank" rel="noopener noreferrer" className="gc-text-link">
+                View full-size image <ArrowUpRight size={17} />
+              </a>
+            </figcaption>
             <Image
-              src={project.image}
+              src={project.detailImage || project.image}
               alt={project.imageAlt}
-              fill
-              priority
+              width={project.detailWidth || 1200}
+              height={project.detailHeight || 675}
+              unoptimized={Boolean(project.detailImage)}
+              preload
               sizes="(max-width: 800px) 95vw, 1200px"
             />
-          </div>
+          </figure>
         </div>
       </section>
       <section className="gc-section">
