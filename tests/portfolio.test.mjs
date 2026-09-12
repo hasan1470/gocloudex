@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { publicUrl, filterProjects } from "../src/lib/portfolio-utils.ts";
+import {
+  publicUrl,
+  filterProjects,
+  mergePortfolioProjects,
+} from "../src/lib/portfolio-utils.ts";
 import { showcase } from "../src/data/showcase.ts";
 import { services } from "../src/data/services.ts";
 import { readFile } from "node:fs/promises";
@@ -41,6 +45,32 @@ test("public links reject local, private, executable and admin placeholders", ()
     publicUrl("https://toolstack-lovat.vercel.app"),
     "https://toolstack-lovat.vercel.app/",
   );
+});
+test("published dashboard projects remain visible when optional links are unusable", () => {
+  const [project] = mergePortfolioProjects([], [
+    {
+      _id: "dashboard-project",
+      title: "Dashboard project",
+      description: "Managed portfolio entry",
+      slug: "dashboard-project",
+      categories: [{ _id: "category", name: "Web design", slug: "web-design" }],
+      image: "https://res.cloudinary.com/demo/image/upload/example.webp",
+      technologies: ["Next.js"],
+      keyFeatures: ["Responsive interface"],
+      projectOverview: "<p>Overview</p>",
+      projectUrl: "http://localhost:3000/admin/projects/new",
+      githubUrl: "http://localhost:3000/admin/projects/new",
+      featured: true,
+      status: "published",
+      completionDate: "2026-09-12T00:00:00.000Z",
+      createdAt: "2026-09-12T00:00:00.000Z",
+      updatedAt: "2026-09-12T00:00:00.000Z",
+    },
+  ]);
+  assert.equal(project.slug, "dashboard-project");
+  assert.equal(project.liveUrl, undefined);
+  assert.equal(project.githubUrl, undefined);
+  assert.equal(project.featured, true);
 });
 test("portfolio filters combine with search and handle old navigation links", () => {
   assert.deepEqual(

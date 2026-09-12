@@ -312,6 +312,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
             : 'Project created successfully!',
         );
         router.push('/admin/projects');
+        router.refresh();
 
       } else {
         toast.error(result.error || `Failed to ${isEditing ? 'update' : 'create'} project`);
@@ -651,6 +652,9 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                 placeholder="https://your-project.com"
               />
+              <p className="mt-2 text-xs text-textLight text-style">
+                Use a public website address. Localhost and admin links are not shown to visitors.
+              </p>
             </div>
 
             <div>
@@ -665,6 +669,9 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
                 placeholder="https://github.com/username/repo"
               />
+              <p className="mt-2 text-xs text-textLight text-style">
+                Leave this blank when the source repository is not public.
+              </p>
             </div>
           </div>
         </div>

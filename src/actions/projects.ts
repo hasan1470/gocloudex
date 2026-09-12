@@ -4,7 +4,8 @@ import connectDB from '@/lib/database';
 import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { Project as ProjectType, Category as CategoryType } from '@/types';
-import { unstable_cache, revalidateTag, revalidatePath } from 'next/cache';
+import { unstable_cache } from 'next/cache';
+import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 /**
  * Fetches all published projects directly from the database.
@@ -80,8 +81,7 @@ export async function deleteProject(id: string) {
         await connectDB();
         const result = await Project.findByIdAndDelete(id);
         if (result) {
-            revalidatePath('/admin/projects');
-            revalidatePath('/portfolio');
+            revalidatePortfolio(result.slug);
             return { success: true };
         }
         return { success: false, error: 'Project not found' };

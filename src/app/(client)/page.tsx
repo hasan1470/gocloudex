@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "@/components/marketing/NavigationLink";
 import { ArrowUpRight, ArrowRight, Code2, Globe2, Layers3 } from "lucide-react";
 import { services } from "@/data/services";
-import { showcase } from "@/data/showcase";
+import { getPortfolio } from "@/lib/portfolio";
 import ProjectCard from "@/components/marketing/ProjectCard";
 import HeroArtwork from "@/components/marketing/HeroArtwork";
 import {
@@ -20,7 +20,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
-export default function HomePage() {
+export default async function HomePage() {
+  const portfolio = await getPortfolio();
+  const featured = portfolio.filter((project) => project.featured);
+  const selectedProjects = [
+    ...featured,
+    ...portfolio.filter((project) => !project.featured),
+  ].slice(0, 4);
   return (
     <div className="gc-site">
       <section className="gc-home-hero">
@@ -125,7 +131,7 @@ export default function HomePage() {
             description="Real interfaces, working features and the thinking behind them. Open a case study, then try the experience for yourself."
           />
           <div className="gc-project-grid">
-            {showcase.slice(0, 4).map((project) => (
+            {selectedProjects.map((project) => (
               <ProjectCard key={project.slug} project={project} />
             ))}
           </div>

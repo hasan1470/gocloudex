@@ -18,6 +18,12 @@ Verified on 7 September 2026 against the owner's repositories, the companion pro
 
 ## Editorial rules
 
+### Dashboard publishing — 12 September 2026
+
+Published projects created in the dashboard are merged into the public collection ahead of the curated source entries. They appear on the portfolio and sitemap, and projects marked Featured can appear in Selected work on the home page. Creating, updating or deleting a project now invalidates the project data and the home, portfolio, case-study and sitemap pages immediately. Invalid local/admin URLs are safely omitted from buttons without hiding the project itself.
+
+The original browser captures were also trimmed on the right edge to remove the browser scrollbar from portfolio thumbnails and full-size case-study previews.
+
 ### Preview update — 8 September 2026
 
 The three recent repositories above were checked against their public GitHub descriptions and READMEs. ThemeFoundry and Vettedly public pages were inspected. StoreMind's public URL timed out during this check; its preview was captured from a local production build of the clean repository at commit `3c4104b944361a9bd7933ee67396d0868294d09a`, matching GitHub HEAD. Its live URL remains the repository's published homepage, not a newly verified availability claim.

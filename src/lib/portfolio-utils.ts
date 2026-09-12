@@ -1,4 +1,5 @@
-import type { ProjectPreview } from "@/data/showcase";
+import type { Project } from "@/types";
+import type { ProjectPreview, ShowcaseProject } from "@/data/showcase";
 
 /** Public links must not send visitors to local/admin placeholders or executable URLs. */
 export function publicUrl(value?: string): string | undefined {
@@ -54,4 +55,48 @@ export function filterProjects<T extends ProjectPreview>(
       .toLocaleLowerCase();
     return matchesFilter && (!normalized || text.includes(normalized));
   });
+}
+
+/** Merge dashboard-managed projects into the verified portfolio collection. */
+export function mergePortfolioProjects(
+  curated: ShowcaseProject[],
+  published: Project[],
+): ShowcaseProject[] {
+  const curatedSlugs = new Set(curated.map((project) => project.slug));
+  const curatedRepositories = new Set(
+    curated.map((project) => publicUrl(project.githubUrl)).filter(Boolean),
+  );
+  const additions = published
+    .filter(
+      (project) =>
+        !curatedSlugs.has(project.slug) &&
+        !curatedRepositories.has(publicUrl(project.githubUrl)),
+    )
+    .map(
+      (project): ShowcaseProject => ({
+        slug: project.slug,
+        title: project.title,
+        category: project.categories?.[0]?.name || "Website",
+        tags: [
+          ...(project.categories || []).map((category) => category.slug),
+          "web-design",
+        ],
+        summary: project.description,
+        image: project.image || "/portfolio/project-placeholder.svg",
+        imageAlt: `${project.title} project preview`,
+        kind: "Portfolio demo",
+        role: "Design & development",
+        stack: project.technologies || [],
+        featured: project.featured,
+        liveUrl: publicUrl(project.projectUrl),
+        githubUrl: publicUrl(project.githubUrl),
+        challenge: project.description,
+        approach: "",
+        features: project.keyFeatures || [],
+        walkthrough: [],
+        overviewHtml: project.projectOverview,
+        note: "This project is managed from the GoCloudEx dashboard. Public live and source links appear when valid web addresses are provided.",
+      }),
+    );
+  return [...additions, ...curated];
 }

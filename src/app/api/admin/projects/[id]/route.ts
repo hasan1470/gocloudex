@@ -4,6 +4,7 @@ import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/upload';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
+import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 // GET /api/admin/projects/[id] - Get single project
 export async function GET(
@@ -86,6 +87,8 @@ export async function PUT(
         { status: 404 }
       );
     }
+
+    const previousSlug = existingProject.slug;
 
     // Validate required fields
     if (!title || !description || !categories?.length || !technologies?.length) {
@@ -175,6 +178,7 @@ export async function PUT(
       },
       { new: true, runValidators: true }
     ).populate('categories', 'name slug'); // Populate categories array
+    revalidatePortfolio(previousSlug, project?.slug);
 
     return NextResponse.json({
       success: true,
@@ -238,6 +242,7 @@ export async function DELETE(
     // Delete the project (this will trigger the post hook to delete image from Cloudinary)
     const deletedProject = await Project.findByIdAndDelete(id);
     console.log('Project deleted successfully:', deletedProject?.title);
+    revalidatePortfolio(project.slug);
 
     return NextResponse.json({
       success: true,

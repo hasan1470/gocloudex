@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" role="img" aria-labelledby="title description">
+  <title id="title">GoCloudEx project preview</title>
+  <desc id="description">A neutral project image used until a custom preview is uploaded.</desc>
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#102d38"/>
+      <stop offset="1" stop-color="#176f69"/>
+    </linearGradient>
+  </defs>
+  <rect width="1600" height="900" fill="url(#background)"/>
+  <g fill="none" stroke="#c6f3e8" stroke-width="7" opacity=".25">
+    <rect x="305" y="195" width="990" height="510" rx="28"/>
+    <path d="M305 290h990M385 242h10m40 0h10m40 0h10" stroke-linecap="round"/>
+  </g>
+  <g fill="#f7fffc" font-family="Arial, sans-serif" text-anchor="middle">
+    <text x="800" y="438" font-size="72" font-weight="700">Project preview</text>
+    <text x="800" y="515" font-size="30" opacity=".72">Upload an image from the GoCloudEx dashboard</text>
+  </g>
+</svg>

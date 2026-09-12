@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 import { Project, Category } from '@/types';
 import { toast } from 'react-hot-toast';
+import { publicUrl } from '@/lib/portfolio-utils';
 
 import { getAdminProjects, deleteProject } from '@/actions/projects';
 import { getAdminCategories } from '@/actions/categories';
@@ -330,9 +331,9 @@ export default function ProjectsPage() {
                               {project.description}
                             </p>
                             <div className="flex items-center space-x-4 mt-2">
-                              {project.projectUrl && (
+                              {publicUrl(project.projectUrl) && (
                                 <a
-                                  href={project.projectUrl}
+                                  href={publicUrl(project.projectUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center space-x-1 text-xs text-textLight hover:text-primary transition-colors"
@@ -341,9 +342,9 @@ export default function ProjectsPage() {
                                   <span>Live</span>
                                 </a>
                               )}
-                              {project.githubUrl && (
+                              {publicUrl(project.githubUrl) && (
                                 <a
-                                  href={project.githubUrl}
+                                  href={publicUrl(project.githubUrl)}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center space-x-1 text-xs text-textLight hover:text-headingLight transition-colors"
@@ -352,14 +353,25 @@ export default function ProjectsPage() {
                                   <span>Code</span>
                                 </a>
                               )}
-                              <Link
-                                href={`/portfolio/${project.slug}`}
-                                target="_blank"
-                                className="flex items-center space-x-1 text-xs text-textLight hover:text-accent transition-colors"
-                              >
-                                <Eye className="h-3 w-3" />
-                                <span>View</span>
-                              </Link>
+                              {project.status === 'published' ? (
+                                <Link
+                                  href={`/portfolio/${project.slug}`}
+                                  target="_blank"
+                                  className="flex items-center space-x-1 text-xs text-textLight hover:text-accent transition-colors"
+                                >
+                                  <Eye className="h-3 w-3" />
+                                  <span>View on website</span>
+                                </Link>
+                              ) : (
+                                <span className="text-xs text-textLight">Publish to view</span>
+                              )}
+                              {(project.projectUrl || project.githubUrl) &&
+                                !publicUrl(project.projectUrl) &&
+                                !publicUrl(project.githubUrl) && (
+                                  <span className="text-xs text-yellow-700 dark:text-yellow-300">
+                                    Replace local links
+                                  </span>
+                                )}
                             </div>
                           </div>
                         </div>

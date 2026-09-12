@@ -12,6 +12,7 @@ export interface ShowcaseProject {
   kind: "Independent product" | "Portfolio demo" | "Client project";
   role: string;
   stack: string[];
+  featured?: boolean;
   liveUrl?: string;
   githubUrl?: string;
   challenge: string;
@@ -34,6 +35,7 @@ export type ProjectPreview = Pick<
   | "imageAlt"
   | "kind"
   | "stack"
+  | "featured"
 >;
 
 // Curated from the owner's repositories and public deployments. See docs/portfolio-sources.md.
@@ -43,7 +45,7 @@ export const showcase: ShowcaseProject[] = [
     tags: ["web-apps", "ecommerce", "web-design", "react"], kind: "Portfolio demo",
     summary: "A theme marketplace where visitors customize a website starter, save its design and export working source files.",
     image: "/portfolio/themefoundry.webp",
-    detailImage: "/portfolio/detail/themefoundry.webp", detailWidth: 1280, detailHeight: 720,
+    detailImage: "/portfolio/detail/themefoundry.webp", detailWidth: 1266, detailHeight: 720,
     imageAlt: "ThemeFoundry marketplace with theme discovery and starter customization",
     role: "Marketplace, live customizer & catalog studio development",
     stack: ["Next.js", "React", "TypeScript", "IndexedDB", "ZIP exports"],
@@ -59,7 +61,7 @@ export const showcase: ShowcaseProject[] = [
     tags: ["ecommerce", "content", "web-apps", "react"], kind: "Portfolio demo",
     summary: "A curated product catalog with a publishing studio, saved shortlists and a complete draft-to-storefront workflow.",
     image: "/portfolio/vettedly.webp",
-    detailImage: "/portfolio/detail/vettedly.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/vettedly.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt: "Vettedly product catalog with a featured product and editorial storefront",
     role: "Storefront, product management & publishing workflow development",
     stack: ["Next.js", "React", "TypeScript", "Browser storage"],
@@ -75,7 +77,7 @@ export const showcase: ShowcaseProject[] = [
     tags: ["web-apps", "ecommerce", "react"], kind: "Portfolio demo",
     summary: "A commerce assistant workspace that connects product discovery and policy answers with editable store knowledge.",
     image: "/portfolio/storemind.webp",
-    detailImage: "/portfolio/detail/storemind.webp", detailWidth: 1280, detailHeight: 720,
+    detailImage: "/portfolio/detail/storemind.webp", detailWidth: 1266, detailHeight: 720,
     imageAlt: "StoreMind commerce assistant dashboard with store knowledge and conversation tools",
     role: "Assistant interface, knowledge management & integration development",
     stack: ["Next.js", "React", "TypeScript", "Knowledge retrieval"],
@@ -95,7 +97,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "A personal finance workspace for everyday spending, budgets and savings goals.",
     image: "/portfolio/pocketwise.webp",
-    detailImage: "/portfolio/detail/pocketwise.webp", detailWidth: 1280, detailHeight: 720,
+    detailImage: "/portfolio/detail/pocketwise.webp", detailWidth: 1266, detailHeight: 720,
     imageAlt:
       "PocketWise dashboard with transaction tracking, budgets and account balances",
     role: "Cross-platform application design & development",
@@ -130,7 +132,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "An interactive product studio that takes custom artwork from editable canvas to a complete demo order.",
     image: "/portfolio/craftlab.webp",
-    detailImage: "/portfolio/detail/craftlab.webp", detailWidth: 1425, detailHeight: 950,
+    detailImage: "/portfolio/detail/craftlab.webp", detailWidth: 1411, detailHeight: 950,
     imageAlt:
       "CraftLab product designer with a shirt preview, artwork tools and size quantities",
     role: "Product editor, storefront workflow & merchant dashboard development",
@@ -165,7 +167,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "Everyday file, text and developer tools in one private browser workspace.",
     image: "/portfolio/toolstack.webp",
-    detailImage: "/portfolio/detail/toolstack.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/toolstack.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt: "Toolstack website with its utility search and tool collection",
     role: "Product design & full-stack development",
     stack: ["Next.js", "React", "TypeScript", "PDF-lib"],
@@ -199,7 +201,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "A complete storefront journey, from product discovery to saved demo orders.",
     image: "/portfolio/shopcart.webp",
-    detailImage: "/portfolio/detail/shopcart.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/shopcart.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt:
       "Shopcart storefront showing product discovery and shopping navigation",
     role: "Storefront customization & commerce workflows",
@@ -236,7 +238,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "Doctor discovery, appointment booking and a connected demonstration staff workflow.",
     image: "/portfolio/prescripto.webp",
-    detailImage: "/portfolio/detail/prescripto.webp", detailWidth: 1280, detailHeight: 720,
+    detailImage: "/portfolio/detail/prescripto.webp", detailWidth: 1266, detailHeight: 720,
     imageAlt:
       "Prescripto appointment website with doctor discovery and booking navigation",
     role: "Application development & booking workflow improvements",
@@ -273,7 +275,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "Turn source content into editable drafts and an organized publishing calendar.",
     image: "/portfolio/recast.webp",
-    detailImage: "/portfolio/detail/recast.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/recast.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt:
       "Recast content studio showing its source input and editing workspace",
     role: "Product design, development & deployment",
@@ -308,7 +310,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "An editorial website with a working writing, editing and article discovery experience.",
     image: "/portfolio/journal.webp",
-    detailImage: "/portfolio/detail/journal.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/journal.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt: "Journal publishing website with featured articles and search",
     role: "Editorial interface & publishing workflow development",
     stack: ["Next.js", "React", "MongoDB", "IndexedDB"],
@@ -344,7 +346,7 @@ export const showcase: ShowcaseProject[] = [
     summary:
       "A cohesive digital home for property, interiors and a curated lifestyle collection.",
     image: "/portfolio/jenifurro.webp",
-    detailImage: "/portfolio/detail/jenifurro.webp", detailWidth: 1265, detailHeight: 712,
+    detailImage: "/portfolio/detail/jenifurro.webp", detailWidth: 1251, detailHeight: 712,
     imageAlt:
       "Jeniffer Urbáez website connecting real estate, interiors and a lifestyle collection",
     role: "Website design & development",

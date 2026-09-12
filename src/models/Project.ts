@@ -47,7 +47,6 @@ const ProjectSchema: Schema = new Schema(
 );
 
 // Create indexes for better performance
-ProjectSchema.index({ slug: 1 });
 ProjectSchema.index({ categories: 1 }); // Updated index
 ProjectSchema.index({ featured: 1 });
 ProjectSchema.index({ status: 1 });

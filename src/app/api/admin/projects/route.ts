@@ -4,6 +4,7 @@ import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { uploadToCloudinary } from '@/lib/upload';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
+import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 // GET /api/admin/projects - Get all projects with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -185,6 +186,7 @@ export async function POST(request: NextRequest) {
     });
 
     await project.populate('categories', 'name slug'); // Populate categories array
+    revalidatePortfolio(project.slug);
 
     return NextResponse.json(
       { success: true, data: project },
