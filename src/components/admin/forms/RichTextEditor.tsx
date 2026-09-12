@@ -1,6 +1,7 @@
 'use client';
 
 import { useEditor, EditorContent } from '@tiptap/react';
+import type { Editor } from '@tiptap/core';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import TextAlign from '@tiptap/extension-text-align';
@@ -48,7 +49,7 @@ const CustomHeading = StarterKit.configure({
 });
 
 // Helper function to check if editor is truly empty
-const isEditorEmpty = (editor: any): boolean => {
+const isEditorEmpty = (editor: Editor): boolean => {
   // Get text content and check if it's empty
   const textContent = editor.getText().trim();
   if (textContent !== '') return false;
@@ -80,7 +81,6 @@ const isValueEmpty = (value: string): boolean => {
 export default function RichTextEditor({ value, onChange, placeholder }: RichTextEditorProps) {
 
 
-  const [mounted, setMounted] = useState(false);
   const [mode, setMode] = useState<EditorMode>('visual');
   const [codeValue, setCodeValue] = useState(value);
   const [linkUrl, setLinkUrl] = useState('');
@@ -166,33 +166,25 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     immediatelyRender: false,
   });
 
-  // Ensure component is mounted (client-side only)
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   // Update editor content when value changes from parent
   useEffect(() => {
-    if (editor && mounted) {
+    if (editor) {
       // Check if the value is effectively empty
       if (isValueEmpty(value)) {
         if (editor.getHTML() !== '') {
-          editor.commands.clearContent();
-          setCodeValue('');
+          editor.commands.clearContent(false);
         }
       } else if (value !== editor.getHTML()) {
         const processedValue = processHtmlWithHeadingStyles(value);
         editor.commands.setContent(processedValue, { emitUpdate: false });
 
-        setCodeValue(processedValue);
       }
     }
-  }, [value, editor, mounted]);
+  }, [value, editor]);
 
   // Handle code mode changes
   const handleCodeChange = (newCode: string) => {
     // Check if code is effectively empty
-    const trimmedCode = newCode.trim();
     const isEmpty = isValueEmpty(newCode);
 
     if (isEmpty) {
@@ -231,6 +223,7 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
 
   // Switch to code mode
   const switchToCode = () => {
+    setCodeValue(value);
     setMode('code');
   };
 
@@ -257,20 +250,6 @@ export default function RichTextEditor({ value, onChange, placeholder }: RichTex
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showLinkInput]);
-
-  if (!mounted) {
-    return (
-      <div className="border border-border rounded-lg">
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className="w-full min-h-[200px] p-4 bg-bgLight text-textLight focus:outline-none resize-none text-style"
-          rows={10}
-        />
-      </div>
-    );
-  }
 
   if (!editor) {
     return (

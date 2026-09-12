@@ -2,18 +2,23 @@
 
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Upload, X, Image as ImageIcon } from 'lucide-react';
+import { Upload, X } from 'lucide-react';
+import Image from 'next/image';
 
 interface SingleImageUploadProps {
   image: File | null;
   onImageChange: (image: File | null) => void;
   existingImageUrl?: string;
+  onRemoveExisting?: () => void;
+  label?: string;
 }
 
 export default function SingleImageUpload({ 
   image, 
   onImageChange,
-  existingImageUrl 
+  existingImageUrl,
+  onRemoveExisting,
+  label = 'project image',
 }: SingleImageUploadProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showExistingImage, setShowExistingImage] = useState(!!existingImageUrl);
@@ -54,7 +59,7 @@ export default function SingleImageUpload({
   const removeExistingImage = () => {
     setShowExistingImage(false);
     onImageChange(null);
-    // You might want to send a signal to delete the existing image from server
+    onRemoveExisting?.();
   };
 
   return (
@@ -77,7 +82,7 @@ export default function SingleImageUpload({
             <Upload className="h-12 w-12 text-textLight" />
             <div>
               <p className="text-lg font-medium text-headingLight text-style">
-                {isDragActive ? 'Drop image here' : 'Upload project image'}
+                {isDragActive ? 'Drop image here' : `Upload ${label}`}
               </p>
               <p className="text-textLight text-sm mt-1 text-style">
                 Drag & drop an image here or click to browse
@@ -96,9 +101,12 @@ export default function SingleImageUpload({
           <div className="border border-border rounded-lg p-4">
             <div className="flex items-center space-x-4">
               <div className="flex-shrink-0">
-                <img
+                <Image
                   src={previewUrl}
                   alt="Project preview"
+                  width={80}
+                  height={80}
+                  unoptimized
                   className="w-20 h-20 object-cover rounded-lg"
                 />
               </div>
@@ -129,13 +137,16 @@ export default function SingleImageUpload({
       {showExistingImage && existingImageUrl && (
         <div className="border border-border rounded-lg p-4">
           <p className="text-sm font-medium text-headingLight mb-2 text-style">
-            Current Project Image
+            Current {label}
           </p>
           <div className="flex items-center space-x-4">
             <div className="flex-shrink-0">
-              <img
+              <Image
                 src={existingImageUrl}
                 alt="Current project"
+                width={80}
+                height={80}
+                unoptimized
                 className="w-20 h-20 object-cover rounded-lg"
               />
             </div>

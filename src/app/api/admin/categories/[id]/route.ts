@@ -3,6 +3,7 @@ import connectDB from '@/lib/database';
 import Category from '@/models/Category';
 import Project from '@/models/Project';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
+import { revalidateCategories, revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 // GET /api/admin/categories/[id] - Get single category
 export async function GET(
@@ -64,7 +65,8 @@ export async function PUT(
     const { name, description } = await request.json();
 
     // Validate required fields
-    if (!name) {
+    const normalizedName = typeof name === 'string' ? name.trim() : '';
+    if (!normalizedName) {
       return NextResponse.json(
         { success: false, error: 'Category name is required' },
         { status: 400 }
@@ -82,8 +84,8 @@ export async function PUT(
 
     // Generate new slug if name changed
     let slug = existingCategory.slug;
-    if (name !== existingCategory.name) {
-      slug = name
+    if (normalizedName !== existingCategory.name) {
+      slug = normalizedName
         .toLowerCase()
         .trim()
         .replace(/[^\w\s-]/g, '')
@@ -106,9 +108,15 @@ export async function PUT(
 
     const category = await Category.findByIdAndUpdate(
       id,
-      { name, slug, description },
+      {
+        name: normalizedName,
+        slug,
+        description: typeof description === 'string' ? description.trim() : '',
+      },
       { new: true, runValidators: true }
     );
+    revalidateCategories();
+    revalidatePortfolio();
 
     return NextResponse.json({
       success: true,
@@ -152,7 +160,7 @@ export async function DELETE(
     }
 
     // Check if category is being used by any projects
-    const projectsCount = await Project.countDocuments({ category: id });
+    const projectsCount = await Project.countDocuments({ categories: id });
     console.log(`Category "${category.name}" is used by ${projectsCount} projects`);
     
     if (projectsCount > 0) {
@@ -167,6 +175,8 @@ export async function DELETE(
 
     // Delete the category
     const deletedCategory = await Category.findByIdAndDelete(id);
+    revalidateCategories();
+    revalidatePortfolio();
     console.log('Category deleted successfully:', deletedCategory?.name);
 
     return NextResponse.json({

@@ -2,9 +2,17 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/database';
 import Project from '@/models/Project';
 import Category from '@/models/Category';
-import { uploadToCloudinary } from '@/lib/upload';
+import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/upload';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
 import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
+import type { FilterQuery } from 'mongoose';
+import type { IProject } from '@/models/Project';
+
+function getErrorField(error: unknown, field: string): unknown {
+  return typeof error === 'object' && error !== null && field in error
+    ? (error as Record<string, unknown>)[field]
+    : undefined;
+}
 
 // GET /api/admin/projects - Get all projects with pagination and filtering
 export async function GET(request: NextRequest) {
@@ -18,8 +26,8 @@ export async function GET(request: NextRequest) {
     await connectDB();
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '10');
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10) || 1);
+    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '10', 10) || 10));
     const category = searchParams.get('category');
     const status = searchParams.get('status');
     const search = searchParams.get('search');
@@ -28,7 +36,7 @@ export async function GET(request: NextRequest) {
     const skip = (page - 1) * limit;
 
     // Build filter object
-    const filter: any = {};
+    const filter: FilterQuery<IProject> = {};
     
     if (category && category !== 'all') {
       const categoryDoc = await Category.findOne({ slug: category });
@@ -58,7 +66,7 @@ export async function GET(request: NextRequest) {
     // Get projects with population
     const projects = await Project.find(filter)
       .populate('categories', 'name slug') 
-      .sort({ createdAt: -1 })
+      .sort({ sortOrder: 1, completionDate: -1 })
       .skip(skip)
       .limit(limit)
       .lean();
@@ -106,7 +114,19 @@ export async function POST(request: NextRequest) {
     const categories = JSON.parse(formData.get('categories') as string || '[]'); // Changed to categories array
     const technologies = JSON.parse(formData.get('technologies') as string || '[]');
     const keyFeatures = JSON.parse(formData.get('keyFeatures') as string || '[]'); // New field
+    const tags = JSON.parse(formData.get('tags') as string || '[]');
+    const walkthrough = JSON.parse(formData.get('walkthrough') as string || '[]');
     const projectOverview = formData.get('projectOverview') as string; // New field
+    const imageAlt = formData.get('imageAlt') as string;
+    const detailWidth = Number(formData.get('detailWidth') || 1200);
+    const detailHeight = Number(formData.get('detailHeight') || 675);
+    const kind = (formData.get('kind') as string) || 'Portfolio demo';
+    const role = (formData.get('role') as string) || 'Design & development';
+    const challenge = (formData.get('challenge') as string) || description;
+    const approach = formData.get('approach') as string;
+    const note = formData.get('note') as string;
+    const credit = formData.get('credit') as string;
+    const sortOrder = Number(formData.get('sortOrder') || 100);
     const projectUrl = formData.get('projectUrl') as string;
     const githubUrl = formData.get('githubUrl') as string;
     const featured = formData.get('featured') === 'true';
@@ -115,13 +135,33 @@ export async function POST(request: NextRequest) {
     
     // Get image file
     const imageFile = formData.get('image') as File;
+    const detailImageFile = formData.get('detailImage') as File;
 
     // Validate required fields
-    if (!title || !description || !categories?.length || !technologies?.length) {
+    const validKinds = ['Independent product', 'Portfolio demo', 'Client project'];
+    const validStatuses = ['draft', 'published', 'archived'];
+    const parsedCompletionDate = new Date(completionDate);
+    if (
+      !title?.trim() ||
+      !description?.trim() ||
+      !Array.isArray(categories) ||
+      !categories.length ||
+      !Array.isArray(technologies) ||
+      !technologies.length ||
+      !Array.isArray(keyFeatures) ||
+      !Array.isArray(tags) ||
+      !Array.isArray(walkthrough) ||
+      !validKinds.includes(kind) ||
+      !validStatuses.includes(status) ||
+      Number.isNaN(parsedCompletionDate.getTime()) ||
+      !Number.isFinite(sortOrder) ||
+      detailWidth <= 0 ||
+      detailHeight <= 0
+    ) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Title, description, categories, and technologies are required' 
+          error: 'Please complete the required project fields with valid values.'
         },
         { status: 400 }
       );
@@ -155,6 +195,7 @@ export async function POST(request: NextRequest) {
 
     // Upload image to Cloudinary if provided
     let imageUrl = '';
+    let detailImageUrl = '';
     if (imageFile && imageFile.size > 0) {
       try {
         imageUrl = await uploadToCloudinary(imageFile);
@@ -167,6 +208,18 @@ export async function POST(request: NextRequest) {
         );
       }
     }
+    if (detailImageFile && detailImageFile.size > 0) {
+      try {
+        detailImageUrl = await uploadToCloudinary(detailImageFile);
+      } catch (error) {
+        if (imageUrl) await deleteFromCloudinary(imageUrl);
+        console.error('Detail image upload error:', error);
+        return NextResponse.json(
+          { success: false, error: 'Failed to upload the detail image' },
+          { status: 500 }
+        );
+      }
+    }
 
     // Create project
     const project = await Project.create({
@@ -175,14 +228,27 @@ export async function POST(request: NextRequest) {
       slug,
       categories, // Array of category IDs
       image: imageUrl,
+      detailImage: detailImageUrl,
+      imageAlt,
+      detailWidth,
+      detailHeight,
+      kind,
+      role,
+      tags,
       technologies,
       keyFeatures, // Array of key features
+      challenge,
+      approach,
+      walkthrough,
+      note,
+      credit,
       projectOverview, // HTML content for project overview
       projectUrl,
       githubUrl,
       featured,
       status,
-      completionDate: new Date(completionDate),
+      completionDate: parsedCompletionDate,
+      sortOrder,
     });
 
     await project.populate('categories', 'name slug'); // Populate categories array
@@ -192,11 +258,11 @@ export async function POST(request: NextRequest) {
       { success: true, data: project },
       { status: 201 }
     );
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Create project error:', error);
     
     // Handle duplicate key errors
-    if (error.code === 11000) {
+    if (getErrorField(error, 'code') === 11000) {
       return NextResponse.json(
         { success: false, error: 'A project with this title already exists' },
         { status: 400 }
@@ -204,8 +270,11 @@ export async function POST(request: NextRequest) {
     }
     
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err: any) => err.message);
+    if (getErrorField(error, 'name') === 'ValidationError') {
+      const validationErrors = getErrorField(error, 'errors');
+      const errors = validationErrors && typeof validationErrors === 'object'
+        ? Object.values(validationErrors).map((item) => String(getErrorField(item, 'message') || item))
+        : ['Project validation failed'];
       return NextResponse.json(
         { success: false, error: errors.join(', ') },
         { status: 400 }

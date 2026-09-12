@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Plus,
   Search,
@@ -12,12 +12,10 @@ import {
   Image as ImageIcon
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Project, Category } from '@/types';
 import { toast } from 'react-hot-toast';
 import { publicUrl } from '@/lib/portfolio-utils';
-
-import { getAdminProjects, deleteProject } from '@/actions/projects';
-import { getAdminCategories } from '@/actions/categories';
 
 export default function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
@@ -43,14 +41,23 @@ export default function ProjectsPage() {
   });
 
   // Fetch projects
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await getAdminProjects(filters);
+      const token = localStorage.getItem('adminToken');
+      const search = new URLSearchParams(
+        Object.entries(filters).map(([key, value]) => [key, String(value)]),
+      );
+      const response = await fetch(`/api/admin/projects?${search}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
 
       if (result.success && result.pagination) {
         setProjects(result.data);
         setPagination(result.pagination);
+      } else {
+        toast.error(result.error || 'Failed to fetch projects.');
       }
     } catch (error) {
       toast.error('Failed to fetch projects. Please try again.');
@@ -58,23 +65,28 @@ export default function ProjectsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters]);
 
   // Fetch categories
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
     try {
-      const data = await getAdminCategories();
-      setCategories(data);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/admin/categories', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+      if (result.success) setCategories(result.data);
+      else toast.error(result.error || 'Failed to fetch categories.');
     } catch (error) {
       toast.error('Failed to fetch categories. Please try again.');
       console.error('Failed to fetch categories:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchProjects();
     fetchCategories();
-  }, [filters]);
+  }, [fetchCategories, fetchProjects]);
 
   // Handle filter changes
   const handleFilterChange = (key: string, value: string | number) => {
@@ -89,12 +101,16 @@ export default function ProjectsPage() {
 
     setDeleteLoading(projectId);
     try {
-      const result = await deleteProject(projectId);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
 
       if (result.success) {
         toast.success('Project deleted successfully!');
-        setProjects(prev => prev.filter(proj => proj._id !== projectId));
-        setPagination(prev => ({ ...prev, total: prev.total - 1 }));
+        await fetchProjects();
       } else {
         toast.error(result.error || 'Failed to delete project. Please try again.');
       }
@@ -120,7 +136,7 @@ export default function ProjectsPage() {
     const pages = [];
     const maxVisiblePages = 5;
     let startPage = Math.max(1, pagination.page - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(pagination.pages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(pagination.pages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
       startPage = Math.max(1, endPage - maxVisiblePages + 1);
@@ -307,9 +323,12 @@ export default function ProjectsPage() {
                         <div className="flex items-center space-x-4">
                           <div className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-primary/20 to-accent/20 rounded-lg flex items-center justify-center">
                             {project.image ? (
-                              <img
+                              <Image
                                 src={project.image}
                                 alt={project.title}
+                                width={48}
+                                height={48}
+                                unoptimized
                                 className="w-12 h-12 rounded-lg object-cover"
                               />
                             ) : (

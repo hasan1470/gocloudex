@@ -33,7 +33,15 @@ export async function verifyAdminAuth(request: Request): Promise<{ user: AuthUse
     }
 
     // Verify the token
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
+    const decoded = jwt.verify(token, JWT_SECRET);
+    if (typeof decoded === 'string' || decoded.role !== 'admin' || typeof decoded.email !== 'string') {
+      return {
+        error: NextResponse.json(
+          { success: false, message: 'Insufficient permissions' },
+          { status: 403 }
+        )
+      };
+    }
     
     // Check if token is expired
     const currentTime = Date.now() / 1000;
@@ -47,15 +55,6 @@ export async function verifyAdminAuth(request: Request): Promise<{ user: AuthUse
     }
 
     // Check if user has admin role
-    if (decoded.role !== 'admin') {
-      return {
-        error: NextResponse.json(
-          { success: false, message: 'Insufficient permissions' },
-          { status: 403 }
-        )
-      };
-    }
-
     return {
       user: {
         email: decoded.email,
@@ -66,19 +65,19 @@ export async function verifyAdminAuth(request: Request): Promise<{ user: AuthUse
   } catch (error) {
     console.error('Token verification error:', error);
     
-    if (error instanceof jwt.JsonWebTokenError) {
-      return {
-        error: NextResponse.json(
-          { success: false, message: 'Invalid token' },
-          { status: 401 }
-        )
-      };
-    }
-    
     if (error instanceof jwt.TokenExpiredError) {
       return {
         error: NextResponse.json(
           { success: false, message: 'Token expired' },
+          { status: 401 }
+        )
+      };
+    }
+
+    if (error instanceof jwt.JsonWebTokenError) {
+      return {
+        error: NextResponse.json(
+          { success: false, message: 'Invalid token' },
           { status: 401 }
         )
       };

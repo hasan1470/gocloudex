@@ -27,11 +27,15 @@ export const uploadToCloudinary = async (file: File): Promise<string> => {
 
 export const deleteFromCloudinary = async (imageUrl: string): Promise<void> => {
   try {
-    // Extract public_id from Cloudinary URL
-    const publicId = imageUrl.split('/').pop()?.split('.')[0];
-    if (publicId) {
-      await cloudinary.uploader.destroy(`gocloudex/projects/${publicId}`);
-    }
+    const url = new URL(imageUrl);
+    if (url.hostname !== 'res.cloudinary.com') return;
+    const uploadMarker = '/upload/';
+    const uploadIndex = url.pathname.indexOf(uploadMarker);
+    if (uploadIndex < 0) return;
+    const assetPath = url.pathname.slice(uploadIndex + uploadMarker.length);
+    const withoutVersion = assetPath.replace(/^v\d+\//, '');
+    const publicId = withoutVersion.replace(/\.[a-z0-9]+$/i, '');
+    if (publicId) await cloudinary.uploader.destroy(publicId);
   } catch (error) {
     console.error('Error deleting image from Cloudinary:', error);
     throw error;

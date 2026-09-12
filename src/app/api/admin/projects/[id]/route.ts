@@ -6,6 +6,12 @@ import { uploadToCloudinary, deleteFromCloudinary } from '@/lib/upload';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
 import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
+function getErrorField(error: unknown, field: string): unknown {
+  return typeof error === 'object' && error !== null && field in error
+    ? (error as Record<string, unknown>)[field]
+    : undefined;
+}
+
 // GET /api/admin/projects/[id] - Get single project
 export async function GET(
   request: NextRequest,
@@ -69,7 +75,19 @@ export async function PUT(
     const categories = JSON.parse(formData.get('categories') as string || '[]'); // Changed to categories array
     const technologies = JSON.parse(formData.get('technologies') as string || '[]');
     const keyFeatures = JSON.parse(formData.get('keyFeatures') as string || '[]'); // New field
+    const tags = JSON.parse(formData.get('tags') as string || '[]');
+    const walkthrough = JSON.parse(formData.get('walkthrough') as string || '[]');
     const projectOverview = formData.get('projectOverview') as string; // New field
+    const imageAlt = formData.get('imageAlt') as string;
+    const detailWidthValue = formData.get('detailWidth');
+    const detailHeightValue = formData.get('detailHeight');
+    const kind = (formData.get('kind') as string) || 'Portfolio demo';
+    const role = (formData.get('role') as string) || 'Design & development';
+    const challenge = (formData.get('challenge') as string) || description;
+    const approach = formData.get('approach') as string;
+    const walkthroughNote = formData.get('note') as string;
+    const credit = formData.get('credit') as string;
+    const sortOrder = Number(formData.get('sortOrder') || 100);
     const projectUrl = formData.get('projectUrl') as string;
     const githubUrl = formData.get('githubUrl') as string;
     const featured = formData.get('featured') === 'true';
@@ -78,6 +96,9 @@ export async function PUT(
     
     // Get image file
     const imageFile = formData.get('image') as File;
+    const detailImageFile = formData.get('detailImage') as File;
+    const removeImage = formData.get('removeImage') === 'true';
+    const removeDetailImage = formData.get('removeDetailImage') === 'true';
 
     // Find existing project
     const existingProject = await Project.findById(id);
@@ -89,13 +110,34 @@ export async function PUT(
     }
 
     const previousSlug = existingProject.slug;
+    const detailWidth = Number(detailWidthValue || existingProject.detailWidth || 1200);
+    const detailHeight = Number(detailHeightValue || existingProject.detailHeight || 675);
 
     // Validate required fields
-    if (!title || !description || !categories?.length || !technologies?.length) {
+    const validKinds = ['Independent product', 'Portfolio demo', 'Client project'];
+    const validStatuses = ['draft', 'published', 'archived'];
+    const parsedCompletionDate = new Date(completionDate);
+    if (
+      !title?.trim() ||
+      !description?.trim() ||
+      !Array.isArray(categories) ||
+      !categories.length ||
+      !Array.isArray(technologies) ||
+      !technologies.length ||
+      !Array.isArray(keyFeatures) ||
+      !Array.isArray(tags) ||
+      !Array.isArray(walkthrough) ||
+      !validKinds.includes(kind) ||
+      !validStatuses.includes(status) ||
+      Number.isNaN(parsedCompletionDate.getTime()) ||
+      !Number.isFinite(sortOrder) ||
+      detailWidth <= 0 ||
+      detailHeight <= 0
+    ) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Title, description, categories, and technologies are required' 
+          error: 'Please complete the required project fields with valid values.'
         },
         { status: 400 }
       );
@@ -137,22 +179,32 @@ export async function PUT(
     }
 
     // Handle image upload if new image is provided
-    let imageUrl = existingProject.image;
+    let imageUrl = removeImage ? '' : existingProject.image;
+    let oldImageToDelete = removeImage ? existingProject.image : '';
     if (imageFile && imageFile.size > 0) {
       try {
-        // Delete old image from Cloudinary if exists
-        if (existingProject.image) {
-          await deleteFromCloudinary(existingProject.image);
-          console.log('Deleted old image from Cloudinary');
-        }
-        
-        // Upload new image
         imageUrl = await uploadToCloudinary(imageFile);
-        console.log('New image uploaded to Cloudinary:', imageUrl);
+        oldImageToDelete = existingProject.image;
       } catch (error) {
         console.error('Image upload error:', error);
         return NextResponse.json(
           { success: false, error: 'Failed to upload image' },
+          { status: 500 }
+        );
+      }
+    }
+
+    let detailImageUrl = removeDetailImage ? '' : existingProject.detailImage;
+    let oldDetailImageToDelete = removeDetailImage ? existingProject.detailImage : '';
+    if (detailImageFile && detailImageFile.size > 0) {
+      try {
+        detailImageUrl = await uploadToCloudinary(detailImageFile);
+        oldDetailImageToDelete = existingProject.detailImage;
+      } catch (error) {
+        if (imageFile && imageUrl) await deleteFromCloudinary(imageUrl);
+        console.error('Detail image upload error:', error);
+        return NextResponse.json(
+          { success: false, error: 'Failed to upload the detail image' },
           { status: 500 }
         );
       }
@@ -167,28 +219,46 @@ export async function PUT(
         slug,
         categories, // Array of category IDs
         image: imageUrl,
+        detailImage: detailImageUrl,
+        imageAlt,
+        detailWidth,
+        detailHeight,
+        kind,
+        role,
+        tags,
         technologies,
         keyFeatures, // Array of key features
+        challenge,
+        approach,
+        walkthrough,
+        note: walkthroughNote,
+        credit,
         projectOverview, // HTML content for project overview
         projectUrl,
         githubUrl,
         featured,
         status,
-        completionDate: new Date(completionDate),
+        completionDate: parsedCompletionDate,
+        sortOrder,
       },
       { new: true, runValidators: true }
     ).populate('categories', 'name slug'); // Populate categories array
+    await Promise.allSettled(
+      [oldImageToDelete, oldDetailImageToDelete]
+        .filter(Boolean)
+        .map((url) => deleteFromCloudinary(url)),
+    );
     revalidatePortfolio(previousSlug, project?.slug);
 
     return NextResponse.json({
       success: true,
       data: project,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Update project error:', error);
     
     // Handle duplicate key errors
-    if (error.code === 11000) {
+    if (getErrorField(error, 'code') === 11000) {
       return NextResponse.json(
         { success: false, error: 'A project with this title already exists' },
         { status: 400 }
@@ -196,8 +266,11 @@ export async function PUT(
     }
     
     // Handle validation errors
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((err: any) => err.message);
+    if (getErrorField(error, 'name') === 'ValidationError') {
+      const validationErrors = getErrorField(error, 'errors');
+      const errors = validationErrors && typeof validationErrors === 'object'
+        ? Object.values(validationErrors).map((item) => String(getErrorField(item, 'message') || item))
+        : ['Project validation failed'];
       return NextResponse.json(
         { success: false, error: errors.join(', ') },
         { status: 400 }

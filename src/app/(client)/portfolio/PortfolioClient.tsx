@@ -3,7 +3,6 @@
 import { useSearchParams } from "next/navigation";
 import { Search, ArrowUpRight } from "lucide-react";
 import {
-  portfolioFilters,
   designReferences,
   type ProjectPreview,
 } from "@/data/showcase";
@@ -20,9 +19,20 @@ export default function PortfolioClient({
   const filter = params.get("filter") || "all";
   const query = params.get("q") || "";
   const visible = filterProjects(projects, filter, query);
-  const filters = [...portfolioFilters];
-  if (projects.some((project) => project.tags.includes("mobile")))
-    filters.push({ label: "Mobile & finance", value: "mobile" });
+  const filterMap = new Map<string, string>();
+  for (const project of projects) {
+    const value = project.category
+      .normalize("NFKD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+    if (value) filterMap.set(value, project.category);
+  }
+  const filters = [
+    { label: "All work", value: "all" },
+    ...Array.from(filterMap, ([value, label]) => ({ value, label })),
+  ];
   const knownFilter = filters.some((item) => item.value === filter);
   function update(key: string, value: string) {
     const next = new URLSearchParams(params.toString());

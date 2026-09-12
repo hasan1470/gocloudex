@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint",
     "test": "node --experimental-strip-types --test tests/*.test.mjs",
+    "migrate:portfolio": "node --experimental-strip-types scripts/migrate-portfolio-to-dashboard.mts",
+    "migrate:portfolio:dry": "node --experimental-strip-types scripts/migrate-portfolio-to-dashboard.mts --dry-run",
+    "verify:portfolio-crud": "node scripts/verify-portfolio-crud.mjs",
     "lint:marketing": "eslint \"src/app/(client)/page.tsx\" \"src/app/(client)/about/page.tsx\" \"src/app/(client)/services\" \"src/app/(client)/portfolio\" src/components/marketing src/components/client/layout/ClientHeader.tsx src/components/client/layout/ClientFooter.tsx src/components/client/layout/ThemeSettings.tsx src/data/services.ts src/data/showcase.ts src/lib/portfolio-utils.ts src/lib/portfolio.ts src/app/robots.ts src/app/sitemap.ts src/app/opengraph-image.tsx src/app/layout.tsx \"src/app/(client)/layout.tsx\" --max-warnings 0",
     "lint:appearance": "eslint src/lib/appearance.ts src/components/client/layout/ThemeSettings.tsx src/components/admin/layout/AdminHeader.tsx src/components/admin/layout/AdminSidebar.tsx src/app/admin/layout.tsx src/app/admin/settings/page.tsx src/app/adminlogin/page.tsx --max-warnings 0",
     "lint:communication": "eslint src/components/communication src/components/ChatWidget.tsx src/lib/chat-auth.ts src/lib/chat-service.ts src/lib/contact-service.ts src/lib/contact-delivery.ts src/lib/communication*.ts src/lib/email.ts src/app/api/chat src/app/api/contact src/app/api/admin/chats src/app/api/admin/emails src/app/api/admin/settings src/app/admin/chats/page.tsx src/app/admin/emails/page.tsx --max-warnings 0"

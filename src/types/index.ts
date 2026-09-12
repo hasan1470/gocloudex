@@ -42,14 +42,27 @@ export interface Project {
   slug: string;
   categories: Category[]; // Changed from category to categories array
   image: string;
+  detailImage?: string;
+  imageAlt?: string;
+  detailWidth?: number;
+  detailHeight?: number;
+  kind: 'Independent product' | 'Portfolio demo' | 'Client project';
+  role: string;
+  tags: string[];
   technologies: string[];
   keyFeatures: string[]; // New field
+  challenge: string;
+  approach?: string;
+  walkthrough: string[];
+  note: string;
+  credit?: string;
   projectOverview: string; // New field
   projectUrl?: string;
   githubUrl?: string;
   featured: boolean;
   completionDate: string;
   status: 'draft' | 'published' | 'archived';
+  sortOrder: number;
   createdAt: string;
   updatedAt: string;
 }

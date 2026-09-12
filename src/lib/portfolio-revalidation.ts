@@ -11,3 +11,10 @@ export function revalidatePortfolio(...slugs: Array<string | undefined>) {
     revalidatePath(`/portfolio/${slug}`);
   }
 }
+
+export function revalidateCategories() {
+  revalidateTag("categories", { expire: 0 });
+  revalidatePath("/admin/categories");
+  revalidatePath("/admin/projects");
+  revalidatePath("/portfolio");
+}

@@ -4,7 +4,6 @@ import Image from "next/image";
 import { ArrowLeft, ArrowUpRight, Github } from "lucide-react";
 import { notFound } from "next/navigation";
 import sanitizeHtml from "sanitize-html";
-import { showcase } from "@/data/showcase";
 import { getPortfolio } from "@/lib/portfolio";
 import { publicUrl } from "@/lib/portfolio-utils";
 import ProjectCard from "@/components/marketing/ProjectCard";
@@ -16,14 +15,11 @@ import {
 
 type Props = { params: Promise<{ slug: string }> };
 export const revalidate = 3600;
-export function generateStaticParams() {
-  return showcase.map(({ slug }) => ({ slug }));
+export async function generateStaticParams() {
+  return (await getPortfolio()).map(({ slug }) => ({ slug }));
 }
 async function findProject(slug: string) {
-  return (
-    showcase.find((project) => project.slug === slug) ||
-    (await getPortfolio()).find((project) => project.slug === slug)
-  );
+  return (await getPortfolio()).find((project) => project.slug === slug);
 }
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -51,7 +47,7 @@ export default async function ProjectPage({ params }: Props) {
   if (!project) notFound();
   const live = publicUrl(project.liveUrl);
   const github = publicUrl(project.githubUrl);
-  const related = showcase
+  const related = (await getPortfolio())
     .filter((item) => item.slug !== project.slug)
     .sort(
       (a, b) =>

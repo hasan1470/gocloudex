@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/database';
 import Category from '@/models/Category';
 import { verifyAdminAuth } from '@/middlewares/authAdmin';
+import { revalidateCategories, revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 // GET /api/admin/categories - Get all categories
 export async function GET(request: NextRequest) {
@@ -43,7 +44,8 @@ export async function POST(request: NextRequest) {
     const { name, description } = await request.json();
 
     // Validate required fields
-    if (!name) {
+    const normalizedName = typeof name === 'string' ? name.trim() : '';
+    if (!normalizedName) {
       return NextResponse.json(
         { success: false, error: 'Category name is required' },
         { status: 400 }
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate slug from name
-    const slug = name
+    const slug = normalizedName
       .toLowerCase()
       .trim()
       .replace(/[^\w\s-]/g, '')
@@ -60,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     // Check if category already exists
     const existingCategory = await Category.findOne({
-      $or: [{ name }, { slug }]
+      $or: [{ name: normalizedName }, { slug }]
     });
 
     if (existingCategory) {
@@ -71,10 +73,12 @@ export async function POST(request: NextRequest) {
     }
 
     const category = await Category.create({
-      name,
+      name: normalizedName,
       slug,
-      description,
+      description: typeof description === 'string' ? description.trim() : '',
     });
+    revalidateCategories();
+    revalidatePortfolio();
 
     return NextResponse.json(
       { success: true, data: category },

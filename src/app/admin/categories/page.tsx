@@ -5,8 +5,6 @@ import Link from 'next/link';
 import { Category } from '@/types';
 import toast from 'react-hot-toast';
 
-import { getAdminCategories, deleteCategory } from '@/actions/categories';
-
 export default function CategoriesPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -17,8 +15,13 @@ export default function CategoriesPage() {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const data = await getAdminCategories();
-      setCategories(data);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch('/api/admin/categories', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
+      if (!result.success) throw new Error(result.error || 'Failed to fetch categories');
+      setCategories(result.data);
     } catch (error) {
       console.error('Failed to fetch categories:', error);
       toast.error('Failed to load categories');
@@ -41,12 +44,16 @@ export default function CategoriesPage() {
 
     setDeleteLoading(categoryId);
     try {
-      const result = await deleteCategory(categoryId);
+      const token = localStorage.getItem('adminToken');
+      const response = await fetch(`/api/admin/categories/${categoryId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const result = await response.json();
 
       if (result.success) {
         toast.success(`Category "${categoryName}" deleted successfully.`);
-        // Remove the category from the local state immediately for better UX
-        setCategories(prev => prev.filter(cat => cat._id !== categoryId));
+        await fetchCategories();
       } else {
         toast.error(result.error || 'Failed to delete category');
       }

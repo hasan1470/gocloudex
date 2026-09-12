@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Save, X } from 'lucide-react';
+import { Save } from 'lucide-react';
 import { Category } from '@/types';
 import toast from 'react-hot-toast';
 
@@ -63,6 +63,7 @@ export default function CategoryForm({ category, isEditing = false }: CategoryFo
 
       if (result.success) {
         router.push('/admin/categories');
+        router.refresh();
         toast.success(`Category ${isEditing ? 'updated' : 'created'} successfully`);
       } else {
         toast.error(`Failed to ${isEditing ? 'update' : 'create'} category: ${result.error || 'Unknown error'}`);

@@ -20,9 +20,17 @@ Verified on 7 September 2026 against the owner's repositories, the companion pro
 
 ### Dashboard publishing — 12 September 2026
 
-Published projects created in the dashboard are merged into the public collection ahead of the curated source entries. They appear on the portfolio and sitemap, and projects marked Featured can appear in Selected work on the home page. Creating, updating or deleting a project now invalidates the project data and the home, portfolio, case-study and sitemap pages immediately. Invalid local/admin URLs are safely omitted from buttons without hiding the project itself.
+Published projects created in the dashboard appear on the portfolio and sitemap, and projects marked Featured can appear in Selected work on the home page. Creating, updating or deleting a project invalidates the project data and the home, portfolio, case-study and sitemap pages immediately. Invalid local/admin URLs are safely omitted from buttons without hiding the project itself.
 
 The original browser captures were also trimmed on the right edge to remove the browser scrollbar from portfolio thumbnails and full-size case-study previews.
+
+### MongoDB and Cloudinary migration — 12 September 2026
+
+The eleven curated case studies are now normal dashboard projects in MongoDB. Each has a Cloudinary card image and a separate high-resolution case-study image. Project type, role, filter tags, brief, approach, features, walkthrough, notes, credits, links, ordering, status, and featured state are editable from the project form.
+
+The public portfolio, homepage, service recommendations, project pages, and sitemap read the project collection from MongoDB. Categories created or renamed in the dashboard are reflected in public portfolio filters after cache invalidation.
+
+The idempotent seed source remains in `scripts/migrate-portfolio-to-dashboard.mts`. Use `npm run migrate:portfolio:dry` to report missing seed projects. Existing database projects are preserved unless the script is explicitly run with `--force`.
 
 ### Preview update — 8 September 2026
 
@@ -33,10 +41,9 @@ All 11 case studies now have separate lossless WebP assets in `public/portfolio/
 - Describe the implementation and the work performed. Do not invent client counts, awards, revenue, conversion uplifts or testimonials.
 - Keep prototype/demo limitations visible next to each case study. Simulated orders, payments and appointments are not real transactions or bookings.
 - Retain starter and third-party credits. A public repository is evidence of the implementation, not a claim that every underlying component was authored from scratch.
-- Curated case studies live in `src/data/showcase.ts`; screenshots live in `public/portfolio`. Update the entry and screenshot when the public experience changes.
+- The original curated seed data remains in `src/data/showcase.ts` for migration history. Live case studies and categories are managed in MongoDB through the dashboard.
 - Services and their relevant-project links live in `src/data/services.ts`. The tests check that these links resolve to real entries.
-- Published CMS projects are still read and merged into the collection. Curated slugs/repositories take precedence to avoid duplicates. A CMS record whose only external links are local/admin placeholders is omitted from the public collection without deleting or changing the database record.
-- CMS rich-text overviews are sanitized before display. Add real public links to publish the existing localhost placeholder. New CMS entries currently receive the neutral Portfolio demo label; add a curated entry to supply a verified project classification and full case study.
+- Published dashboard projects are the public portfolio source. Local/admin links are omitted while the project remains visible, and rich-text overviews are sanitized before display.
 - The old award/client-story/open-source example routes redirect to the relevant portfolio view. They no longer show hardcoded recognition or testimonial claims.
 
 ## Reference shelf
@@ -47,4 +54,4 @@ https://linear.app, https://stripe.com and https://www.gov.uk are explicitly lab
 
 Public project home pages were inspected and captured for this update. The companion task's `D:/MERN/All New/portfolio-audit/PORTFOLIO_STATUS.md` records functional and deployment checks for the six app demos. The GoCloudEx task tested its own routes, filters, case studies and responsive presentation; it did not repeat every external application's integration tests.
 
-Chat, contact forms, email delivery and administrative workflows were outside this redesign. No database content was written or deleted.
+The portfolio migration created project and category records and uploaded their image assets to Cloudinary. It did not delete existing project or category records.

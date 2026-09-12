@@ -57,46 +57,51 @@ export function filterProjects<T extends ProjectPreview>(
   });
 }
 
-/** Merge dashboard-managed projects into the verified portfolio collection. */
-export function mergePortfolioProjects(
-  curated: ShowcaseProject[],
-  published: Project[],
-): ShowcaseProject[] {
-  const curatedSlugs = new Set(curated.map((project) => project.slug));
-  const curatedRepositories = new Set(
-    curated.map((project) => publicUrl(project.githubUrl)).filter(Boolean),
-  );
-  const additions = published
-    .filter(
-      (project) =>
-        !curatedSlugs.has(project.slug) &&
-        !curatedRepositories.has(publicUrl(project.githubUrl)),
-    )
-    .map(
+/** Convert dashboard-managed records into the public portfolio shape. */
+export function mapPortfolioProjects(published: Project[]): ShowcaseProject[] {
+  return published.map(
       (project): ShowcaseProject => ({
         slug: project.slug,
         title: project.title,
         category: project.categories?.[0]?.name || "Website",
-        tags: [
-          ...(project.categories || []).map((category) => category.slug),
-          "web-design",
-        ],
+        tags: Array.from(
+          new Set([
+            ...(project.tags || []),
+            ...(project.categories || []).map((category) => category.slug),
+          ]),
+        ),
         summary: project.description,
         image: project.image || "/portfolio/project-placeholder.svg",
-        imageAlt: `${project.title} project preview`,
-        kind: "Portfolio demo",
-        role: "Design & development",
+        detailImage: project.detailImage,
+        detailWidth: project.detailWidth,
+        detailHeight: project.detailHeight,
+        imageAlt: project.imageAlt || `${project.title} project preview`,
+        kind: project.kind || "Portfolio demo",
+        role: project.role || "Design & development",
         stack: project.technologies || [],
         featured: project.featured,
         liveUrl: publicUrl(project.projectUrl),
         githubUrl: publicUrl(project.githubUrl),
-        challenge: project.description,
-        approach: "",
+        challenge: project.challenge || project.description,
+        approach: project.approach || "",
         features: project.keyFeatures || [],
-        walkthrough: [],
+        walkthrough: project.walkthrough || [],
         overviewHtml: project.projectOverview,
-        note: "This project is managed from the GoCloudEx dashboard. Public live and source links appear when valid web addresses are provided.",
+        note:
+          project.note ||
+          "This project is managed from the GoCloudEx dashboard. Public live and source links appear when valid web addresses are provided.",
+        credit: project.credit,
       }),
     );
+}
+
+/** Backwards-compatible merge used by seed-data tests. */
+export function mergePortfolioProjects(
+  curated: ShowcaseProject[],
+  published: Project[],
+): ShowcaseProject[] {
+  const additions = mapPortfolioProjects(published).filter(
+    (project) => !curated.some((item) => item.slug === project.slug),
+  );
   return [...additions, ...curated];
 }

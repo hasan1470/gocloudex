@@ -2,7 +2,7 @@ import Link from "@/components/marketing/NavigationLink";
 import { ArrowUpRight, ArrowLeft } from "lucide-react";
 import type { Metadata } from "next";
 import { services } from "@/data/services";
-import { showcase } from "@/data/showcase";
+import { getPortfolio } from "@/lib/portfolio";
 import ProjectCard from "./ProjectCard";
 import { Process, ProjectCTA, SectionHeading } from "./Sections";
 
@@ -19,11 +19,12 @@ export function serviceMetadata(slug: string): Metadata {
     },
   };
 }
-export default function ServiceDetail({ slug }: { slug: string }) {
+export default async function ServiceDetail({ slug }: { slug: string }) {
   const service = services.find((item) => item.slug === slug)!;
+  const portfolio = await getPortfolio();
   const projects = service.projectSlugs
     .flatMap((projectSlug) =>
-      showcase.filter((project) => project.slug === projectSlug),
+      portfolio.filter((project) => project.slug === projectSlug),
     )
     .slice(0, 2);
   const structuredData = {

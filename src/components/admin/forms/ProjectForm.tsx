@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Save,
@@ -29,22 +29,36 @@ interface ProjectFormData {
   categories: string[];
   technologies: string[];
   keyFeatures: string[];
+  tags: string[];
+  walkthrough: string[];
   projectOverview: string;
+  imageAlt: string;
+  detailWidth: number;
+  detailHeight: number;
+  kind: 'Independent product' | 'Portfolio demo' | 'Client project';
+  role: string;
+  challenge: string;
+  approach: string;
+  note: string;
+  credit: string;
   projectUrl: string;
   githubUrl: string;
   featured: boolean;
   status: 'draft' | 'published' | 'archived';
   completionDate: string;
+  sortOrder: number;
 }
 
 export default function ProjectForm({ project, isEditing = false }: ProjectFormProps) {
   const router = useRouter();
-  const token = typeof window !== 'undefined' ? localStorage.getItem('adminToken') : null;
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [techInput, setTechInput] = useState('');
   const [keyFeatureInput, setKeyFeatureInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [detailImageFile, setDetailImageFile] = useState<File | null>(null);
+  const [removeImage, setRemoveImage] = useState(false);
+  const [removeDetailImage, setRemoveDetailImage] = useState(false);
   const [showTechSuggestions, setShowTechSuggestions] = useState(false);
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
   const [categorySearch, setCategorySearch] = useState('');
@@ -59,16 +73,28 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     categories: [],
     technologies: [],
     keyFeatures: [],
+    tags: [],
+    walkthrough: [],
     projectOverview: '',
+    imageAlt: '',
+    detailWidth: 1200,
+    detailHeight: 675,
+    kind: 'Portfolio demo',
+    role: 'Design & development',
+    challenge: '',
+    approach: '',
+    note: '',
+    credit: '',
     projectUrl: '',
     githubUrl: '',
     featured: false,
     status: 'draft',
     completionDate: new Date().toISOString().split('T')[0],
+    sortOrder: 100,
   });
 
   // Fetch projects
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     setLoading(true);
     try {
       const data = await getPublishedProjects();
@@ -78,15 +104,17 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   // Get all unique technologies from projects
-  const allTechnologies = Array.from(
-    new Set(portfolioProjects.flatMap(project => project.technologies))
-  ).sort();
+  const allTechnologies = useMemo(
+    () => Array.from(new Set(portfolioProjects.flatMap(project => project.technologies))).sort(),
+    [portfolioProjects],
+  );
 
   // Fetch categories
   useEffect(() => {
+    const token = localStorage.getItem('adminToken');
     fetchProjects();
     const fetchCategories = async () => {
       try {
@@ -107,7 +135,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     };
 
     fetchCategories();
-  }, []);
+  }, [fetchProjects]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -132,12 +160,24 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
         categories: project.categories?.map(cat => cat._id) || [],
         technologies: project.technologies || [],
         keyFeatures: project.keyFeatures || [],
+        tags: project.tags || [],
+        walkthrough: project.walkthrough || [],
         projectOverview: project.projectOverview || '',
+        imageAlt: project.imageAlt || '',
+        detailWidth: project.detailWidth || 1200,
+        detailHeight: project.detailHeight || 675,
+        kind: project.kind || 'Portfolio demo',
+        role: project.role || 'Design & development',
+        challenge: project.challenge || project.description,
+        approach: project.approach || '',
+        note: project.note || '',
+        credit: project.credit || '',
         projectUrl: project.projectUrl || '',
         githubUrl: project.githubUrl || '',
         featured: project.featured || false,
         status: project.status || 'draft',
         completionDate: project.completionDate ? new Date(project.completionDate).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
+        sortOrder: project.sortOrder ?? 100,
       });
     }
   }, [project, isEditing]);
@@ -155,22 +195,34 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       setFilteredTechSuggestions([]);
       setShowTechSuggestions(false);
     }
-  }, [techInput, formData.technologies]);
+  }, [allTechnologies, techInput, formData.technologies]);
 
   // Filter categories based on search
   const filteredCategories = categories.filter(category =>
     category.name.toLowerCase().includes(categorySearch.toLowerCase())
   );
 
-  // Get selected category names for display
-  const selectedCategoryNames = formData.categories.map(catId => {
-    const category = categories.find(c => c._id === catId);
-    return category?.name || '';
-  }).filter(Boolean);
-
   // Handle form input changes
-  const handleInputChange = (field: keyof ProjectFormData, value: any) => {
+  const handleInputChange = <K extends keyof ProjectFormData>(field: K, value: ProjectFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleDetailImageChange = (file: File | null) => {
+    setDetailImageFile(file);
+    if (!file) return;
+    setRemoveDetailImage(false);
+    const objectUrl = URL.createObjectURL(file);
+    const preview = new window.Image();
+    preview.onload = () => {
+      setFormData((previous) => ({
+        ...previous,
+        detailWidth: preview.naturalWidth,
+        detailHeight: preview.naturalHeight,
+      }));
+      URL.revokeObjectURL(objectUrl);
+    };
+    preview.onerror = () => URL.revokeObjectURL(objectUrl);
+    preview.src = objectUrl;
   };
 
   // Handle category selection
@@ -271,6 +323,7 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
     setLoading(true);
 
     try {
+      const token = localStorage.getItem('adminToken');
       const url = isEditing && project
         ? `/api/admin/projects/${project._id}`
         : '/api/admin/projects';
@@ -283,16 +336,33 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
       formDataToSend.append('categories', JSON.stringify(formData.categories));
       formDataToSend.append('technologies', JSON.stringify(formData.technologies));
       formDataToSend.append('keyFeatures', JSON.stringify(formData.keyFeatures));
+      formDataToSend.append('tags', JSON.stringify(formData.tags));
+      formDataToSend.append('walkthrough', JSON.stringify(formData.walkthrough));
       formDataToSend.append('projectOverview', formData.projectOverview);
+      formDataToSend.append('imageAlt', formData.imageAlt);
+      formDataToSend.append('detailWidth', String(formData.detailWidth));
+      formDataToSend.append('detailHeight', String(formData.detailHeight));
+      formDataToSend.append('kind', formData.kind);
+      formDataToSend.append('role', formData.role);
+      formDataToSend.append('challenge', formData.challenge);
+      formDataToSend.append('approach', formData.approach);
+      formDataToSend.append('note', formData.note);
+      formDataToSend.append('credit', formData.credit);
       formDataToSend.append('projectUrl', formData.projectUrl);
       formDataToSend.append('githubUrl', formData.githubUrl);
       formDataToSend.append('featured', formData.featured.toString());
       formDataToSend.append('status', formData.status);
       formDataToSend.append('completionDate', formData.completionDate);
+      formDataToSend.append('sortOrder', String(formData.sortOrder));
+      formDataToSend.append('removeImage', String(removeImage));
+      formDataToSend.append('removeDetailImage', String(removeDetailImage));
 
       // Append image file if exists
       if (imageFile) {
         formDataToSend.append('image', imageFile);
+      }
+      if (detailImageFile) {
+        formDataToSend.append('detailImage', detailImageFile);
       }
 
       const response = await fetch(url, {
@@ -466,6 +536,97 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
           </div>
         </div>
 
+        {/* Case Study Content */}
+        <div className="bg-bgLight border border-border rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
+            Case Study Content
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Project type</label>
+              <select
+                value={formData.kind}
+                onChange={(e) => handleInputChange('kind', e.target.value as ProjectFormData['kind'])}
+                className="w-full px-4 py-3 border border-border rounded-lg bg-bgLight text-style"
+              >
+                <option value="Portfolio demo">Portfolio demo</option>
+                <option value="Independent product">Independent product</option>
+                <option value="Client project">Client project</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Our role</label>
+              <input
+                value={formData.role}
+                onChange={(e) => handleInputChange('role', e.target.value)}
+                className="w-full px-4 py-3 border border-border rounded-lg text-style"
+                placeholder="Website design & development"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">The brief</label>
+              <textarea
+                value={formData.challenge}
+                onChange={(e) => handleInputChange('challenge', e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="What problem did this project solve?"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Our approach</label>
+              <textarea
+                value={formData.approach}
+                onChange={(e) => handleInputChange('approach', e.target.value)}
+                rows={4}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="How was the work planned and delivered?"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Walkthrough steps</label>
+              <textarea
+                value={formData.walkthrough.join('\n')}
+                onChange={(e) => handleInputChange('walkthrough', e.target.value.split('\n').map((item) => item.trim()).filter(Boolean))}
+                rows={6}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="One step per line"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Filter tags</label>
+              <textarea
+                value={formData.tags.join('\n')}
+                onChange={(e) => handleInputChange('tags', e.target.value.split('\n').map((item) => item.trim()).filter(Boolean))}
+                rows={6}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="web-apps&#10;ecommerce&#10;react"
+              />
+              <p className="mt-2 text-xs text-textLight text-style">One tag per line. These power the public portfolio filters.</p>
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Project note</label>
+              <textarea
+                value={formData.note}
+                onChange={(e) => handleInputChange('note', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="Demo limitations, data behavior, or ownership notes"
+              />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Credit</label>
+              <textarea
+                value={formData.credit}
+                onChange={(e) => handleInputChange('credit', e.target.value)}
+                rows={2}
+                className="w-full px-4 py-3 border border-border rounded-lg resize-y text-style"
+                placeholder="Optional starter, collaborator, or source credit"
+              />
+            </div>
+          </div>
+        </div>
+
         {/* Project Overview */}
         <div className="bg-bgLight border border-border rounded-lg p-6">
           <h2 className="text-xl font-semibold text-headingLight mb-6 heading-style">
@@ -491,11 +652,48 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
             Project Image
           </h2>
 
-          <SingleImageUpload
-            image={imageFile}
-            onImageChange={setImageFile}
-            existingImageUrl={project?.image}
-          />
+          <div className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Portfolio card image</label>
+              <SingleImageUpload
+                image={imageFile}
+                onImageChange={(file) => { setImageFile(file); if (file) setRemoveImage(false); }}
+                existingImageUrl={project?.image}
+                onRemoveExisting={() => setRemoveImage(true)}
+                label="card image"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Case-study image</label>
+              <SingleImageUpload
+                image={detailImageFile}
+                onImageChange={handleDetailImageChange}
+                existingImageUrl={project?.detailImage}
+                onRemoveExisting={() => setRemoveDetailImage(true)}
+                label="case-study image"
+              />
+              <p className="mt-2 text-xs text-textLight text-style">Use the high-resolution screenshot shown on the project detail page.</p>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">Image description</label>
+              <input
+                value={formData.imageAlt}
+                onChange={(e) => handleInputChange('imageAlt', e.target.value)}
+                className="w-full px-4 py-3 border border-border rounded-lg text-style"
+                placeholder="Describe the interface for visitors using a screen reader"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-headingLight mb-2 text-style">Image width</label>
+                <input type="number" min="1" value={formData.detailWidth} onChange={(e) => handleInputChange('detailWidth', Number(e.target.value))} className="w-full px-4 py-3 border border-border rounded-lg text-style" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-headingLight mb-2 text-style">Image height</label>
+                <input type="number" min="1" value={formData.detailHeight} onChange={(e) => handleInputChange('detailHeight', Number(e.target.value))} className="w-full px-4 py-3 border border-border rounded-lg text-style" />
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Technologies */}
@@ -705,13 +903,27 @@ export default function ProjectForm({ project, isEditing = false }: ProjectFormP
               </label>
               <select
                 value={formData.status}
-                onChange={(e) => handleInputChange('status', e.target.value as any)}
+                onChange={(e) => handleInputChange('status', e.target.value as ProjectFormData['status'])}
                 className="w-full px-4 py-3 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-ring text-style"
               >
                 <option value="draft">Draft</option>
                 <option value="published">Published</option>
                 <option value="archived">Archived</option>
               </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-headingLight mb-2 text-style">
+                Display order
+              </label>
+              <input
+                type="number"
+                min="0"
+                value={formData.sortOrder}
+                onChange={(e) => handleInputChange('sortOrder', Number(e.target.value))}
+                className="w-full px-4 py-3 border border-border rounded-lg text-style"
+              />
+              <p className="mt-2 text-xs text-textLight text-style">Lower numbers appear first.</p>
             </div>
 
             {/* Featured */}

@@ -5,7 +5,6 @@ import Project from '@/models/Project';
 import Category from '@/models/Category';
 import { Project as ProjectType, Category as CategoryType } from '@/types';
 import { unstable_cache } from 'next/cache';
-import { revalidatePortfolio } from '@/lib/portfolio-revalidation';
 
 /**
  * Fetches all published projects directly from the database.
@@ -17,7 +16,7 @@ export const getPublishedProjects = unstable_cache(
             await connectDB();
             const projects = await Project.find({ status: 'published' })
                 .populate('categories')
-                .sort({ completionDate: -1 })
+                .sort({ sortOrder: 1, completionDate: -1 })
                 .lean();
 
             // Convert Mongo objects to plain JS objects for Serializability
@@ -72,65 +71,3 @@ export const getProjectBySlug = unstable_cache(
     ['project-by-slug'],
     { revalidate: 3600, tags: ['projects'] }
 );
-
-/**
- * Deletes a project by ID.
- */
-export async function deleteProject(id: string) {
-    try {
-        await connectDB();
-        const result = await Project.findByIdAndDelete(id);
-        if (result) {
-            revalidatePortfolio(result.slug);
-            return { success: true };
-        }
-        return { success: false, error: 'Project not found' };
-    } catch (error) {
-        console.error('Error deleting project:', error);
-        return { success: false, error: 'Failed to delete project' };
-    }
-}
-
-/**
- * Enhanced fetch for admin projects with filters.
- */
-export async function getAdminProjects(filters: any = {}) {
-    try {
-        await connectDB();
-        const { page = 1, limit = 10, category = 'all', status = 'all', featured = 'all', search = '' } = filters;
-        const skip = (page - 1) * limit;
-
-        const query: any = {};
-        if (category !== 'all') {
-            const categoryDoc = await Category.findOne({ slug: category });
-            if (categoryDoc) query.categories = categoryDoc._id;
-        }
-        if (status !== 'all') query.status = status;
-        if (featured !== 'all') query.featured = featured === 'true';
-        if (search) {
-            query.$or = [
-                { title: { $regex: search, $options: 'i' } },
-                { description: { $regex: search, $options: 'i' } }
-            ];
-        }
-
-        const [projects, total] = await Promise.all([
-            Project.find(query).populate('categories').sort({ completionDate: -1 }).skip(skip).limit(limit).lean(),
-            Project.countDocuments(query)
-        ]);
-
-        return {
-            success: true,
-            data: JSON.parse(JSON.stringify(projects)),
-            pagination: {
-                page: Number(page),
-                limit: Number(limit),
-                total,
-                pages: Math.ceil(total / limit)
-            }
-        };
-    } catch (error) {
-        console.error('Error fetching admin projects:', error);
-        return { success: false, error: 'Failed to fetch projects' };
-    }
-}
